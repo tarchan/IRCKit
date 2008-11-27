@@ -22,18 +22,19 @@ public class IRCClient
 	 */
 	public static void main(String[] args)
 	{
-		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-		try
-		{
-			while (true)
-			{
-				String input = in.readLine();
-				System.out.println("echo: " + input);
-			}
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-		}
+		System.out.println("Welcome to IRCKit!");
+//		try
+//		{
+//			BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+//			while (true)
+//			{
+//				String input = in.readLine();
+//				System.out.println("echo: " + input);
+//			}
+//		}
+//		catch (IOException e)
+//		{
+//			e.printStackTrace();
+//		}
 	}
 }
