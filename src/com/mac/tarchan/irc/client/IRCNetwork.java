@@ -14,8 +14,11 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.Reader;
+import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Properties;
 
@@ -255,24 +258,24 @@ public class IRCNetwork
 		return this;
 	}
 
-	/**
-	 * 
-	 * @param channel
-	 */
-	public void join(String channel)
-	{
-		join(channel, "");
-	}
-
-	/**
-	 * 
-	 * @param channel
-	 * @param key
-	 */
-	public void join(String channel, String key)
-	{
-		out.join(channel, key);
-	}
+//	/**
+//	 * 
+//	 * @param channel
+//	 */
+//	public void join(String channel)
+//	{
+//		join(channel, "");
+//	}
+//
+//	/**
+//	 * 
+//	 * @param channel
+//	 * @param key
+//	 */
+//	public void join(String channel, String key)
+//	{
+//		out.join(channel, key);
+//	}
 
 	/**
 	 * この IRC ネットワークとの接続を切断します。
@@ -293,5 +296,154 @@ public class IRCNetwork
 	public String toString()
 	{
 		return "irc network: " + name;
+	}
+
+	/** ネットワークグループ */
+	protected static HashMap<String, IRCNetwork> groups = new HashMap<String, IRCNetwork>();
+
+	/** URL */
+	protected URL url;
+
+	/** ユーザ名 */
+	protected String username;
+
+	/** パスワード */
+	protected String pasword;
+
+	/**
+	 * 指定された IRC ネットワークを構築します。
+	 * 
+	 * @param address サーバアドレス
+	 * @param username ユーザ名
+	 * @param password パスワード
+	 * @throws IllegalArgumentException 指定された文字列が RFC 2396 に違反する場合
+	 * @throws MalformedURLException URL のプロトコルハンドラが見つからなかった場合、または URL の構築中にその他の何らかのエラーが発生した場合
+	 */
+	public IRCNetwork(String address, String username, String password) throws MalformedURLException
+	{
+		URI uri = URI.create(address);
+		url = uri.toURL();
+		this.username = username;
+		this.pasword = password;
+		System.out.println("host=" + url.getHost() + ", port=" + url.getPort());
+	}
+
+	/**
+	 * 指定された IRC ネットワークを登録します。
+	 * 
+	 * @param groupName IRC ネットワーク名
+	 * @param address サーバアドレス
+	 * @param username ユーザ名
+	 * @param password パスワード
+	 * @throws IllegalArgumentException 指定された文字列が RFC 2396 に違反する場合
+	 * @throws MalformedURLException URL のプロトコルハンドラが見つからなかった場合、または URL の構築中にその他の何らかのエラーが発生した場合
+	 */
+	public static void register(String groupName, String address, String username, String password) throws MalformedURLException
+	{
+		IRCNetwork network = new IRCNetwork(address, username, password);
+		groups.put(groupName, network);
+	}
+
+	/**
+	 * 指定された IRC ネットワークを検索します。
+	 * 
+	 * @param groupName IRC ネットワーク名
+	 * @return 指定されたグループの IRC ネットワーク
+	 */
+	public static IRCNetwork find(String groupName)
+	{
+		return groups.get(groupName);
+	}
+
+	/** IRC行区切り */
+	private static final String CRLF = "\r\n";
+
+	/** PASS <password> */
+	public static final String PASS = "PASS %s";
+
+	/** NICK <nickname> */
+	public static final String NICK = "NICK %s";
+
+	/** USER <user> <mode> <unused> <realname> */
+	public static final String USER = "USER %s %d * :%s";
+
+	/**
+	 * IRC ネットワークを接続します。
+	 * 
+	 * @throws IOException 
+	 */
+	public void open() throws IOException
+	{
+		// TODO IRCサーバに接続
+		System.out.println("connect to " + url);
+		URLConnection conn = url.openConnection();
+		conn.setDoInput(true);
+		conn.setDoOutput(true);
+		// TODO IRCサーバにログイン
+		PrintWriter out = new PrintWriter(new OutputStreamWriter(conn.getOutputStream()), true);
+		out.printf(PASS + CRLF, pasword);
+		out.printf(NICK + CRLF, username);
+		out.printf(USER + CRLF, username, 0, username);
+		out.flush();
+		BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+		while (true)
+		{
+			String line = in.readLine();
+			System.out.println("IRC: " + line);
+			if (line == null) continue;
+			if (line.startsWith("ERROR")) break;
+		}
+		in.close();
+		out.close();
+		System.out.println("bye!");
+	}
+
+	/**
+	 * 指定されたチャンネルに参加します。
+	 * 
+	 * @param channelName チャンネル名
+	 * @param keyword 秘密のキーワード
+	 */
+	public void join(String channelName, String keyword)
+	{
+		try
+		{
+			open();
+			// TODO IRCサーバにjoinコマンドを送信
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * IRC ネットワークを切断します。
+	 */
+	public void quit()
+	{
+		// TODO IRCサーバにquitコマンドを送信
+	}
+
+	/**
+	 * すべての IRC ネットワークを切断します。
+	 */
+	public static void quitAll()
+	{
+		for (IRCNetwork network : groups.values())
+		{
+			network.quit();
+		}
+	}
+
+	/**
+	 * 指定されたチャンネルにメッセージを送信します。
+	 * 
+	 * @param channelName チャンネル名
+	 * @param message メッセージ
+	 */
+	public void privmsg(String channelName, String message)
+	{
+		// TODO IRCサーバにprivmsgコマンドを送信
 	}
 }
