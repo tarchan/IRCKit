@@ -18,6 +18,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Properties;
@@ -299,7 +300,7 @@ public class IRCNetwork
 	}
 
 	/** ネットワークグループ */
-	protected static HashMap<String, IRCNetwork> groups = new HashMap<String, IRCNetwork>();
+	protected static final HashMap<String, IRCNetwork> groups = new HashMap<String, IRCNetwork>();
 
 	/** URL */
 	protected URL url;
@@ -355,7 +356,7 @@ public class IRCNetwork
 		return groups.get(groupName);
 	}
 
-	/** IRC行区切り */
+	/** 改行コード */
 	private static final String CRLF = "\r\n";
 
 	/** PASS <password> */
@@ -367,12 +368,15 @@ public class IRCNetwork
 	/** USER <user> <mode> <unused> <realname> */
 	public static final String USER = "USER %s %d * :%s";
 
+	/** PONG <server1> [<server2>] */
+	public static final String PONG = "PONG %s";
+
 	/**
 	 * IRC ネットワークを接続します。
 	 * 
 	 * @throws IOException 
 	 */
-	public void open() throws IOException
+	public void login() throws IOException
 	{
 		// TODO IRCサーバに接続
 		System.out.println("connect to " + url);
@@ -381,16 +385,24 @@ public class IRCNetwork
 		conn.setDoOutput(true);
 		// TODO IRCサーバにログイン
 		PrintWriter out = new PrintWriter(new OutputStreamWriter(conn.getOutputStream()), true);
-		out.printf(PASS + CRLF, pasword);
+		if (pasword != null && pasword.trim().length() > 0) out.printf(PASS + CRLF, pasword);
 		out.printf(NICK + CRLF, username);
 		out.printf(USER + CRLF, username, 0, username);
-		out.flush();
+//		out.flush();
 		BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 		while (true)
 		{
 			String line = in.readLine();
-			System.out.println("IRC: " + line);
+//			IRCMessage msg = new IRCMessage(this, line);
+			System.out.println("IRC: " + IRCMessage.decode(line, "ISO-2022-JP"));
 			if (line == null) continue;
+			if (line.startsWith("PING"))
+			{
+				String[] ping = line.split(":");
+				System.out.println("ping-pong at " + new Date() + "/" + ping[1]);
+				out.printf(PONG + CRLF, ping[1]);
+				out.flush();
+			}
 			if (line.startsWith("ERROR")) break;
 		}
 		in.close();
@@ -408,7 +420,7 @@ public class IRCNetwork
 	{
 		try
 		{
-			open();
+			login();
 			// TODO IRCサーバにjoinコマンドを送信
 		}
 		catch (IOException e)
