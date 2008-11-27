@@ -7,9 +7,6 @@
  */
 package com.mac.tarchan.irc.client;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 
@@ -41,8 +38,8 @@ public class IRCClient
 					// TODO 受信したメッセージを表示
 				}
 			});
-//			irc.registerNetwork("tokyo", "http://irc.tokyo.wide.ad.jp:6667", "tarchan", "");
-			irc.registerNetwork("tokyo", "http://irc.mozilla.org:6667", "tarchan", "");
+			irc.registerNetwork("tokyo", "http://irc.tokyo.wide.ad.jp:6667", "tarchan", "");
+//			irc.registerNetwork("tokyo", "http://irc.mozilla.org:6667", "tarchan", "");
 			irc.join("tokyo", "#dameTunes", "");
 			irc.privmsg("tokyo", "#dameTunes", "テスト");
 			irc.quit();
