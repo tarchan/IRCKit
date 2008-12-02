@@ -305,28 +305,47 @@ public class IRCNetwork
 	/** URL */
 	protected URL url;
 
+	/** ユーザプロパティー */
+	protected Properties prof;
+
 	/** ユーザ名 */
 	protected String username;
 
 	/** パスワード */
-	protected String pasword;
+	protected String password;
 
 	/**
 	 * 指定された IRC ネットワークを構築します。
 	 * 
 	 * @param address サーバアドレス
-	 * @param username ユーザ名
-	 * @param password パスワード
+	 * @param prof ユーザプロパティー
 	 * @throws IllegalArgumentException 指定された文字列が RFC 2396 に違反する場合
 	 * @throws MalformedURLException URL のプロトコルハンドラが見つからなかった場合、または URL の構築中にその他の何らかのエラーが発生した場合
 	 */
-	public IRCNetwork(String address, String username, String password) throws MalformedURLException
+	public IRCNetwork(String address, Properties prof) throws MalformedURLException
 	{
 		URI uri = URI.create(address);
 		url = uri.toURL();
-		this.username = username;
-		this.pasword = password;
+		this.prof = prof;
 		System.out.println("host=" + url.getHost() + ", port=" + url.getPort());
+	}
+
+	/**
+	 * デフォルトのプロパティーを返します。
+	 * 
+	 * @return デフォルトのプロパティー
+	 */
+	public static Properties createDefaultProperties()
+	{
+		Properties def = new Properties();
+		String username = System.getProperty("user.name");
+		def.setProperty("irc.user.name", username);
+		def.setProperty("irc.user.password", "");
+		def.setProperty("irc.user.mode", "0");
+		def.setProperty("irc.nick.name", username);
+		def.setProperty("irc.real.name", username);
+
+		return new Properties(def);
 	}
 
 	/**
@@ -341,7 +360,12 @@ public class IRCNetwork
 	 */
 	public static void register(String groupName, String address, String username, String password) throws MalformedURLException
 	{
-		IRCNetwork network = new IRCNetwork(address, username, password);
+		Properties prof = createDefaultProperties();
+		prof.setProperty("irc.user.name", username);
+		prof.setProperty("irc.real.name", username);
+		prof.setProperty("irc.nick.name", username);
+		prof.setProperty("irc.user.password", password);
+		IRCNetwork network = new IRCNetwork(address, prof);
 		groups.put(groupName, network);
 	}
 
@@ -378,17 +402,41 @@ public class IRCNetwork
 	 */
 	public void login() throws IOException
 	{
+		String username = prof.getProperty("irc.user.name");
+		String password = prof.getProperty("irc.user.password");
+		int mode = Integer.parseInt(prof.getProperty("irc.user.mode"));
+		String realname = prof.getProperty("irc.real.name");
+		String nickname = prof.getProperty("irc.nick.name");
+		login(username, password, mode, realname, nickname);
+	}
+
+	/**
+	 * IRC ネットワークを接続します。
+	 * 
+	 * @param username ユーザ名
+	 * @param password パスワード
+	 * @param mode 接続モード
+	 * @param realname 本名
+	 * @param nickname ニックネーム
+	 * @throws IOException 接続エラーが発生した場合
+	 */
+	public void login(String username, String password, int mode, String realname, String nickname) throws IOException
+	{
 		// TODO IRCサーバに接続
 		System.out.println("connect to " + url);
 		URLConnection conn = url.openConnection();
+		System.out.println("conn=" + conn);
 		conn.setDoInput(true);
 		conn.setDoOutput(true);
+		conn.connect();
 		// TODO IRCサーバにログイン
-		PrintWriter out = new PrintWriter(new OutputStreamWriter(conn.getOutputStream()), true);
-		if (pasword != null && pasword.trim().length() > 0) out.printf(PASS + CRLF, pasword);
+		PrintWriter out = new PrintWriter(new OutputStreamWriter(conn.getOutputStream(), "ISO-2022-JP"), true);
+		if (password.trim().length() > 0) out.printf(PASS + CRLF, password);
+		out.flush();
 		out.printf(NICK + CRLF, username);
+		out.flush();
 		out.printf(USER + CRLF, username, 0, username);
-//		out.flush();
+		out.flush();
 		BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 		while (true)
 		{

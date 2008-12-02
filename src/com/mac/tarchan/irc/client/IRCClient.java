@@ -9,6 +9,7 @@ package com.mac.tarchan.irc.client;
 
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Properties;
 
 /**
  * @since 1.0
@@ -16,56 +17,6 @@ import java.util.ArrayList;
  */
 public class IRCClient
 {
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args)
-	{
-		System.out.println("Welcome to IRCKit!");
-		try
-		{
-			IRCClient irc = new IRCClient();
-			irc.setUseSystemProxies(true);
-			irc.registerHandler(new IRCMessageHandler()
-			{
-				/**
-				 * 受信したメッセージを表示します。
-				 * 
-				 * @param msg メッセージ
-				 */
-				public void privmsg(IRCMessage msg)
-				{
-					// TODO 受信したメッセージを表示
-				}
-			});
-			irc.registerNetwork("tokyo", "http://irc.tokyo.wide.ad.jp:6667", "tarchan", "");
-//			irc.registerNetwork("tokyo", "http://irc.mozilla.org:6667", "tarchan", "");
-			irc.join("tokyo", "#dameTunes", "");
-			irc.privmsg("tokyo", "#dameTunes", "テスト");
-			irc.quit();
-		}
-		catch (MalformedURLException e)
-		{
-			e.printStackTrace();
-		}
-
-
-
-//		try
-//		{
-//			BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-//			while (true)
-//			{
-//				String input = in.readLine();
-//				System.out.println("echo: " + input);
-//			}
-//		}
-//		catch (IOException e)
-//		{
-//			e.printStackTrace();
-//		}
-	}
-
 	/** メッセージハンドラ */
 	protected ArrayList<IRCMessageHandler> handlers = new ArrayList<IRCMessageHandler>();
 
@@ -79,6 +30,16 @@ public class IRCClient
 		String ver = System.getProperty("java.version");
 		System.out.println("java.version=" + ver);
 		System.setProperty("java.net.useSystemProxies", Boolean.valueOf(useSystemProxies).toString());
+	}
+
+	/**
+	 * デフォルトのプロパティーを返します。
+	 * 
+	 * @return デフォルトのプロパティー
+	 */
+	public Properties createDefaultProperties()
+	{
+		return IRCNetwork.createDefaultProperties();
 	}
 
 	/**
