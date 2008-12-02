@@ -20,8 +20,9 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
-import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
+import javax.swing.text.Style;
+import javax.swing.text.StyleContext;
 import javax.swing.text.StyledDocument;
 
 /**
@@ -32,14 +33,25 @@ import javax.swing.text.StyledDocument;
 public class IRCConsole
 {
 	/**
-	 * @param args
+	 * チャットコンソールを起動します。
+	 * 
+	 * @param args 引数
 	 */
 	public static void main(String[] args)
 	{
 		IRCConsole console = new IRCConsole();
 		console.createChatWindow();
-//		console.test();
+		console.test();
 	}
+
+	/** 改行コード */
+	protected final String LF = System.getProperty("line.separator");
+
+	/** ドキュメント */
+	protected StyledDocument doc;
+
+	/** 表示スタイル */
+	protected Style style = StyleContext.getDefaultStyleContext().getStyle(StyleContext.DEFAULT_STYLE);
 
 	/**
 	 * チャットウインドウを作成します。
@@ -52,8 +64,7 @@ public class IRCConsole
 		final JTextPane textPane = new JTextPane();
 		textPane.setEditable(false);
 		textPane.setPreferredSize(new Dimension(320, 240));
-		final StyledDocument doc = textPane.getStyledDocument();
-		final String LF = System.getProperty("line.separator");
+		doc = textPane.getStyledDocument();
 
 		// スクロールパネル
 		JScrollPane scrollPane = new JScrollPane(textPane);
@@ -65,23 +76,14 @@ public class IRCConsole
 		{
 			public void actionPerformed(ActionEvent evt)
 			{
-				try
-				{
-					// 入力テキストを取得
-					String str = evt.getActionCommand();
+				// 入力テキストを取得
+				String str = evt.getActionCommand();
 
-					// 入力フィールドをクリア
-					textField.setText("");
+				// 入力フィールドをクリア
+				textField.setText("");
 
-					// 表示エリアに1行追加
-					AttributeSet style = null;
-					doc.insertString(doc.getLength(), str + LF, style);
-//					textPane.setCaretPosition(doc.getLength());
-				}
-				catch (BadLocationException e)
-				{
-					e.printStackTrace();
-				}
+				// 表示エリアに1行追加
+				appendLine(str);
 			}
 		});
 
@@ -102,11 +104,30 @@ public class IRCConsole
 	}
 
 	/**
+	 * 指定された文字列を表示エリアに追加します。
+	 * 
+	 * @param str 文字列
+	 */
+	public void appendLine(String str)
+	{
+		try
+		{
+			// 表示エリアに1行追加
+			doc.insertString(doc.getLength(), str + LF, style);
+//			textPane.setCaretPosition(doc.getLength());
+		}
+		catch (BadLocationException e)
+		{
+			e.printStackTrace();
+		}
+	}
+
+	/**
 	 * IRCKitの接続テスト
 	 */
 	public void test()
 	{
-		System.out.println("Welcome to IRCKit!");
+		appendLine("Welcome to IRCKit!");
 		try
 		{
 			IRCClient irc = new IRCClient();
@@ -121,6 +142,7 @@ public class IRCConsole
 				public void privmsg(IRCMessage msg)
 				{
 					// TODO 受信したメッセージを表示
+					appendLine(msg.toString());
 				}
 			});
 			Properties prof = irc.createDefaultProperties();
