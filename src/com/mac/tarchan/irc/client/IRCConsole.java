@@ -7,8 +7,22 @@
  */
 package com.mac.tarchan.irc.client;
 
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.Window;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.net.MalformedURLException;
 import java.util.Properties;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextField;
+import javax.swing.JTextPane;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.StyledDocument;
 
 /**
  * IRCConsole
@@ -22,7 +36,69 @@ public class IRCConsole
 	 */
 	public static void main(String[] args)
 	{
-		new IRCConsole().test();
+		IRCConsole console = new IRCConsole();
+		console.createChatWindow();
+//		console.test();
+	}
+
+	/**
+	 * チャットウインドウを作成します。
+	 * 
+	 * @return チャットウインドウのインスタンス
+	 */
+	public Window createChatWindow()
+	{
+		// 表示エリア
+		final JTextPane textPane = new JTextPane();
+		textPane.setEditable(false);
+		textPane.setPreferredSize(new Dimension(320, 240));
+		final StyledDocument doc = textPane.getStyledDocument();
+		final String LF = System.getProperty("line.separator");
+
+		// スクロールパネル
+		JScrollPane scrollPane = new JScrollPane(textPane);
+		scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+
+		// 入力フィールド
+		final JTextField textField = new JTextField();
+		textField.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent evt)
+			{
+				try
+				{
+					// 入力テキストを取得
+					String str = evt.getActionCommand();
+
+					// 入力フィールドをクリア
+					textField.setText("");
+
+					// 表示エリアに1行追加
+					AttributeSet style = null;
+					doc.insertString(doc.getLength(), str + LF, style);
+//					textPane.setCaretPosition(doc.getLength());
+				}
+				catch (BadLocationException e)
+				{
+					e.printStackTrace();
+				}
+			}
+		});
+
+		// メインパネル
+		JPanel mainPane = new JPanel();
+		mainPane.setLayout(new BorderLayout());
+		mainPane.add(scrollPane, BorderLayout.CENTER);
+		mainPane.add(textField, BorderLayout.SOUTH);
+
+		// ウインドウ
+		JFrame frame = new JFrame();
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.add(mainPane);
+		frame.pack();
+		frame.setVisible(true);
+
+		return frame;
 	}
 
 	/**
