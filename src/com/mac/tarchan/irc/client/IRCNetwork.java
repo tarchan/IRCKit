@@ -25,6 +25,7 @@ import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import com.mac.tarchan.net.irc.IRCConnection;
 import com.mac.tarchan.net.irc.IRCWriter;
 
@@ -302,6 +303,9 @@ public class IRCNetwork
 	/** ネットワークグループ */
 	protected static final HashMap<String, IRCNetwork> groups = new HashMap<String, IRCNetwork>();
 
+	/** クライアント */
+	protected IRCClient client;
+
 	/** URL */
 	protected URL url;
 
@@ -346,6 +350,16 @@ public class IRCNetwork
 		def.setProperty("irc.real.name", username);
 
 		return new Properties(def);
+	}
+
+	/**
+	 * IRCクライアントを設定します。
+	 * 
+	 * @param client IRCクライアント
+	 */
+	public void setClient(IRCClient client)
+	{
+		this.client = client;
 	}
 
 	/**
@@ -441,8 +455,7 @@ public class IRCNetwork
 		while (true)
 		{
 			String line = in.readLine();
-//			IRCMessage msg = new IRCMessage(this, line);
-			System.out.println("IRC: " + IRCMessage.decode(line, "ISO-2022-JP"));
+			System.out.println("IRC: " + line);
 			if (line == null) continue;
 			if (line.startsWith("PING"))
 			{
@@ -451,6 +464,10 @@ public class IRCNetwork
 				out.printf(PONG + CRLF, ping[1]);
 				out.flush();
 			}
+
+			IRCMessage msg = new IRCMessage(this, line);
+			client.reply(msg);
+
 			if (line.startsWith("ERROR")) break;
 		}
 		in.close();
