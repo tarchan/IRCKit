@@ -15,6 +15,9 @@ import java.awt.event.ActionListener;
 import java.net.MalformedURLException;
 import java.util.Properties;
 
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -45,7 +48,10 @@ public class IRCConsole
 	}
 
 	/** 改行コード */
-	protected final String LF = System.getProperty("line.separator");
+	protected static final String NL = System.getProperty("line.separator");
+
+	/** 表示エリア */
+	protected JTextPane textPane;
 
 	/** ドキュメント */
 	protected StyledDocument doc;
@@ -61,7 +67,7 @@ public class IRCConsole
 	public Window createChatWindow()
 	{
 		// 表示エリア
-		final JTextPane textPane = new JTextPane();
+		textPane = new JTextPane();
 		textPane.setEditable(false);
 		textPane.setPreferredSize(new Dimension(320, 240));
 		doc = textPane.getStyledDocument();
@@ -69,6 +75,11 @@ public class IRCConsole
 		// スクロールパネル
 		JScrollPane scrollPane = new JScrollPane(textPane);
 		scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+		scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		scrollPane.setBorder(BorderFactory.createEmptyBorder());
+		scrollPane.setViewportBorder(BorderFactory.createEmptyBorder(0, 3, 0, 2));
+
+//		final JButton sendButton = new JButton("Send");
 
 		// 入力フィールド
 		final JTextField textField = new JTextField();
@@ -87,14 +98,21 @@ public class IRCConsole
 			}
 		});
 
+		JPanel inputPane = new JPanel();
+		inputPane.setLayout(new BoxLayout(inputPane, BoxLayout.LINE_AXIS));
+		inputPane.add(Box.createHorizontalGlue());
+		inputPane.add(textField);
+//		inputPane.add(sendButton);
+		inputPane.add(Box.createHorizontalStrut(11));
+
 		// メインパネル
 		JPanel mainPane = new JPanel();
 		mainPane.setLayout(new BorderLayout());
 		mainPane.add(scrollPane, BorderLayout.CENTER);
-		mainPane.add(textField, BorderLayout.SOUTH);
+		mainPane.add(inputPane, BorderLayout.SOUTH);
 
 		// ウインドウ
-		JFrame frame = new JFrame();
+		JFrame frame = new JFrame("チャット");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.add(mainPane);
 		frame.pack();
@@ -113,8 +131,8 @@ public class IRCConsole
 		try
 		{
 			// 表示エリアに1行追加
-			doc.insertString(doc.getLength(), str + LF, style);
-//			textPane.setCaretPosition(doc.getLength());
+			doc.insertString(doc.getLength(), str + NL, style);
+			textPane.setCaretPosition(doc.getLength());
 		}
 		catch (BadLocationException e)
 		{
@@ -134,15 +152,16 @@ public class IRCConsole
 			irc.setUseSystemProxies(true);
 			irc.registerHandler(new IRCMessageHandler()
 			{
-				/**
-				 * 受信したメッセージを表示します。
-				 * 
-				 * @param msg メッセージ
-				 */
-				public void privmsg(IRCMessage msg)
+				public void reply(IRCMessage msg)
 				{
-					// TODO 受信したメッセージを表示
+					// TODO メッセージを表示
 					appendLine(msg.toString());
+				}
+
+				public void error(Exception e)
+				{
+					// エラーを表示
+					e.printStackTrace();
 				}
 			});
 			Properties prof = irc.createDefaultProperties();

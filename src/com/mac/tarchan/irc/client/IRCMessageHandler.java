@@ -15,9 +15,16 @@ package com.mac.tarchan.irc.client;
 public interface IRCMessageHandler
 {
 	/**
-	 * メッセージを表示します。
+	 * メッセージを処理します。
 	 * 
 	 * @param msg メッセージ
 	 */
-	public void privmsg(IRCMessage msg);
+	public void reply(IRCMessage msg);
+
+	/**
+	 * 例外を処理します。
+	 * 
+	 * @param e 例外
+	 */
+	public void error(Exception e);
 }
