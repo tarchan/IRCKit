@@ -322,6 +322,9 @@ public class IRCNetwork
 	/** JOIN (<channel> *(","<channel>) [<key> *(","<key>)]) / "0" */
 	public static final String JOIN = "JOIN %s %s";
 
+	/** PRIVMSG <msgtarget> <text to be sent> */
+	public static final String PRIVMSG = "PRIVMSG %s :%s";
+
 	/** ネットワークグループ */
 	protected static final HashMap<String, IRCNetwork> groups = new HashMap<String, IRCNetwork>();
 
@@ -554,6 +557,7 @@ public class IRCNetwork
 	 */
 	public void privmsg(String channelName, String message)
 	{
-		// TODO IRCサーバにprivmsgコマンドを送信
+		String cmd = String.format(PRIVMSG, channelName, message);
+		put(cmd);
 	}
 }
