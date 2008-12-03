@@ -97,7 +97,7 @@ public class IRCConsole implements Appendable, Flushable
 				textField.setText("");
 
 				// 表示エリアに1行追加
-				if (!str.isEmpty()) appendLine(str);
+				if (!str.isEmpty()) putCommand(str);
 			}
 		});
 
@@ -143,6 +143,31 @@ public class IRCConsole implements Appendable, Flushable
 	}
 
 	/**
+	 * コマンドを送信します。
+	 * 
+	 * @param command コマンド
+	 */
+	public void putCommand(String command)
+	{
+		// 表示エリアに追加
+		appendLine(command);
+
+		// IRC ネットワークに送信
+		if (command.startsWith("/"))
+		{
+			// コマンド
+			irc.put("tokyo", command.substring(1));
+		}
+		else
+		{
+			// メッセージ送信
+		}
+	}
+
+	/** IRC クライアント */
+	protected IRCClient irc;
+
+	/**
 	 * IRCKitの接続テスト
 	 */
 	public void test()
@@ -151,15 +176,16 @@ public class IRCConsole implements Appendable, Flushable
 		formatter.format("Welcome to IRCKit!" + NL);
 		try
 		{
-			IRCClient irc = new IRCClient();
+			irc = new IRCClient();
 			irc.setUseSystemProxies(true);
 			irc.registerHandler(new IRCMessageHandler()
 			{
 				public void reply(IRCMessage msg)
 				{
 					// TODO メッセージを表示
+					String encoding = "ISO-2022-JP";
 					String nick = msg.getNick();
-					String text = msg.getMessage("ISO-2022-JP");
+					String text = msg.getTrailing(encoding);
 					formatter.format("(%s) %s" + NL, nick, text);
 					flush();
 				}
@@ -172,9 +198,11 @@ public class IRCConsole implements Appendable, Flushable
 			});
 			Properties prof = irc.createDefaultProperties();
 			prof.setProperty("irc.real.name", "たーちゃん");
+			prof.setProperty("irc.encoding", "ISO-2022-JP");
 			prof.list(System.out);
-			irc.registerNetwork("tokyo", "irc://irc.tokyo.wide.ad.jp:6667", "tarchan", "");
-//			irc.registerNetwork("tokyo", "http://irc.mozilla.org:6667", "tarchan", "");
+			irc.registerNetwork("tokyo", "irc://irc.tokyo.wide.ad.jp:6667");
+//			irc.registerNetwork("tokyo", "irc://irc.mozilla.org:6667");
+			irc.login("tokyo", prof);
 			irc.join("tokyo", "#javabreak", "");
 			irc.privmsg("tokyo", "#javabreak", "テスト");
 			irc.quit();

@@ -57,15 +57,35 @@ public class IRCClient
 	 * 
 	 * @param groupName IRC ネットワーク名
 	 * @param address サーバアドレス
-	 * @param username ユーザ名
-	 * @param password パスワード
 	 * @throws IllegalArgumentException 指定された文字列が RFC 2396 に違反する場合
 	 * @throws MalformedURLException URL のプロトコルハンドラが見つからなかった場合、または URL の構築中にその他の何らかのエラーが発生した場合
 	 */
-	public void registerNetwork(String groupName, String address, String username, String password) throws MalformedURLException
+	public void registerNetwork(String groupName, String address) throws MalformedURLException
 	{
-		IRCNetwork.register(groupName, address, username, password);
+		IRCNetwork.register(groupName, address);
 		IRCNetwork.find(groupName).setClient(this);
+	}
+
+	/**
+	 * 指定された IRC ネットワークにログインします。
+	 * 
+	 * @param groupName IRC ネットワーク名
+	 * @param prof ユーザプロフィール
+	 */
+	public void login(String groupName, Properties prof)
+	{
+		IRCNetwork.find(groupName).login(prof);
+	}
+
+	/**
+	 * 指定された IRC ネットワークにコマンドを送信します。
+	 * 
+	 * @param groupName IRC ネットワーク名
+	 * @param command コマンド
+	 */
+	public void put(String groupName, String command)
+	{
+		IRCNetwork.find(groupName).put(command);
 	}
 
 	/**
