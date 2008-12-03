@@ -12,7 +12,10 @@ import java.awt.Dimension;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.Flushable;
+import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.Formatter;
 import java.util.Properties;
 
 import javax.swing.BorderFactory;
@@ -33,7 +36,7 @@ import javax.swing.text.StyledDocument;
  * 
  * @author tarchan
  */
-public class IRCConsole
+public class IRCConsole implements Appendable, Flushable
 {
 	/**
 	 * チャットコンソールを起動します。
@@ -94,7 +97,7 @@ public class IRCConsole
 				textField.setText("");
 
 				// 表示エリアに1行追加
-				appendLine(str);
+				if (!str.isEmpty()) appendLine(str);
 			}
 		});
 
@@ -130,11 +133,10 @@ public class IRCConsole
 	{
 		try
 		{
-			// 表示エリアに1行追加
-			doc.insertString(doc.getLength(), str + NL, style);
-			textPane.setCaretPosition(doc.getLength());
+			append(str + NL);
+			flush();
 		}
-		catch (BadLocationException e)
+		catch (IOException e)
 		{
 			e.printStackTrace();
 		}
@@ -145,7 +147,8 @@ public class IRCConsole
 	 */
 	public void test()
 	{
-		appendLine("Welcome to IRCKit!");
+		final Formatter formatter = new Formatter(this);
+		formatter.format("Welcome to IRCKit!" + NL);
 		try
 		{
 			IRCClient irc = new IRCClient();
@@ -155,7 +158,10 @@ public class IRCConsole
 				public void reply(IRCMessage msg)
 				{
 					// TODO メッセージを表示
-					appendLine(msg.toString());
+					String nick = msg.getNick();
+					String text = msg.getMessage("ISO-2022-JP");
+					formatter.format("(%s) %s" + NL, nick, text);
+					flush();
 				}
 
 				public void error(Exception e)
@@ -169,13 +175,54 @@ public class IRCConsole
 			prof.list(System.out);
 			irc.registerNetwork("tokyo", "irc://irc.tokyo.wide.ad.jp:6667", "tarchan", "");
 //			irc.registerNetwork("tokyo", "http://irc.mozilla.org:6667", "tarchan", "");
-			irc.join("tokyo", "#dameTunes", "");
-			irc.privmsg("tokyo", "#dameTunes", "テスト");
+			irc.join("tokyo", "#javabreak", "");
+			irc.privmsg("tokyo", "#javabreak", "テスト");
 			irc.quit();
 		}
 		catch (MalformedURLException e)
 		{
 			e.printStackTrace();
 		}
+	}
+
+	/**
+	 * @see java.lang.Appendable#append(java.lang.CharSequence)
+	 */
+	public Appendable append(CharSequence csq) throws IOException
+	{
+		try
+		{
+			doc.insertString(doc.getLength(), csq.toString(), style);
+		}
+		catch (BadLocationException e)
+		{
+			throw new IOException(e);
+		}
+
+		return this;
+	}
+
+	/**
+	 * @see java.lang.Appendable#append(char)
+	 */
+	public Appendable append(char c) throws IOException
+	{
+		return append(String.valueOf(c));
+	}
+
+	/**
+	 * @see java.lang.Appendable#append(java.lang.CharSequence, int, int)
+	 */
+	public Appendable append(CharSequence csq, int start, int end) throws IOException
+	{
+		return append(csq.subSequence(start, end));
+	}
+
+	/**
+	 * @see java.io.Flushable#flush()
+	 */
+	public void flush()
+	{
+		textPane.setCaretPosition(doc.getLength());
 	}
 }

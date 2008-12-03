@@ -65,6 +65,7 @@ public class IRCClient
 	public void registerNetwork(String groupName, String address, String username, String password) throws MalformedURLException
 	{
 		IRCNetwork.register(groupName, address, username, password);
+		IRCNetwork.find(groupName).setClient(this);
 	}
 
 	/**
@@ -98,5 +99,18 @@ public class IRCClient
 	{
 		// TODO チャンネルにメッセージを送信
 		IRCNetwork.find(groupName).privmsg(channelName, message);
+	}
+
+	/**
+	 * リプライメッセージを処理します。
+	 * 
+	 * @param msg リプライメッセージ
+	 */
+	public void reply(IRCMessage msg)
+	{
+		for (IRCMessageHandler handle : handlers)
+		{
+			handle.reply(msg);
+		}
 	}
 }
