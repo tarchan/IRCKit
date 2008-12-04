@@ -18,7 +18,7 @@ import java.util.Properties;
 public class IRCClient
 {
 	/** メッセージハンドラ */
-	protected ArrayList<IRCMessageHandler> handlers = new ArrayList<IRCMessageHandler>();
+	protected ArrayList<IRCMessageListener> handlers = new ArrayList<IRCMessageListener>();
 
 	/**
 	 * システムプロキシを使用するかどうかを設定します。
@@ -47,7 +47,7 @@ public class IRCClient
 	 * 
 	 * @param handler メッセージハンドラ
 	 */
-	public void registerHandler(IRCMessageHandler handler)
+	public void registerHandler(IRCMessageListener handler)
 	{
 		handlers.add(handler);
 	}
@@ -128,7 +128,7 @@ public class IRCClient
 	 */
 	public void reply(IRCMessage msg)
 	{
-		for (IRCMessageHandler handle : handlers)
+		for (IRCMessageListener handle : handlers)
 		{
 			handle.reply(msg);
 		}

@@ -15,6 +15,7 @@ import java.awt.event.ActionListener;
 import java.io.Flushable;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.Date;
 import java.util.Formatter;
 import java.util.Properties;
 
@@ -143,6 +144,44 @@ public class IRCConsole implements Appendable, Flushable
 	}
 
 	/**
+	 * CommandPublisher
+	 */
+	class CommandPublisher implements Runnable
+	{
+		/** コマンド */
+		protected String str;
+
+		/**
+		 * @param command コマンド
+		 */
+		public CommandPublisher(String command)
+		{
+			this.str = command;
+		}
+
+		/**
+		 * 
+		 */
+		public void run()
+		{
+			// IRC ネットワークに送信
+			if (str.startsWith("/"))
+			{
+				// コマンド
+				irc.put("tokyo", str.substring(1));
+			}
+			else
+			{
+				// メッセージ送信
+				String groupName = "tokyo";
+				String channelName = "#javabreak";
+				String message = str;
+				irc.privmsg(groupName, channelName, message);
+			}
+		}
+	}
+
+	/**
 	 * コマンドを送信します。
 	 * 
 	 * @param command コマンド
@@ -152,16 +191,6 @@ public class IRCConsole implements Appendable, Flushable
 		// 表示エリアに追加
 		appendLine(command);
 
-		// IRC ネットワークに送信
-		if (command.startsWith("/"))
-		{
-			// コマンド
-			irc.put("tokyo", command.substring(1));
-		}
-		else
-		{
-			// メッセージ送信
-		}
 	}
 
 	/** IRC クライアント */
@@ -178,22 +207,48 @@ public class IRCConsole implements Appendable, Flushable
 		{
 			irc = new IRCClient();
 			irc.setUseSystemProxies(true);
-			irc.registerHandler(new IRCMessageHandler()
+			irc.registerHandler(new IRCMessageAdapter()
 			{
-				public void reply(IRCMessage msg)
+				/** エンコーディング */
+				String encoding = "ISO-2022-JP";
+
+//				@Override
+//				public void reply(IRCMessage reply)
+//				{
+//					super.reply(reply);
+//					appendLine(reply.getMessage(encoding));
+//				}
+
+				/**
+				 * @see com.mac.tarchan.irc.client.IRCMessageAdapter#welcome(com.mac.tarchan.irc.client.IRCMessage)
+				 */
+				@Override
+				public void welcome(IRCMessage reply)
 				{
-					// TODO メッセージを表示
-					String encoding = "ISO-2022-JP";
-					String nick = msg.getNick();
-					String text = msg.getTrailing(encoding);
-					formatter.format("(%s) %s" + NL, nick, text);
-					flush();
+					appendLine(reply.getTrailing(encoding));
 				}
 
-				public void error(Exception e)
+				/**
+				 * @see com.mac.tarchan.irc.client.IRCMessageAdapter#ping(com.mac.tarchan.irc.client.IRCMessage)
+				 */
+				@Override
+				public void ping(IRCMessage reply)
 				{
-					// エラーを表示
-					e.printStackTrace();
+					appendLine("PONG " + reply.getTrailing(encoding));
+				}
+
+				/**
+				 * @see com.mac.tarchan.irc.client.IRCMessageAdapter#privmsg(com.mac.tarchan.irc.client.IRCMessage)
+				 */
+				@Override
+				public void privmsg(IRCMessage reply)
+				{
+					// メッセージを表示
+					Date date = new Date(reply.getWhen());
+					String nick = reply.getNick();
+					String text = reply.getTrailing(encoding);
+					String str = String.format("%tR (%s) %s", date, nick, text);
+					appendLine(str);
 				}
 			});
 			Properties prof = irc.createDefaultProperties();

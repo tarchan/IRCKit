@@ -2,28 +2,22 @@
  * IRCMessageListener.java
  * IRCKit
  *
- * Created by tarchan on 2008/04/04.
+ * Created by tarchan on 2008/11/27.
  * Copyright (c) 2008 tarchan. All rights reserved.
  */
 package com.mac.tarchan.irc.client;
 
 /**
- * @since 1.0
+ * IRCMessageListener
+ * 
  * @author tarchan
  */
 public interface IRCMessageListener
 {
 	/**
-	 * メッセージを受け取ります。
+	 * リプライメッセージを受け取ります。
 	 * 
-	 * @param message IRC メッセージ
+	 * @param reply リプライメッセージ
 	 */
-	public void onMessage(IRCMessage message);
-
-	/**
-	 * エラーを受け取ります。
-	 * 
-	 * @param e 発生した例外
-	 */
-	public void onError(Exception e);
+	public void reply(IRCMessage reply);
 }
