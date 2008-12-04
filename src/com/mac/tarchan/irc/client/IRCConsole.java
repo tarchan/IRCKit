@@ -27,6 +27,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
+import javax.swing.SwingUtilities;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Style;
 import javax.swing.text.StyleContext;
@@ -191,6 +192,7 @@ public class IRCConsole implements Appendable, Flushable
 		// 表示エリアに追加
 		appendLine(command);
 
+		SwingUtilities.invokeLater(new CommandPublisher(command));
 	}
 
 	/** IRC クライアント */

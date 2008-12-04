@@ -27,8 +27,12 @@ public class IRCMessageAdapter implements IRCMessageListener
 	public IRCMessageAdapter()
 	{
 		registerAction("001", "welcome");
+//		registerAction("020", "pleasewait");
+//		registerAction("433", "NICKNAMEINUSE");
+//		registerAction("451", "NOTREGISTERED");
 		registerAction("PING", "ping");
 		registerAction("PRIVMSG", "privmsg");
+//		registerAction("ERROR", "error");
 	}
 
 	/**
@@ -47,11 +51,11 @@ public class IRCMessageAdapter implements IRCMessageListener
 		}
 		catch (SecurityException e)
 		{
-			e.printStackTrace();
+			error(e);
 		}
 		catch (NoSuchMethodException e)
 		{
-			e.printStackTrace();
+			error(e);
 		}
 	}
 
@@ -62,22 +66,34 @@ public class IRCMessageAdapter implements IRCMessageListener
 	{
 		try
 		{
-			String cmd = reply.getCommand();
-			Method m = actions.get(cmd);
+			String key = reply.getCommand();
+			Method m = actions.get(key);
 			if (m != null) m.invoke(this, reply);
+			else error(new NullPointerException(key));
+
 		}
 		catch (IllegalArgumentException e)
 		{
-			e.printStackTrace();
+			error(e);
 		}
 		catch (IllegalAccessException e)
 		{
-			e.printStackTrace();
+			error(e);
 		}
 		catch (InvocationTargetException e)
 		{
-			e.printStackTrace();
+			error(e);
 		}
+	}
+
+	/**
+	 * 例外を受け取ります。
+	 * 
+	 * @param e 例外
+	 */
+	public void error(Exception e)
+	{
+		System.err.println(e.toString());
 	}
 
 	/**
