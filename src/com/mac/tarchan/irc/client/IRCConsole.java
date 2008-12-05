@@ -214,12 +214,12 @@ public class IRCConsole implements Appendable, Flushable
 				/** エンコーディング */
 				String encoding = "ISO-2022-JP";
 
-//				@Override
-//				public void reply(IRCMessage reply)
-//				{
-//					super.reply(reply);
-//					appendLine(reply.getMessage(encoding));
-//				}
+				@Override
+				public void reply(IRCMessage reply)
+				{
+					super.reply(reply);
+					if (!isConsumed()) appendLine(reply.getMessage(encoding));
+				}
 
 				/**
 				 * @see com.mac.tarchan.irc.client.IRCMessageAdapter#welcome(com.mac.tarchan.irc.client.IRCMessage)

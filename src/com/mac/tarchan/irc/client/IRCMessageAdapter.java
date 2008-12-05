@@ -12,14 +12,21 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 
 /**
- * IRCMessageAdapter
+ * リプライメッセージを受け取るためのアダプタクラスです。
+ * このクラスは、リスナーオブジェクトの作成を容易にするために、よく使われる空のメソッドを提供します。
+ * IRCMessage リスナーを作成するには、このクラスを拡張して、必要なIRCコマンド用のメソッドを登録します。
+ * 拡張したクラスを使ってリスナーオブジェクトを作成してから、registerAction メソッドを使って必要なメソッドを登録するだけで済みます。
  * 
- * @author tarchan
+ * @see IRCMessage
+ * @see IRCMessageListener
  */
 public class IRCMessageAdapter implements IRCMessageListener
 {
 	/** IRCコマンドに対応するアクション */
 	protected HashMap<String, Method> actions = new HashMap<String, Method>();
+
+	/** イベントの消費を表します。 */
+	protected boolean consumed;
 
 	/**
 	 * IRCメッセージアダプタを構築します。
@@ -36,7 +43,7 @@ public class IRCMessageAdapter implements IRCMessageListener
 	}
 
 	/**
-	 * 指定されたアクションをを登録します。
+	 * IRCコマンドに対応するアクションをを登録します。
 	 * 
 	 * @param key IRCコマンド
 	 * @param action アクション
@@ -60,17 +67,43 @@ public class IRCMessageAdapter implements IRCMessageListener
 	}
 
 	/**
+	 * リプライメッセージが消費されたかどうかを返します。
+	 * 
+	 * @return リプライメッセージが消費された場合は true
+	 */
+	protected boolean isConsumed()
+	{
+		return consumed;
+	}
+
+	/**
+	 * リプライメッセージが消費されたかどうかを設定します。
+	 * 
+	 * @param consumed リプライメッセージが消費された場合は true
+	 */
+	protected void setConsumed(boolean consumed)
+	{
+		this.consumed = consumed;
+	}
+
+	/**
+	 * リプライメッセージを受信したときに呼び出されます。
+	 * 
+	 * @param reply リプライメッセージ
 	 * @see com.mac.tarchan.irc.client.IRCMessageListener#reply(com.mac.tarchan.irc.client.IRCMessage)
 	 */
 	public void reply(IRCMessage reply)
 	{
 		try
 		{
+			setConsumed(false);
 			String key = reply.getCommand();
 			Method m = actions.get(key);
-			if (m != null) m.invoke(this, reply);
-			else error(new NullPointerException(key));
-
+			if (m != null)
+			{
+				m.invoke(this, reply);
+				setConsumed(true);
+			}
 		}
 		catch (IllegalArgumentException e)
 		{
@@ -87,7 +120,7 @@ public class IRCMessageAdapter implements IRCMessageListener
 	}
 
 	/**
-	 * 例外を受け取ります。
+	 * 例外が発生したときに呼び出されます。
 	 * 
 	 * @param e 例外
 	 */
@@ -97,7 +130,7 @@ public class IRCMessageAdapter implements IRCMessageListener
 	}
 
 	/**
-	 * IRCネットワークに接続した場合に受け取ります。
+	 * IRCネットワークに接続したときに呼び出されます。
 	 * 
 	 * @param reply リプライメッセージ
 	 */
@@ -106,7 +139,7 @@ public class IRCMessageAdapter implements IRCMessageListener
 	}
 
 	/**
-	 * PINGメッセージを受け取ります。
+	 * PINGメッセージを受信したときに呼び出されます。
 	 * 
 	 * @param reply リプライメッセージ
 	 */
@@ -115,7 +148,7 @@ public class IRCMessageAdapter implements IRCMessageListener
 	}
 
 	/**
-	 * チャットメッセージを受け取ります。
+	 * チャットメッセージを受信したときに呼び出されます。
 	 * 
 	 * @param reply リプライメッセージ
 	 */
