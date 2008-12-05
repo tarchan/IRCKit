@@ -8,14 +8,15 @@
 package com.mac.tarchan.irc.client;
 
 /**
- * IRCMessageListener
+ * リプライメッセージを受け取るためのリスナーインターフェースです。
  * 
- * @author tarchan
+ * @see IRCMessageAdapter
+ * @see IRCMessage
  */
 public interface IRCMessageListener
 {
 	/**
-	 * リプライメッセージを受け取ります。
+	 * リプライメッセージを受信したときに呼び出されます。
 	 * 
 	 * @param reply リプライメッセージ
 	 */
