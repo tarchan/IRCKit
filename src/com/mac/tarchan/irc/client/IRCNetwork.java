@@ -18,7 +18,6 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Properties;
@@ -111,6 +110,7 @@ public class IRCNetwork
 	 * この IRC ネットワークのメッセージを受け取るオブジェクトを設定します。
 	 * @param client メッセージを受け取るオブジェクト
 	 * @return IRCNetwork オブジェクト
+	 * @deprecated
 	 */
 	public IRCNetwork register(Object client)
 	{
@@ -125,6 +125,7 @@ public class IRCNetwork
 	 * @param pass 接続パスワード
 	 * @return このオブジェクトへの参照
 	 * @throws IOException 接続時にエラーが発生した場合
+	 * @deprecated
 	 */
 	public IRCNetwork connect(String url, String user, String pass) throws IOException
 	{
@@ -151,6 +152,7 @@ public class IRCNetwork
 	 * @param config 接続プロパティー
 	 * @return このオブジェクトへの参照
 	 * @throws IOException 接続時にエラーが発生した場合
+	 * @deprecated
 	 */
 	public IRCNetwork connect(Properties config) throws IOException
 	{
@@ -178,6 +180,7 @@ public class IRCNetwork
 	 * Reader オブジェクトを返します。
 	 * 
 	 * @return Reader オブジェクト
+	 * @deprecated
 	 */
 	public Reader reader()
 	{
@@ -188,6 +191,7 @@ public class IRCNetwork
 	 * PrintWriter オブジェクトを返します。
 	 * 
 	 * @return PrintWriter オブジェクト
+	 * @deprecated
 	 */
 	public PrintWriter writer()
 	{
@@ -195,15 +199,16 @@ public class IRCNetwork
 	}
 
 	/**
-	 * 1 行読み込みます。
+	 * 1行読み込みます。
 	 * 
-	 * @return 1 行の文字列
+	 * @return 1行の文字列
+	 * @deprecated
 	 */
 	public String readLine()
 	{
 		try
 		{
-			return in0.readLine();
+			return in.readLine();
 		}
 		catch (IOException e)
 		{
@@ -216,6 +221,7 @@ public class IRCNetwork
 	 * 1 行読み込んで IRCMessage に変換します。
 	 * 
 	 * @return IRCMessage オブジェクト
+	 * @deprecated
 	 */
 	public IRCMessage readMessage()
 	{
@@ -230,6 +236,7 @@ public class IRCNetwork
 	 * @param format 書式文字列
 	 * @param args 引数
 	 * @return このオブジェクトへの参照
+	 * @deprecated
 	 */
 	public IRCNetwork printLine(String format, Object... args)
 	{
@@ -243,6 +250,7 @@ public class IRCNetwork
 	 * @param format
 	 * @param args
 	 * @return このオブジェクトへの参照
+	 * @deprecated
 	 */
 	public IRCNetwork printBreak(String format, Object... args)
 	{
@@ -256,6 +264,7 @@ public class IRCNetwork
 	 * @param ch
 	 * @param msg
 	 * @return このオブジェクトへの参照
+	 * @deprecated
 	 */
 	public IRCNetwork printMessage(String ch, String msg)
 	{
@@ -334,24 +343,17 @@ public class IRCNetwork
 	/** URL */
 	protected URL url;
 
-	/** ユーザプロパティー */
-//	protected Properties prof;
-
-	/** ユーザ名 */
-//	protected String username;
-
-	/** パスワード */
-//	protected String password;
-
 	/**
 	 * 指定された IRC ネットワークを構築します。
 	 * 
+	 * @param groupName IRC ネットワーク名
 	 * @param address サーバアドレス
 	 * @throws IllegalArgumentException 指定された文字列が RFC 2396 に違反する場合
 	 * @throws MalformedURLException URL のプロトコルハンドラが見つからなかった場合、または URL の構築中にその他の何らかのエラーが発生した場合
 	 */
-	public IRCNetwork(String address) throws MalformedURLException
+	public IRCNetwork(String groupName, String address) throws MalformedURLException
 	{
+		this.name = groupName;
 		URI uri = URI.create(address);
 		url = uri.toURL();
 		System.out.println("host=" + url.getHost() + ", port=" + url.getPort());
@@ -394,9 +396,9 @@ public class IRCNetwork
 	 * @throws IllegalArgumentException 指定された文字列が RFC 2396 に違反する場合
 	 * @throws MalformedURLException URL のプロトコルハンドラが見つからなかった場合、または URL の構築中にその他の何らかのエラーが発生した場合
 	 */
-	public static void register(String groupName, String address) throws MalformedURLException
+	public static void registerNetwork(String groupName, String address) throws MalformedURLException
 	{
-		IRCNetwork network = new IRCNetwork(address);
+		IRCNetwork network = new IRCNetwork(groupName, address);
 		groups.put(groupName, network);
 	}
 
@@ -410,6 +412,9 @@ public class IRCNetwork
 	{
 		return groups.get(groupName);
 	}
+
+	/** 入力ストリーム */
+	protected BufferedReader in;
 
 	/** 出力ストリーム */
 	protected PrintWriter out;
@@ -434,48 +439,48 @@ public class IRCNetwork
 		conn.setDoOutput(true);
 		conn.connect();
 		// TODO IRCサーバにログイン
+		in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 		out = new PrintWriter(new OutputStreamWriter(conn.getOutputStream(), encoding), true);
 		if (password.trim().length() > 0) out.printf(PASS + CRLF, password);
 //		out.flush();
-		out.printf(NICK + CRLF, username);
+		out.printf(NICK + CRLF, nickname);
 //		out.flush();
-		out.printf(USER + CRLF, username, 0, username);
+		out.printf(USER + CRLF, username, mode, realname);
 //		out.flush();
-		new Thread(new Runnable()
-		{
-			public void run()
-			{
-				try
-				{
-					BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-					while (true)
-					{
-						String line = in.readLine();
-						System.out.println("IRC: " + line);
-						if (line == null) continue;
-						if (line.startsWith("PING"))
-						{
-							String[] ping = line.split(":");
-							System.out.println("ping-pong at " + new Date() + "/" + ping[1]);
-							out.printf(PONG + CRLF, ping[1]);
-							out.flush();
-						}
-
-						IRCMessage msg = new IRCMessage(this, line);
-						client.reply(msg);
-
-						if (line.startsWith("ERROR")) break;
-					}
-					in.close();
-					out.close();
-					System.out.println("bye!");
-				}
-				catch (IOException e)
-				{
-					e.printStackTrace();
-				}
-			}
-		}).start();
+//		new Thread(new Runnable()
+//		{
+//			public void run()
+//			{
+//				try
+//				{
+//					while (true)
+//					{
+//						String line = in.readLine();
+//						System.out.println("IRC: " + line);
+//						if (line == null) continue;
+//						if (line.startsWith("PING"))
+//						{
+//							String[] ping = line.split(":");
+//							System.out.println("ping-pong at " + new Date() + "/" + ping[1]);
+//							out.printf(PONG + CRLF, ping[1]);
+//							out.flush();
+//						}
+//
+//						IRCMessage msg = new IRCMessage(this, line);
+//						client.reply(msg);
+//
+//						if (line.startsWith("ERROR")) break;
+//					}
+//					in.close();
+//					out.close();
+//					System.out.println("bye!");
+//				}
+//				catch (IOException e)
+//				{
+//					e.printStackTrace();
+//				}
+//			}
+//		}).start();
 	}
 
 	/**
@@ -505,6 +510,17 @@ public class IRCNetwork
 		{
 			e.printStackTrace();
 		}
+	}
+
+	/**
+	 * 1行ゲットします。
+	 * 
+	 * @return 文字列
+	 * @throws IOException 入力エラーが発生した場合
+	 */
+	public String get() throws IOException
+	{
+		return in.readLine();
 	}
 
 	/**
