@@ -7,6 +7,7 @@
  */
 package com.mac.tarchan.irc.client;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Properties;
@@ -62,7 +63,7 @@ public class IRCClient
 	 */
 	public void registerNetwork(String groupName, String address) throws MalformedURLException
 	{
-		IRCNetwork.register(groupName, address);
+		IRCNetwork.registerNetwork(groupName, address);
 		IRCNetwork.find(groupName).setClient(this);
 	}
 
@@ -117,7 +118,6 @@ public class IRCClient
 	 */
 	public void privmsg(String groupName, String channelName, String message)
 	{
-		// TODO チャンネルにメッセージを送信
 		IRCNetwork.find(groupName).privmsg(channelName, message);
 	}
 
@@ -132,5 +132,15 @@ public class IRCClient
 		{
 			handle.reply(msg);
 		}
+	}
+
+	/**
+	 * @param groupName IRC ネットワーク名
+	 * @return 1行
+	 * @throws IOException 入力エラーが発生した場合
+	 */
+	public String readLine(String groupName) throws IOException
+	{
+		return IRCNetwork.find(groupName).get();
 	}
 }
