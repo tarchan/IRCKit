@@ -35,6 +35,7 @@ import javax.swing.text.StyledDocument;
 import com.mac.tarchan.irc.client.IRCClient;
 import com.mac.tarchan.irc.client.IRCMessage;
 import com.mac.tarchan.irc.client.IRCMessageAdapter;
+import com.mac.tarchan.irc.client.IRCMessageListener;
 
 /**
  * Chat
@@ -282,32 +283,38 @@ public class Chat extends SwingWorker<Object, IRCMessage>
 
 		setStyle("error");
 		printLine("Hello");
-		irc.registerHandler(new IRCMessageAdapter()
-		{
-			/**
-			 * @see com.mac.tarchan.irc.client.IRCMessageAdapter#privmsg(com.mac.tarchan.irc.client.IRCMessage)
-			 */
-			@Override
-			public void privmsg(IRCMessage reply)
-			{
-				// メッセージを表示
-				Date date = new Date(reply.getWhen());
-				String nick = reply.getNick();
-				String text = reply.getTrailing(encoding);
-				String str = String.format("%tR (%s) %s", date, nick, text);
-				printLine(str);
-			}
-
-			/**
-			 * @see com.mac.tarchan.irc.client.IRCMessageAdapter#welcome(com.mac.tarchan.irc.client.IRCMessage)
-			 */
-			@Override
-			public void welcome(IRCMessage reply)
-			{
-				printLine(reply.getTrailing(encoding));
-			}
-			
-		});
+		irc.registerHandler(new IRCMessageAdapter());
+//		irc.registerHandler(new ChatAdapter(this));
+//		irc.registerHandler(handler);
+//		irc.registerHandler(new IRCMessageAdapter()
+//		{
+//			/** エンコーディング */
+//			protected String encoding = "ISO-2022-JP";
+//
+//			/**
+//			 * @see com.mac.tarchan.irc.client.IRCMessageAdapter#privmsg(com.mac.tarchan.irc.client.IRCMessage)
+//			 */
+//			@Override
+//			public void privmsg(IRCMessage reply)
+//			{
+//				// メッセージを表示
+//				Date date = new Date(reply.getWhen());
+//				String nick = reply.getNick();
+//				String text = reply.getTrailing(encoding);
+//				String str = String.format("%tR (%s) %s", date, nick, text);
+//				printLine(str);
+//			}
+//
+//			/**
+//			 * @see com.mac.tarchan.irc.client.IRCMessageAdapter#welcome(com.mac.tarchan.irc.client.IRCMessage)
+//			 */
+//			@Override
+//			public void welcome(IRCMessage reply)
+//			{
+//				printLine(reply.getTrailing(encoding));
+//			}
+//			
+//		});
 
 		while (true)
 		{
@@ -338,7 +345,107 @@ public class Chat extends SwingWorker<Object, IRCMessage>
 		for (IRCMessage reply : chunks)
 		{
 //			System.out.println();
-			printLine(reply.getMessage("ISO-2022-JP"));
+//			setStyle("text");
+//			printLine(reply.getMessage("ISO-2022-JP"));
+			irc.reply(reply);
 		}
 	}
+
+	/** リプライメッセージハンドラ */
+	static class ChatAdapter extends IRCMessageAdapter
+	{
+		/** チャット */
+		protected Chat chat;
+
+		/** エンコーディング */
+		protected String encoding = "ISO-2022-JP";
+
+		/**
+		 * チャットアダプタ
+		 * 
+		 * @param chat チャット
+		 */
+		public ChatAdapter(Chat chat)
+		{
+			this.chat = chat;
+		}
+
+		/**
+		 * @see com.mac.tarchan.irc.client.IRCMessageAdapter#privmsg(com.mac.tarchan.irc.client.IRCMessage)
+		 */
+		@Override
+		public void privmsg(IRCMessage reply)
+		{
+			// メッセージを表示
+			Date date = new Date(reply.getWhen());
+			String nick = reply.getNick();
+			String text = reply.getTrailing(encoding);
+			String str = String.format("%tR (%s) %s", date, nick, text);
+			chat.printLine(str);
+		}
+
+		/**
+		 * @see com.mac.tarchan.irc.client.IRCMessageAdapter#welcome(com.mac.tarchan.irc.client.IRCMessage)
+		 */
+		@Override
+		public void welcome(IRCMessage reply)
+		{
+			chat.printLine(reply.getTrailing(encoding));
+		}
+
+		/**
+		 * @see com.mac.tarchan.irc.client.IRCMessageAdapter#ping(com.mac.tarchan.irc.client.IRCMessage)
+		 */
+		@Override
+		public void ping(IRCMessage reply)
+		{
+			super.ping(reply);
+			String trail = reply.getTrailing();
+			String pong = String.format("PONG %s", trail);
+			chat.setStyle("system");
+			chat.printLine(pong);
+		}
+	}
+
+	/** リプライメッセージハンドラ */
+	protected IRCMessageListener handler = new IRCMessageAdapter()
+	{
+		protected String encoding = "ISO-2022-JP";
+
+		/**
+		 * @see com.mac.tarchan.irc.client.IRCMessageAdapter#privmsg(com.mac.tarchan.irc.client.IRCMessage)
+		 */
+		@Override
+		public void privmsg(IRCMessage reply)
+		{
+			// メッセージを表示
+			Date date = new Date(reply.getWhen());
+			String nick = reply.getNick();
+			String text = reply.getTrailing(encoding);
+			String str = String.format("%tR (%s) %s", date, nick, text);
+			printLine(str);
+		}
+
+		/**
+		 * @see com.mac.tarchan.irc.client.IRCMessageAdapter#welcome(com.mac.tarchan.irc.client.IRCMessage)
+		 */
+		@Override
+		public void welcome(IRCMessage reply)
+		{
+			printLine(reply.getTrailing(encoding));
+		}
+
+		/**
+		 * @see com.mac.tarchan.irc.client.IRCMessageAdapter#ping(com.mac.tarchan.irc.client.IRCMessage)
+		 */
+		@Override
+		public void ping(IRCMessage reply)
+		{
+			super.ping(reply);
+			String trail = reply.getTrailing();
+			String pong = String.format("PONG %s", trail);
+			setStyle("system");
+			printLine(pong);
+		}
+	};
 }

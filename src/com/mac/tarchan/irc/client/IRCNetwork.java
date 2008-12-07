@@ -442,45 +442,41 @@ public class IRCNetwork
 		in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 		out = new PrintWriter(new OutputStreamWriter(conn.getOutputStream(), encoding), true);
 		if (password.trim().length() > 0) out.printf(PASS + CRLF, password);
-//		out.flush();
 		out.printf(NICK + CRLF, nickname);
-//		out.flush();
 		out.printf(USER + CRLF, username, mode, realname);
-//		out.flush();
-//		new Thread(new Runnable()
-//		{
-//			public void run()
-//			{
-//				try
-//				{
-//					while (true)
-//					{
-//						String line = in.readLine();
-//						System.out.println("IRC: " + line);
-//						if (line == null) continue;
-//						if (line.startsWith("PING"))
-//						{
-//							String[] ping = line.split(":");
-//							System.out.println("ping-pong at " + new Date() + "/" + ping[1]);
-//							out.printf(PONG + CRLF, ping[1]);
-//							out.flush();
-//						}
-//
-//						IRCMessage msg = new IRCMessage(this, line);
-//						client.reply(msg);
-//
-//						if (line.startsWith("ERROR")) break;
-//					}
-//					in.close();
-//					out.close();
-//					System.out.println("bye!");
-//				}
-//				catch (IOException e)
-//				{
-//					e.printStackTrace();
-//				}
-//			}
-//		}).start();
+		new Thread(new Runnable()
+		{
+			public void run()
+			{
+				try
+				{
+					while (true)
+					{
+						String line = in.readLine();
+						System.out.println("IRC: " + line);
+						if (line == null) continue;
+						if (line.startsWith("PING"))
+						{
+							String[] ping = line.split(":");
+							System.out.println("ping-pong: " + ping[1]);
+							out.printf(PONG + CRLF, ping[1]);
+						}
+
+						IRCMessage msg = new IRCMessage(this, line);
+						client.reply(msg);
+
+						if (line.startsWith("ERROR")) break;
+					}
+					in.close();
+					out.close();
+					System.out.println("bye!");
+				}
+				catch (IOException e)
+				{
+					e.printStackTrace();
+				}
+			}
+		}).start();
 	}
 
 	/**
@@ -520,7 +516,7 @@ public class IRCNetwork
 	 */
 	public String get() throws IOException
 	{
-		System.out.println("get: " + in);
+//		System.out.println("get: " + in);
 		return in.readLine();
 	}
 
