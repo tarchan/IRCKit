@@ -8,9 +8,11 @@
 package com.mac.tarchan.irc.examples;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 
@@ -26,11 +28,13 @@ import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Style;
+import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
 import javax.swing.text.StyledDocument;
 
 import com.mac.tarchan.irc.client.IRCClient;
 import com.mac.tarchan.irc.client.IRCMessage;
+import com.mac.tarchan.irc.client.IRCMessageAdapter;
 
 /**
  * Chat
@@ -49,6 +53,7 @@ public class Chat extends SwingWorker<Object, IRCMessage>
 			public void run()
 			{
 				chat.createAndShowWindow();
+				chat.setStyle("system");
 				chat.printLine("Welcome to IRCKit!");
 			}
 		});
@@ -66,7 +71,7 @@ public class Chat extends SwingWorker<Object, IRCMessage>
 	protected StyledDocument doc;
 
 	/** 表示スタイル */
-	protected Style style = StyleContext.getDefaultStyleContext().getStyle(StyleContext.DEFAULT_STYLE);
+//	protected Style style = StyleContext.getDefaultStyleContext().getStyle(StyleContext.DEFAULT_STYLE);
 
 	/** 入力フィールド */
 	protected JTextField textField;
@@ -81,6 +86,8 @@ public class Chat extends SwingWorker<Object, IRCMessage>
 		textPane.setEditable(false);
 		textPane.setPreferredSize(new Dimension(320, 240));
 		doc = textPane.getStyledDocument();
+
+		initStyle(doc);
 
 		// スクロールパネル
 		JScrollPane scrollPane = new JScrollPane(textPane);
@@ -106,7 +113,26 @@ public class Chat extends SwingWorker<Object, IRCMessage>
 
 				// 表示エリアに1行追加
 //				System.out.println(str);
-				if (!str.isEmpty()) printLine(str);
+				if (!str.isEmpty())
+				{
+					setStyle("text");
+					printLine(str);
+				}
+			}
+		});
+		textField.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent evt)
+			{
+				// 入力テキストを取得
+				String str = evt.getActionCommand();
+
+				// メッセージを送信
+				System.out.println(str);
+				if (!str.isEmpty())
+				{
+					putCommand(str);
+				}
 			}
 		});
 
@@ -132,6 +158,54 @@ public class Chat extends SwingWorker<Object, IRCMessage>
 		frame.add(mainPane);
 		frame.pack();
 		frame.setVisible(true);
+
+		// フォーカスを設定
+		textField.requestFocusInWindow();
+	}
+
+	/**
+	 * ドキュメントのスタルを初期化します。
+	 * 
+	 * @param doc ドキュメント
+	 */
+	protected void initStyle(StyledDocument doc)
+	{
+//		String fontFamily = "Monaco";
+//		int fontSize = 9;
+		String fontFamily = "Lucida Grande";
+		int fontSize = 12;
+		Style def = StyleContext.getDefaultStyleContext().getStyle(StyleContext.DEFAULT_STYLE);
+
+		// 標準テキスト
+		Style text = doc.addStyle("text", def);
+		StyleConstants.setFontFamily(text, fontFamily);
+		StyleConstants.setFontSize(text, fontSize);
+
+		// システムテキスト
+		Style system = doc.addStyle("system", text);
+		StyleConstants.setForeground(system, Color.GREEN.darker());
+		StyleConstants.setItalic(system, true);
+
+		// エラーテキスト
+		Style error = doc.addStyle("error", text);
+		StyleConstants.setForeground(error, Color.RED);
+		StyleConstants.setBold(error, true);
+	}
+
+	/**
+	 * 指定されたスタイルを表示エリアに設定します。
+	 * 
+	 * @param styleName スタイル
+	 */
+	public void setStyle(final String styleName)
+	{
+		SwingUtilities.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				doc.setLogicalStyle(doc.getLength(), doc.getStyle(styleName));
+			}
+		});
 	}
 
 	/**
@@ -141,20 +215,44 @@ public class Chat extends SwingWorker<Object, IRCMessage>
 	 */
 	public void printLine(final String line)
 	{
-//		SwingUtilities.invokeLater(new Runnable()
-//		{
-//			public void run()
+		SwingUtilities.invokeLater(new Runnable()
+		{
+			public void run()
 			{
 				try
 				{
-					doc.insertString(doc.getLength(), line + NL, style);
+					System.out.println("print: " + Thread.currentThread() + ": " + line);
+					doc.insertString(doc.getLength(), line + NL, null);
 				}
 				catch (BadLocationException e)
 				{
 					e.printStackTrace();
 				}
 			}
-//		});
+		});
+	}
+
+	/** IRCクライアント */
+	protected IRCClient irc = new IRCClient();
+
+	/**
+	 * コマンドを送信します。
+	 * 
+	 * @param str IRCコマンド
+	 */
+	public void putCommand(final String str)
+	{
+		SwingUtilities.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				System.out.println("put: " + Thread.currentThread() + ": " + str);
+				synchronized (irc)
+				{
+					irc.privmsg("tokyo", "#javabreak", str);
+				}
+			}
+		});
 	}
 
 	/**
@@ -164,8 +262,10 @@ public class Chat extends SwingWorker<Object, IRCMessage>
 	protected Object doInBackground() throws Exception
 	{
 		System.out.println("doInBackground");
-		String encoding = "ISO-2022-JP";
-		final IRCClient irc = new IRCClient();
+		setStyle("error");
+		printLine("Hello");
+		final String encoding = "ISO-2022-JP";
+//		final IRCClient irc = new IRCClient();
 		irc.setUseSystemProxies(true);
 		Properties prof = irc.createDefaultProperties();
 		prof.setProperty("irc.real.name", "たーちゃん");
@@ -177,32 +277,52 @@ public class Chat extends SwingWorker<Object, IRCMessage>
 		irc.join("tokyo", "#javabreak", "");
 		irc.privmsg("tokyo", "#javabreak", "テスト");
 
-		textField.addActionListener(new ActionListener()
-		{
-			public void actionPerformed(ActionEvent evt)
-			{
-				// 入力テキストを取得
-				String str = evt.getActionCommand();
+		setStyle("error");
+		printLine("Hello");
 
-				// メッセージを送信
-				System.out.println(str);
-				if (!str.isEmpty())
-				{
-//					irc.privmsg("tokyo", "#javabreak", str);
-				}
+		setStyle("error");
+		printLine("Hello");
+		irc.registerHandler(new IRCMessageAdapter()
+		{
+			/**
+			 * @see com.mac.tarchan.irc.client.IRCMessageAdapter#privmsg(com.mac.tarchan.irc.client.IRCMessage)
+			 */
+			@Override
+			public void privmsg(IRCMessage reply)
+			{
+				// メッセージを表示
+				Date date = new Date(reply.getWhen());
+				String nick = reply.getNick();
+				String text = reply.getTrailing(encoding);
+				String str = String.format("%tR (%s) %s", date, nick, text);
+				printLine(str);
 			}
+
+			/**
+			 * @see com.mac.tarchan.irc.client.IRCMessageAdapter#welcome(com.mac.tarchan.irc.client.IRCMessage)
+			 */
+			@Override
+			public void welcome(IRCMessage reply)
+			{
+				printLine(reply.getTrailing(encoding));
+			}
+			
 		});
 
 		while (true)
 		{
-			String line = irc.readLine("tokyo");
-			if (line == null) break;
+			IRCMessage reply = null;
+			synchronized (irc)
+			{
+				reply = irc.get("tokyo");
+			}
+			if (reply == null) break;
 
-			IRCMessage reply = new IRCMessage(irc, line);
 //			reply.setEncoding(encoding);
 			publish(reply);
 		}
 
+		System.out.println("quit");
 		irc.quit();
 
 		return null;
