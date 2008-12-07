@@ -520,6 +520,7 @@ public class IRCNetwork
 	 */
 	public String get() throws IOException
 	{
+		System.out.println("get: " + in);
 		return in.readLine();
 	}
 

@@ -135,12 +135,16 @@ public class IRCClient
 	}
 
 	/**
+	 * リプライメッセージを受け取ります。
+	 * 
 	 * @param groupName IRC ネットワーク名
-	 * @return 1行
+	 * @return リプライメッセージ
 	 * @throws IOException 入力エラーが発生した場合
 	 */
-	public String readLine(String groupName) throws IOException
+	public IRCMessage get(String groupName) throws IOException
 	{
-		return IRCNetwork.find(groupName).get();
+		IRCNetwork network = IRCNetwork.find(groupName);
+		String line = network.get();
+		return line != null ? new IRCMessage(network, line) : null;
 	}
 }
