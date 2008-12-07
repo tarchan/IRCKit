@@ -111,6 +111,7 @@ public class IRCMessageAdapter implements IRCMessageListener
 		}
 		catch (IllegalAccessException e)
 		{
+			System.err.println("error: " + reply);
 			error(e);
 		}
 		catch (InvocationTargetException e)
@@ -145,6 +146,10 @@ public class IRCMessageAdapter implements IRCMessageListener
 	 */
 	public void ping(IRCMessage reply)
 	{
+		IRCNetwork network = reply.getNetwork();
+		String trail = reply.getTrailing();
+		String pong = String.format("PONG %s", trail);
+		network.put(pong);
 	}
 
 	/**
@@ -154,5 +159,9 @@ public class IRCMessageAdapter implements IRCMessageListener
 	 */
 	public void privmsg(IRCMessage reply)
 	{
+		String nick = reply.getNick();
+		String text = reply.getTrailing("ISO-2022-JP");
+		String str = String.format("(%s) %s", nick, text);
+		System.out.println(str);
 	}
 }
