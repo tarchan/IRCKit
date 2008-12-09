@@ -54,6 +54,7 @@ public class IRCMessageAdapter implements IRCMessageListener
 		{
 			Class<? extends IRCMessageListener> c = getClass();
 			Method m = c.getMethod(action, IRCMessage.class);
+			m.setAccessible(true);
 			actions.put(key, m);
 		}
 		catch (SecurityException e)
