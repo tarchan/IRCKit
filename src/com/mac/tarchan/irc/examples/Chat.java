@@ -72,7 +72,7 @@ public class Chat extends SwingWorker<Object, IRCMessage>
 	protected StyledDocument doc;
 
 	/** 表示スタイル */
-//	protected Style style = StyleContext.getDefaultStyleContext().getStyle(StyleContext.DEFAULT_STYLE);
+	protected Style style = StyleContext.getDefaultStyleContext().getStyle(StyleContext.DEFAULT_STYLE);
 
 	/** 入力フィールド */
 	protected JTextField textField;
@@ -191,6 +191,10 @@ public class Chat extends SwingWorker<Object, IRCMessage>
 		Style error = doc.addStyle("error", text);
 		StyleConstants.setForeground(error, Color.RED);
 		StyleConstants.setBold(error, true);
+
+		// その他
+		Style other = doc.addStyle("other", text);
+		StyleConstants.setForeground(other, Color.GRAY);
 	}
 
 	/**
@@ -198,13 +202,13 @@ public class Chat extends SwingWorker<Object, IRCMessage>
 	 * 
 	 * @param styleName スタイル
 	 */
-	public void setStyle(final String styleName)
+	public synchronized void setStyle(final String styleName)
 	{
 		SwingUtilities.invokeLater(new Runnable()
 		{
 			public void run()
 			{
-				doc.setLogicalStyle(doc.getLength(), doc.getStyle(styleName));
+				style = doc.getStyle(styleName);
 			}
 		});
 	}
@@ -214,7 +218,7 @@ public class Chat extends SwingWorker<Object, IRCMessage>
 	 * 
 	 * @param line テキスト
 	 */
-	public void printLine(final String line)
+	public synchronized void printLine(final String line)
 	{
 		SwingUtilities.invokeLater(new Runnable()
 		{
@@ -223,7 +227,7 @@ public class Chat extends SwingWorker<Object, IRCMessage>
 				try
 				{
 					System.out.println("print: " + Thread.currentThread() + ": " + line);
-					doc.insertString(doc.getLength(), line + NL, null);
+					doc.insertString(doc.getLength(), line + NL, style);
 				}
 				catch (BadLocationException e)
 				{
@@ -283,8 +287,8 @@ public class Chat extends SwingWorker<Object, IRCMessage>
 
 		setStyle("error");
 		printLine("Hello");
-		irc.registerHandler(new IRCMessageAdapter());
-//		irc.registerHandler(new ChatAdapter(this));
+//		irc.registerHandler(new IRCMessageAdapter());
+		irc.registerHandler(new ChatAdapter(this));
 //		irc.registerHandler(handler);
 //		irc.registerHandler(new IRCMessageAdapter()
 //		{
@@ -370,6 +374,20 @@ public class Chat extends SwingWorker<Object, IRCMessage>
 			this.chat = chat;
 		}
 
+//		/**
+//		 * @see com.mac.tarchan.irc.client.IRCMessageAdapter#reply(com.mac.tarchan.irc.client.IRCMessage)
+//		 */
+//		@Override
+//		public void reply(IRCMessage reply)
+//		{
+//			super.reply(reply);
+//			if (!isConsumed())
+//			{
+//				chat.setStyle("other");
+//				chat.printLine(reply.getTrailing(encoding));
+//			}
+//		}
+
 		/**
 		 * @see com.mac.tarchan.irc.client.IRCMessageAdapter#privmsg(com.mac.tarchan.irc.client.IRCMessage)
 		 */
@@ -381,6 +399,7 @@ public class Chat extends SwingWorker<Object, IRCMessage>
 			String nick = reply.getNick();
 			String text = reply.getTrailing(encoding);
 			String str = String.format("%tR (%s) %s", date, nick, text);
+			chat.setStyle("text");
 			chat.printLine(str);
 		}
 
@@ -390,6 +409,7 @@ public class Chat extends SwingWorker<Object, IRCMessage>
 		@Override
 		public void welcome(IRCMessage reply)
 		{
+			chat.setStyle("system");
 			chat.printLine(reply.getTrailing(encoding));
 		}
 
@@ -423,6 +443,7 @@ public class Chat extends SwingWorker<Object, IRCMessage>
 			String nick = reply.getNick();
 			String text = reply.getTrailing(encoding);
 			String str = String.format("%tR (%s) %s", date, nick, text);
+			setStyle("text");
 			printLine(str);
 		}
 
@@ -432,7 +453,22 @@ public class Chat extends SwingWorker<Object, IRCMessage>
 		@Override
 		public void welcome(IRCMessage reply)
 		{
+			setStyle("system");
 			printLine(reply.getTrailing(encoding));
+		}
+
+		/**
+		 * @see com.mac.tarchan.irc.client.IRCMessageAdapter#reply(com.mac.tarchan.irc.client.IRCMessage)
+		 */
+		@Override
+		public void reply(IRCMessage reply)
+		{
+			super.reply(reply);
+			if (!isConsumed())
+			{
+				setStyle("other");
+				printLine(reply.getTrailing(encoding));
+			}
 		}
 
 		/**
