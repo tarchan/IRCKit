@@ -1,68 +1,50 @@
 /*
- * IRCMessage.java
- * IRCKit
- *
- * Created by tarchan on 2005/05/19.
- * Copyright (c) 2005 tarchan. All rights reserved.
+ * Copyright (c) 2009 tarchan. All rights reserved.
  */
 package com.mac.tarchan.irc.client;
 
+import java.awt.Color;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EventObject;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 /**
  * IRCメッセージを構文解析します。
- * 
- * <ul>
- * <li><a href="http://www.haun.org/kent/lib/rfc1459-irc-ja.html" charset="EUC-JP">RFC1459: Internet Relay Chat Protocol (IRC)</a></li>
- * <li><a href="http://www.irchelp.org/irchelp/rfc/index.html">RFC: Internet Relay Chat Protocol</a>
- * <ul>
- * <li><a href="http://www.irchelp.org/irchelp/rfc/rfc.html">RFC 1459: Internet Relay Chat Protocol</a></li>
- * <li><a href="http://www.irchelp.org/irchelp/rfc/ctcpspec.html">The Client-To-Client Protocol (CTCP)</a></li>
- * <li><a href="http://www.irchelp.org/irchelp/rfc/dccspec.html">A description of the DCC protocol</a></li>
- * </ul>
- * </li>
- * </ul>
- * 
+ *
  * <pre>
- * message ::= [':'&lt;prefix&gt; &lt;SPACE&gt;] &lt;command&gt; &lt;params&gt; &lt;crlf&gt;
- * prefix ::= &lt;servername&gt; | &lt;nick&gt; ['!'&lt;user&gt;]['@'&lt;host&gt;]
- * command ::= &lt;letter&gt; {&lt;letter&gt;} | &lt;number&gt; &lt;number&gt; &lt;number&gt;
- * params ::= &lt;SPACE&gt;[':'&lt;trailing&gt; | &lt;middle&gt; &lt;params&gt;]
+ * message = [':'<prefix> <SPACE>] <command> <params> <crlf>
+ * prefix = <servername> | <nick>['!'<user>]['@'<host>]
+ * params = <SPACE>[':'<trailing> | <middle> <params>]
  * </pre>
  *
  * @author tarchan
  */
 public class IRCMessage extends EventObject
 {
-	/** ロガー */
-	private static final Log log = LogFactory.getLog(IRCMessage.class);
-
 	/** アドレス区切り */
 	public static final String ADDRESS_DELIMITER = "[!@]";
 
 	/** CTCPメッセージ */
 //	private static final char CTCP = 0x01;
 //	private static final String CTCP_DELIMITER = String.valueOf(CTCP);
-	private static final String CTCP_DELIMITER = "\1";
+	private static final String CTCP_DELIMITER = "\0x1";
 
 	/** ボールド表示 */
-	private static final String BOLD_DELIMITER = "\2";
+	private static final String BOLD_DELIMITER = "\0x2";
 
 	/** カラー表示*/
-	private static final String COLOR_DELIMITER = "\3";
+	private static final String COLOR_DELIMITER = "\0x3";
 
 //	/** 反転表示または斜体表示 */
 //	private static final String REVERSE_DELIMITER = "\0x16";
@@ -119,7 +101,7 @@ public class IRCMessage extends EventObject
 	private String _middle[];
 
 	/** トレーラ */
-	private String _trailing;
+	private String _trail;
 
 	/** サーバ名(prefix) */
 	private String _server;
@@ -133,13 +115,16 @@ public class IRCMessage extends EventObject
 	/** ホスト名 (prefix) */
 	private String _host;
 
+	/** 文字エンコーディング */
+	private String encoding;
+
 	/**
 	 * IRCメッセージを解析して IRCMessage を作成します。
 	 * 
 	 * @param source メッセージのソース
 	 * @param message メッセージ
 	 */
-	public IRCMessage(IRCNetwork source, String message)
+	public IRCMessage(Object source, String message)
 	{
 		this(source, message, System.currentTimeMillis());
 	}
@@ -149,9 +134,9 @@ public class IRCMessage extends EventObject
 	 * 
 	 * @param source メッセージのソース
 	 * @param message メッセージ
-	 * @param when メッセージ作成日時
+	 * @param when メッセージを受け取った時間
 	 */
-	public IRCMessage(IRCNetwork source, String message, long when)
+	public IRCMessage(Object source, String message, long when)
 	{
 		// オリジナルのパラメータを保存する
 		super(source);
@@ -171,16 +156,16 @@ public class IRCMessage extends EventObject
 	 */
 	protected void setMessage(String message) throws NullPointerException, IllegalArgumentException
 	{
-		if (message == null) throw new NullPointerException("message　is null");
+		if (message == null) throw new NullPointerException("message");
 
 		// 疑似BNFによるメッセージを構文解析する
 		parse(message);
 	}
 
 	/**
-	 * メッセージが発生したタイムスタンプを設定します。
+	 * 入力時刻を設定します。
 	 * 
-	 * @param when タイムスタンプ
+	 * @param when 入力時刻
 	 */
 	protected void setWhen(long when)
 	{
@@ -238,7 +223,6 @@ public class IRCMessage extends EventObject
 		// ERRORコマンド対応
 		if (_command.equals("ERROR:"))
 		{
-			log.warn(message);
 			_command = "ERROR";
 			token[1] = ":" + token[1];
 		}
@@ -312,7 +296,7 @@ public class IRCMessage extends EventObject
 			// ':' からはじまる場合は <trailing> を設定して終了します。
 			if (params.startsWith(":"))
 			{
-				_trailing = params.substring(1);
+				_trail = params.substring(1);
 //				System.out.println(array.size() + "=" + _trailing);
 				break;
 			}
@@ -339,32 +323,11 @@ public class IRCMessage extends EventObject
 	}
 
 	/**
-	 * 入力ソースを返します。
-	 * 
-	 * @return 入力ソース
-	 */
-	public IRCNetwork getNetwork()
-	{
-		return (IRCNetwork)getSource();
-	}
-
-	/**
 	 * 入力メッセージを返します。
 	 * 
 	 * @return 入力メッセージ
 	 */
 	public String getMessage()
-	{
-		return _msg;
-	}
-
-	/**
-	 * 入力メッセージを指定したエンコーディングで変換して返します。
-	 * 
-	 * @param encoding 文字エンコーディング
-	 * @return 入力メッセージ
-	 */
-	public String getMessage(String encoding)
 	{
 		return decode(_msg, encoding);
 	}
@@ -526,7 +489,7 @@ public class IRCMessage extends EventObject
 	}
 
 	/**
-	 * 指定したインデックス以降のパラメータ配列を返します。
+	 * 指定したインデックスより後のパラメータ配列を返します。
 	 * 
 	 * @param start 開始インデックス
 	 * @return パラメータ配列
@@ -540,7 +503,7 @@ public class IRCMessage extends EventObject
 	}
 
 	/**
-	 * 指定したインデックス以降のパラメータリストを返します。
+	 * 指定したインデックスより後のパラメータをリストで返します。
 	 * 
 	 * @param start 開始インデックス
 	 * @return パラメータリスト
@@ -557,20 +520,9 @@ public class IRCMessage extends EventObject
 	 * 
 	 * @return トレーラ
 	 */
-	public String getTrailing()
+	public String getTrail()
 	{
-		return _trailing;
-	}
-
-	/**
-	 * 指定した文字エンコーディングで変換したトレーラを返します。
-	 * 
-	 * @param encoding 文字エンコーディング
-	 * @return トレーラ
-	 */
-	public String getTrailing(String encoding)
-	{
-		return decode(_trailing, encoding);
+		return decode(_trail, encoding);
 	}
 
 	/**
@@ -583,6 +535,7 @@ public class IRCMessage extends EventObject
 	public static String decode(String input, String encoding)
 	{
 		if (input == null) return null;
+		if (encoding == null) return input;
 
 		// 半角カナ対応
 		input = escapeKana(input);
@@ -592,17 +545,10 @@ public class IRCMessage extends EventObject
 		return cb.toString();
 	}
 
-	/** 半角カナにマッチする正規表現 */
-	private static Pattern KANA = Pattern.compile("(\\x1b\\(J)(.*?)(\\x1b(\\(B|\\(J|\\$@|\\$B))");
 //	private static Pattern KANA = Pattern.compile("(\\x1b\\x28\\x4a)([\\xa1-\\xdf]*)(\\x1b\\x28\\x42)");
+	private static Pattern KANA = Pattern.compile("(\\x1b\\(J)(.*?)(\\x1b(\\(B|\\(J|\\$@|\\$B))");
 //	private static Pattern KANA = Pattern.compile("(\\x1b\\(J)(?!\\x1b(\\(B|\\(J|\\$@|\\$B))+(\\x1b(\\(B|\\(J|\\$@|\\$B))");
 
-	/**
-	 * 不正な半角かなを正規のかな表現に変換します。
-	 * 
-	 * @param input 不正な半角かな表現を含む文字列
-	 * @return 正規のかな表現に変換した文字列
-	 */
 	private static String escapeKana(String input)
 	{
 		if (input == null) return null;
@@ -638,12 +584,6 @@ public class IRCMessage extends EventObject
 		return input;
 	}
 
-	/**
-	 * バイト配列の文字表現を返します。
-	 * 
-	 * @param b バイト配列
-	 * @return バイト配列の文字表現
-	 */
 	private static String toHexString(byte[] b)
 	{
 		StringBuilder sb = new StringBuilder();
@@ -654,12 +594,6 @@ public class IRCMessage extends EventObject
 		return sb.toString();
 	}
 
-	/**
-	 * バイト配列を返します。
-	 * 
-	 * @param input 文字列
-	 * @return バイト配列
-	 */
 	private static byte[] getRowBytes(String input)
 	{
 		if (input == null) return null;
@@ -694,35 +628,20 @@ public class IRCMessage extends EventObject
 		return output;
 	}
 
-	/**
-	 * ターゲットを返します。
-	 * 
-	 * @return ターゲット
-	 */
-	public String getTarget()
-	{
-		return getParam(0);
-	}
-
-	/**
-	 * メッセージターゲットを返します。
-	 * 
-	 * @return メッセージターゲット
-	 */
-	public String getMessageTarget()
-	{
-		return getParam(1);
-	}
-
-	/**
-	 * メッセージソースを返します。
-	 * 
-	 * @return メッセージソース
-	 */
-	public String getMessageSource()
-	{
-		return getParam(2);
-	}
+//	public String getTarget()
+//	{
+//		return getParam(0);
+//	}
+//
+//	public String getMessageTarget()
+//	{
+//		return getParam(1);
+//	}
+//
+//	public String getMessageSource()
+//	{
+//		return getParam(2);
+//	}
 
 //	public boolean withCTCP()
 //	{
@@ -735,11 +654,11 @@ public class IRCMessage extends EventObject
 //	}
 
 	/**
-	 * CTCPメッセージかどうかを判定します。
+	 * CTCPを含むかどうか判定します。
 	 * 
-	 * @return CTCPメッセージの場合は true
+	 * @return CTCPを含む場合は true
 	 */
-	public boolean isCTCP()
+	public boolean withCTCP()
 	{
 //		return getTrailing().startsWith(CTCP_DELIMITER);
 //		String trail = getTrailing();
@@ -747,50 +666,38 @@ public class IRCMessage extends EventObject
 //		char ch = trail.charAt(0);
 //		System.out.println("char=0x" + Integer.toHexString(ch) + "," + trail.startsWith(CTCP_DELIMITER) + "," + BOLD_DELIMITER + ";");
 //		return Character.isISOControl(ch);
-		return getTrailing().contains(CTCP_DELIMITER);
+		return getTrail().contains(CTCP_DELIMITER);
 	}
 
 	/**
-	 * ボールドスタイルかどうかを判定します。
+	 * ボールド指定を含むかどうか判定します。
 	 * 
-	 * @return ボールドスタイルの場合は true
+	 * @return ボールド指定を含む場合は true
 	 */
-	public boolean isBold()
+	public boolean withBold()
 	{
-		return getTrailing().contains(BOLD_DELIMITER);
+		return getTrail().contains(BOLD_DELIMITER);
 	}
 
 	/**
-	 * カラー指定かどうかを判定します。
+	 * カラー指定を含むかどうか判定します。
 	 * 
-	 * @return カラー指定の場合は true
+	 * @return カラー指定を含む場合は true
 	 */
-	public boolean isColor()
+	public boolean withColor()
 	{
-		return getTrailing().contains(COLOR_DELIMITER);
+		return getTrail().contains(COLOR_DELIMITER);
 	}
 
-	/**
-	 * CTCPメッセージを分割します。
-	 * 
-	 * @param input CTCPを含む文字列
-	 * @return CTCPを分割した配列
-	 */
-	public static String[] splitCTCP(String input)
-	{
-		return input.split(CTCP_DELIMITER);
-	}
-
-	/**
-	 * CTCPメッセージに変換します。
-	 * 
-	 * @param input プレーンな文字列
-	 * @return CTCP文字列
-	 */
-	public static String quoteCTCP(String input)
-	{
-		return CTCP_DELIMITER + input + CTCP_DELIMITER;
-	}
+//	public static String[] splitCTCP(String input)
+//	{
+//		return input.split(CTCP_DELIMITER);
+//	}
+//
+//	public static String quoteCTCP(String input)
+//	{
+//		return CTCP_DELIMITER + input + CTCP_DELIMITER;
+//	}
 
 	/**
 	 * パラメータとトレーラを合成した文字列を返します。
@@ -801,7 +708,7 @@ public class IRCMessage extends EventObject
 	{
 		List<String> list = new ArrayList<String>(Arrays.asList(_middle));
 		list = list.subList(1, list.size());
-		if (_trailing != null) list.add(_trailing);
+		if (_trail != null) list.add(_trail);
 
 		StringBuffer buf = new StringBuffer();
 		Iterator<String> it = list.iterator();
@@ -815,15 +722,116 @@ public class IRCMessage extends EventObject
 	}
 
 	/**
-	 * 入力メッセージを返します。
+	 * メッセージのデバッグ文字列を返します。
 	 * 
-	 * @return 入力メッセージ
+	 * @return デバッグ文字列
 	 */
 	public String toString()
 	{
 //		return "(" + _command + ")" + _msg;
 //		return "(" + _command + ")," + _prefix + "," + Arrays.toString(_middle) + "," + _trailing;
-//		return getClass().getName() + "[" + _command + ", " + _prefix + ", " + Arrays.toString(_middle) + ", " + _trailing + "]";
-		return _msg;
+//		return getClass().getName() + "[" + _command + ", " + _prefix + ", " + Arrays.toString(_middle) + ", " + _trail + "]";
+		return String.format("[%s] %s %s %s", getCommand(), getPrefix(), Arrays.toString(_middle), getTrail());
 	}
+
+	/**
+	 * メッセージを作成します。
+	 * 
+	 * @param str 文字列
+	 * @param source ソース
+	 * @return メッセージ
+	 */
+	public static IRCMessage valueOf(String str, Object source)
+	{
+		return new IRCMessage(source, str);
+	}
+
+	private boolean createAndInvoke(Object target, String name)
+	{
+		try
+		{
+			// ex. onPrivmsg
+			Class<? extends Object> c = target.getClass();
+			Method m = c.getMethod(name, IRCMessage.class);
+			m.setAccessible(true);	// 必要?
+			IRCMessage msg = this;
+			m.invoke(target, msg);
+			return true;
+		}
+		catch (SecurityException x)
+		{
+			return false;
+		}
+		catch (NoSuchMethodException x)
+		{
+			return false;
+		}
+		catch (IllegalArgumentException x)
+		{
+			return false;
+		}
+		catch (IllegalAccessException x)
+		{
+			return false;
+		}
+		catch (InvocationTargetException x)
+		{
+			return false;
+		}
+	}
+
+	/**
+	 * アッパーキャメルケースに変換します。
+	 * c
+	 * @param str 文字列
+	 * @return アッパーキャメルケースの文字列
+	 */
+	private String toUpperCamelCase(String str)
+	{
+		return str.substring(0, 1).toUpperCase() + str.substring(1).toLowerCase();
+	}
+
+	/**
+	 * コマンドに対応するメソッドを実行します。
+	 * 
+	 * @param target ターゲットオブジェクト
+	 * @return 実行できた場合は true
+	 */
+	public boolean invoke(Object target)
+	{
+		String name = "on" + toUpperCamelCase(getCommand());
+		boolean success = createAndInvoke(target, name) || createAndInvoke(target, "onMessage");
+		return success;
+	}
+
+	/**
+	 * @param encoding 文字エンコーディング
+	 */
+	public void setEncoding(String encoding)
+	{
+		this.encoding = encoding;
+	}
+
+	/** 色コード */
+	public static final HashMap<Integer, Color> COLORS = new HashMap<Integer, Color>()
+	{
+		{
+			put(1, Color.BLACK);			// 1 - Black
+			put(2, new Color(0x000080));	// 2 - Navy Blue
+			put(3, Color.GREEN);			// 3 - Green
+			put(4, Color.RED);				// 4 - Red
+			put(5, new Color(0xa52a2a));	// 5 - Brown
+			put(6, new Color(0x800080));	// 6 - Purple
+			put(7, new Color(0x808000));	// 7 - Olive
+			put(8, Color.YELLOW);			// 8 - Yellow
+			put(9, new Color(0x32cd32));	// 9 - Lime Green
+			put(10, new Color(0x008080));	// 10 - Teal
+			put(11, new Color(0x00ffff));	// 11 - Aqua Light
+			put(12, new Color(0x4169e1));	// 12 - Royal Blue
+			put(13, new Color(0xff69b4));	// 13 - Hot Pink
+			put(14, Color.DARK_GRAY);		// 14 - Dark Gray
+			put(15, Color.LIGHT_GRAY);		// 15 - Light Gray
+			put(16, Color.WHITE);			// 16 - White
+		}
+	};
 }
