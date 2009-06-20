@@ -139,7 +139,7 @@ public class IRCMessage extends EventObject
 	 * @param source メッセージのソース
 	 * @param message メッセージ
 	 */
-	public IRCMessage(Object source, String message)
+	public IRCMessage(IRCNetwork source, String message)
 	{
 		this(source, message, System.currentTimeMillis());
 	}
@@ -151,7 +151,7 @@ public class IRCMessage extends EventObject
 	 * @param message メッセージ
 	 * @param when メッセージ作成日時
 	 */
-	public IRCMessage(Object source, String message, long when)
+	public IRCMessage(IRCNetwork source, String message, long when)
 	{
 		// オリジナルのパラメータを保存する
 		super(source);

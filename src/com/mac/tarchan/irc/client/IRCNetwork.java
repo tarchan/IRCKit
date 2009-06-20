@@ -444,39 +444,39 @@ public class IRCNetwork
 		if (password.trim().length() > 0) out.printf(PASS + CRLF, password);
 		out.printf(NICK + CRLF, nickname);
 		out.printf(USER + CRLF, username, mode, realname);
-		new Thread(new Runnable()
-		{
-			public void run()
-			{
-				try
-				{
-					while (true)
-					{
-						String line = in.readLine();
-						System.out.println("IRC: " + line);
-						if (line == null) continue;
-						if (line.startsWith("PING"))
-						{
-							String[] ping = line.split(":");
-							System.out.println("ping-pong: " + ping[1]);
-							out.printf(PONG + CRLF, ping[1]);
-						}
-
-						IRCMessage msg = new IRCMessage(this, line);
-						client.reply(msg);
-
-						if (line.startsWith("ERROR")) break;
-					}
-					in.close();
-					out.close();
-					System.out.println("bye!");
-				}
-				catch (IOException e)
-				{
-					e.printStackTrace();
-				}
-			}
-		}).start();
+//		new Thread(new Runnable()
+//		{
+//			public void run()
+//			{
+//				try
+//				{
+//					while (true)
+//					{
+//						String line = in.readLine();
+//						System.out.println("IRC: " + line);
+//						if (line == null) continue;
+//						if (line.startsWith("PING"))
+//						{
+//							String[] ping = line.split(":");
+//							System.out.println("ping-pong: " + ping[1]);
+//							out.printf(PONG + CRLF, ping[1]);
+//						}
+//
+//						IRCMessage msg = new IRCMessage(this, line);
+//						client.reply(msg);
+//
+//						if (line.startsWith("ERROR")) break;
+//					}
+//					in.close();
+//					out.close();
+//					System.out.println("bye!");
+//				}
+//				catch (IOException e)
+//				{
+//					e.printStackTrace();
+//				}
+//			}
+//		}).start();
 	}
 
 	/**
