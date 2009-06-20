@@ -320,17 +320,18 @@ public class Chat extends SwingWorker<Object, IRCMessage>
 //			
 //		});
 
-		while (true)
+		while (!isCancelled())
 		{
-			IRCMessage reply = null;
-			synchronized (irc)
-			{
-				reply = irc.get("tokyo");
-			}
-			if (reply == null) break;
-
-//			reply.setEncoding(encoding);
-			publish(reply);
+//			IRCMessage reply = null;
+//			synchronized (irc)
+//			{
+//				reply = irc.get("tokyo");
+//			}
+//			if (reply == null) break;
+//
+////			reply.setEncoding(encoding);
+//			publish(reply);
+//			Thread.sleep(10);
 		}
 
 		System.out.println("quit");
