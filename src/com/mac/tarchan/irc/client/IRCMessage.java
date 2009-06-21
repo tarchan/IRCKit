@@ -21,12 +21,10 @@ import java.util.regex.Pattern;
 
 /**
  * IRCメッセージを構文解析します。
- *
- * <pre>
- * message = [':'<prefix> <SPACE>] <command> <params> <crlf>
- * prefix = <servername> | <nick>['!'<user>]['@'<host>]
- * params = <SPACE>[':'<trailing> | <middle> <params>]
- * </pre>
+ * 疑似BNFによるメッセージ形式は次のとおりです。
+ * <p
+ * <a href="http://www.haun.org/kent/lib/rfc1459-irc-ja.html#c2.3.1">RFC1459: Internet Relay Chat Protocol (IRC)</a>
+ *</p>
  *
  * @author tarchan
  */
@@ -46,43 +44,17 @@ public class IRCMessage extends EventObject
 	/** カラー表示*/
 	private static final String COLOR_DELIMITER = "\0x3";
 
-//	/** 反転表示または斜体表示 */
-//	private static final String REVERSE_DELIMITER = "\0x16";
-//
-//	/** アンダーライン表示 */
-//	private static final String UNDERLINE_DELIMITER = "\0x1f";
-//
-//	/** 使用禁止 */
-//	private static final String NO_USE = "[\0x00\0x0d\0x0a]";	
+	/** 反転表示または斜体表示 */
+	private static final String REVERSE_DELIMITER = "\0x16";
+
+	/** アンダーライン表示 */
+	private static final String UNDERLINE_DELIMITER = "\0x1f";
 
 	/** 接続が登録されて、すべてのIRCネットワークに認知されたということを表します。 */
 	public static final int RPL_WELCOME = 001;
 
 	/** サービスがうまく登録されると、サーバからサービスに送られます。 */
 	public static final int RPL_YOURESERVICE = 383;
-
-//	/**
-//	 * クライアント-サーバ接続に使われる番号です。
-//	 * クライアント-サーバ接続に使われるリプライは、001から099です。
-//	 */
-//	private static final int CONNECT_REPLY = 001;
-//
-//	/**
-//	 * コマンドリプライを表す番号です。
-//	 * コマンドの結果生成されるリプライは、200から399です。
-//	 */
-//	private static final int COMMAND_REPLY = 200;
-//
-//	/**
-//	 * エラーリプライを表す番号です。
-//	 * エラーリプライは、400から599です。
-//	 */
-//	private static final int ERROR_REPLY = 400;
-//
-//	/**
-//	 * ニューメリックリプライ以外を表す番号です。
-//	 */
-//	private static final int UNKNOWN_REPLY = -1;
 
 	/** 入力メッセージ */
 	private String _msg;
@@ -670,9 +642,9 @@ public class IRCMessage extends EventObject
 	}
 
 	/**
-	 * ボールド指定を含むかどうか判定します。
+	 * ボールド表示を含むかどうか判定します。
 	 * 
-	 * @return ボールド指定を含む場合は true
+	 * @return ボールド表示を含む場合は true
 	 */
 	public boolean withBold()
 	{
@@ -680,13 +652,33 @@ public class IRCMessage extends EventObject
 	}
 
 	/**
-	 * カラー指定を含むかどうか判定します。
+	 * カラー表示を含むかどうか判定します。
 	 * 
-	 * @return カラー指定を含む場合は true
+	 * @return カラー表示を含む場合は true
 	 */
 	public boolean withColor()
 	{
 		return getTrail().contains(COLOR_DELIMITER);
+	}
+
+	/**
+	 * 反転表示または斜体表示を含むかどうか判定します。
+	 * 
+	 * @return 反転表示または斜体表示を含む場合は true
+	 */
+	public boolean withReverse()
+	{
+		return getTrail().contains(REVERSE_DELIMITER);
+	}
+
+	/**
+	 * アンダーライン表示を含むかどうか判定します。
+	 * 
+	 * @return アンダーライン表示を含む場合は true
+	 */
+	public boolean withUnderline()
+	{
+		return getTrail().contains(UNDERLINE_DELIMITER);
 	}
 
 //	public static String[] splitCTCP(String input)

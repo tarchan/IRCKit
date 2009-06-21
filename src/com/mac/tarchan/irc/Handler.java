@@ -10,12 +10,18 @@ import java.net.URLConnection;
 import java.net.URLStreamHandler;
 
 /**
- * Handler
+ * IRC接続のプロトコルハンドラです。
+ * 
+ * @author tarchan
+ * @see URL#URL(String, String, int, String)
  */
 public class Handler extends URLStreamHandler
 {
 	/**
-	 * @see java.net.URLStreamHandler#openConnection(java.net.URL)
+	 * IRC接続をオープンします。
+	 * 
+	 * @see URLStreamHandler#openConnection(java.net.URL)
+	 * @see IRCConnection
 	 */
 	@Override
 	protected URLConnection openConnection(URL url) throws IOException
@@ -24,7 +30,9 @@ public class Handler extends URLStreamHandler
 	}
 
 	/**
-	 * @see java.net.URLStreamHandler#getDefaultPort()
+	 * IRC接続のデフォルトのポート番号を返します。
+	 * 
+	 * @see URLStreamHandler#getDefaultPort()
 	 */
 	@Override
 	protected int getDefaultPort()

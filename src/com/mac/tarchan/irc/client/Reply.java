@@ -9,14 +9,20 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * メッセージハンドラを示すアノテーションです。
+ * メソッド宣言がメッセージハンドラであることを示します。
  * 
  * @author tarchan
+ * @see IRCMessageHandler#onMessage(IRCMessage)
+ * @see IRCClient#addMessageHandlerAll(Object)
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface Reply
 {
-	/** コマンド */
+	/**
+	 * 注釈を付けたメソッドで処理されるコマンドを示します。
+	 * 
+	 * @see IRCMessage#getCommand()
+	 */
 	String value();
 }

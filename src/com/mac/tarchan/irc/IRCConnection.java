@@ -11,14 +11,17 @@ import java.net.URL;
 import java.net.URLConnection;
 
 /**
- * IRC 接続です。
+ * IRCサーバーへのURL接続です。
+ * IRC URL 構文は次のとおりです。
+ * <pre>irc://host:port</pre>
  * 
+ * @author tarchan
  * @see Handler#openConnection(URL)
  */
 public class IRCConnection extends URLConnection
 {
 	/** ソケット */
-	protected Socket socket;
+	private Socket socket;
 
 	/**
 	 * IRC 接続を構築します。
