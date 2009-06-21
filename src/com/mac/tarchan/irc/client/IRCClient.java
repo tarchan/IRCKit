@@ -21,7 +21,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * IRCClient
+ * IRCクライアントを実装します。
+ * 
+ * @author tarchan
  */
 public class IRCClient
 {
@@ -43,28 +45,22 @@ public class IRCClient
 	};
 
 	/** 環境設定 */
-	protected Properties props = new Properties(DEFAULTS);
+	private Properties props = new Properties(DEFAULTS);
 
 	/** 改行コード */
-	public static final String CRLF = "\r\n";
+	private static final String CRLF = "\r\n";
 
 	/** 入力ストリーム */
-	protected InputStream in;
+	private InputStream in;
 
 	/** 出力ストリーム */
-	protected PrintStream out;
-
-//	/** メッセージキュー */
-//	protected Queue<String> queue;
-
-//	/** 入力キュー */
-//	protected ScheduledExecutorService inQueue = Executors.newScheduledThreadPool(1);
+	private PrintStream out;
 
 	/** メッセージキュー */
-	protected ExecutorService postQueue = Executors.newSingleThreadExecutor();
+	private ExecutorService postQueue = Executors.newSingleThreadExecutor();
 
 	/** メッセージハンドラ */
-	protected HashMap<String, ArrayList<IRCMessageHandler>> handlerMap = new HashMap<String, ArrayList<IRCMessageHandler>>();
+	private HashMap<String, ArrayList<IRCMessageHandler>> handlerMap = new HashMap<String, ArrayList<IRCMessageHandler>>();
 
 	static
 	{
@@ -76,7 +72,7 @@ public class IRCClient
 	}
 
 	/**
-	 * IRCClient
+	 * IRCクライアントを構築します。
 	 */
 	public IRCClient()
 	{
@@ -98,6 +94,7 @@ public class IRCClient
 	 * プロトコルハンドラのパッケージを設定します。
 	 * 
 	 * @param name パッケージ名
+	 * @see URL#URL(String, String, int, String)
 	 */
 	public static void setProtocolHandlerPackage(String name)
 	{
@@ -203,6 +200,8 @@ public class IRCClient
 	}
 
 	/**
+	 * 注釈されたメッセージハンドラをすべて追加します。
+	 * 
 	 * @param obj オブジェクト
 	 * @return メッセージハンドラの配列
 	 * @see Reply
@@ -219,7 +218,7 @@ public class IRCClient
 				IRCMessageHandler handler = EventHandler.create(IRCMessageHandler.class, obj, m.getName(), "");
 				addMessageHandler(reply.value(), handler);
 				handlerChain.add(handler);
-				System.out.format("handler: %s: %s\n", reply.value(), handler);
+				System.out.format("handler: %s: %s\n", reply.value(), handler.getClass());
 			}
 		}
 		return handlerChain.toArray(new IRCMessageHandler[handlerChain.size()]);
@@ -239,6 +238,19 @@ public class IRCClient
 		{
 			handlerChain.remove(handler);
 			if (handlerChain.size() == 0) handlerMap.remove(command);
+		}
+	}
+
+	/**
+	 * すべてのメッセージハンドラを削除します。
+	 * 
+	 * @param handler メッセージハンドラ
+	 */
+	public void removeMessageHandlerAll(IRCMessageHandler handler)
+	{
+		for (String command : handlerMap.keySet())
+		{
+			removeMessageHandler(command, handler);
 		}
 	}
 

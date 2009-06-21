@@ -3,15 +3,21 @@
  */
 package com.mac.tarchan.irc.client;
 
+import java.util.EventListener;
+
 /**
- * IRCMessageListener
- */
-public interface IRCMessageHandler
+ * IRCメッセージを受け取るためのリスナーインターフェースです。
+ * 
+ * @author tarchan
+ * @see IRCMessage
+ * @see IRCClient#addMessageHandler(String, IRCMessageHandler)
+*/
+public interface IRCMessageHandler extends EventListener
 {
 	/**
-	 * メッセージを受け取ります。
+	 * IRCメッセージを受け取ります。
 	 * 
-	 * @param msg メッセージ
+	 * @param msg IRCメッセージ
 	 */
 	public void onMessage(IRCMessage msg);
 }
