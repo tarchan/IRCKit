@@ -57,10 +57,10 @@ public class IRCMessage extends EventObject
 	public static final int RPL_YOURESERVICE = 383;
 
 	/** 入力メッセージ */
-	private String _msg;
+	private String msg;
 
 	/** 入力時刻 */
-	private long _when;
+	private long when;
 
 	// メッセージ解析結果
 	/** プレフィックス */
@@ -141,7 +141,7 @@ public class IRCMessage extends EventObject
 	 */
 	protected void setWhen(long when)
 	{
-		_when = when;
+		this.when = when;
 	}
 
 	/**
@@ -157,7 +157,7 @@ public class IRCMessage extends EventObject
 	 */
 	private void parse(String message)
 	{
-		_msg = message;
+		this.msg = message;
 
 		// message = [':'<prefix> <SPACE>] <command> <params> <crlf>
 		String params = parseMessage(message);
@@ -301,7 +301,7 @@ public class IRCMessage extends EventObject
 	 */
 	public String getMessage()
 	{
-		return decode(_msg, encoding);
+		return decode(msg, encoding);
 	}
 
 	/**
@@ -311,7 +311,7 @@ public class IRCMessage extends EventObject
 	 */
 	public long getWhen()
 	{
-		return _when;
+		return when;
 	}
 
 	/**
@@ -333,7 +333,7 @@ public class IRCMessage extends EventObject
 	 * 
 	 * @return コマンドが数字の場合は true、そうでない場合は false
 	 */
-	public boolean isNumelic()
+	public boolean isNumelicReply()
 	{
 		return NUMERIC_REPLY_PATTERN.matcher(getCommand()).matches();
 	}
@@ -346,9 +346,9 @@ public class IRCMessage extends EventObject
 	 * 
 	 * @return ニューメリックリプライまたは -1
 	 */
-	public int getNumelic()
+	public int getNumber()
 	{
-		if (isNumelic())
+		if (isNumelicReply())
 		{
 			return Integer.parseInt(getCommand());
 		}
