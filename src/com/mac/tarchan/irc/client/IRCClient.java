@@ -324,16 +324,6 @@ public class IRCClient
 	public void onMessage(String text)
 	{
 		IRCMessage msg = createMessage(text);
-//		try
-//		{
-//			text = new String(text.getBytes(), encoding);
-//		}
-//		catch (UnsupportedEncodingException x)
-//		{
-//			x.printStackTrace();
-//		}
-//		System.out.format("[GET][%s] %s\n", msg.getCommand(), text);
-//		if (handler != null) handler.onMessage(msg);
 		fireHandler(msg.getCommand(), msg);
 		fireHandler("ALL", msg);
 	}
@@ -478,10 +468,16 @@ public class IRCClient
 	/**
 	 * 接続を継続するために PONG を送信します。
 	 */
-	private static class PingPong
+	public static class PingPong
 	{
+		/** IRCクライアント */
 		protected IRCClient irc;
 
+		/**
+		 * PingPongを構築します。
+		 * 
+		 * @param irc IRCクライアント
+		 */
 		public PingPong(IRCClient irc)
 		{
 			this.irc = irc;
@@ -505,10 +501,16 @@ public class IRCClient
 	/**
 	 * IRCサーバーにログインしたら、自動的にJOINします。
 	 */
-	private static class AutoJoin
+	public static class AutoJoin
 	{
+		/** IRCクライアント */
 		protected IRCClient irc;
 
+		/**
+		 * AutoJoinを構築します。
+		 * 
+		 * @param irc IRCクライアント
+		 */
 		public AutoJoin(IRCClient irc)
 		{
 			this.irc = irc;
