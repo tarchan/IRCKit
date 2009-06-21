@@ -35,12 +35,12 @@ public class IRCClient
 			setProperty("irc.port", "6667");
 			setProperty("irc.channel", "");
 			setProperty("irc.encoding", "UTF-8");
-			setProperty("irc.user.name", "");
+			setProperty("irc.user.name", System.getProperty("user.name", ""));
 			setProperty("irc.user.pass", "");
 			setProperty("irc.user.mode", "12");
 			setProperty("irc.user.icon", "");
-			setProperty("irc.nick.name", "");
-			setProperty("irc.real.name", "");
+			setProperty("irc.nick.name", System.getProperty("user.name", ""));
+			setProperty("irc.real.name", "IRCKit 0.2");
 		}
 	};
 
@@ -76,7 +76,8 @@ public class IRCClient
 	 */
 	public IRCClient()
 	{
-		addMessageHandler("PING", EventHandler.create(IRCMessageHandler.class, this, "ping", "trail"));
+		new PingPong(this);
+		new AutoJoin(this);
 	}
 
 	/**
@@ -259,15 +260,15 @@ public class IRCClient
 	 * 
 	 * @throws IOException 入出力エラーが発生した場合
 	 */
-	public void login() throws IOException
+	public void open() throws IOException
 	{
 		String host = getProperty("irc.host");
 		String port = getProperty("irc.port");
 		URL url = new URL(String.format("irc://%s:%s", host, port));
-		System.out.format("[LOGIN] %s\n", url);
+		System.out.format("[OPEN] %s\n", url);
 		URLConnection con = url.openConnection();
 		con.connect();
-		System.out.format("[LOGIN] %s\n", con);
+		System.out.format("[OPEN] %s\n", con);
 
 		String encoding = getProperty("irc.encoding");
 		in = con.getInputStream();
@@ -291,17 +292,7 @@ public class IRCClient
 	}
 
 	/**
-	 * 接続を継続するために PONG を送信します。
-	 * 
-	 * @param server サーバ名
-	 */
-	public void ping(String server)
-	{
-		postMessage(String.format("PONG :%s", server));
-	}
-
-	/**
-	 * IRCをログアウトします。
+	 * IRCサーバーをログアウトします。
 	 * 
 	 * @param msg QUITメッセージ
 	 */
@@ -347,14 +338,27 @@ public class IRCClient
 		fireHandler("ALL", msg);
 	}
 
-	private void fireHandler(String command, IRCMessage msg)
+	/**
+	 * メッセージハンドラを呼び出します。
+	 * 
+	 * @param command コマンド
+	 * @param msg IRCメッセージ
+	 */
+	protected void fireHandler(String command, IRCMessage msg)
 	{
 		ArrayList<IRCMessageHandler> handlerChain = handlerMap.get(command);
 		if (handlerChain == null) return;
 
 		for (IRCMessageHandler handler : handlerChain)
 		{
-			handler.onMessage(msg);
+			try
+			{
+				handler.onMessage(msg);
+			}
+			catch (Exception x)
+			{
+				x.printStackTrace();
+			}
 		}
 	}
 
@@ -364,7 +368,7 @@ public class IRCClient
 	 * @param str 文字列
 	 * @return メッセージ
 	 */
-	public IRCMessage createMessage(String str)
+	protected IRCMessage createMessage(String str)
 	{
 		IRCMessage msg = IRCMessage.valueOf(str, this);
 		String encoding = getProperty("irc.encoding");
@@ -373,56 +377,68 @@ public class IRCClient
 	}
 
 	/**
-	 * IRCサーバーからの入力を読み込みます。
+	 * デバッグのために現在のスレッドを表示します。
+	 */
+	public static void listThread()
+	{
+		ThreadGroup group = Thread.currentThread().getThreadGroup();
+		while (true)
+		{
+			ThreadGroup parent = group.getParent();
+			if (parent == null)
+			{
+				break;
+			}
+			else
+			{
+				group = parent;
+			}
+		}
+		group.list();
+	}
+
+	/**
+	 * IRCサーバーからの入力をポーリングします。
 	 */
 	private static class PollMessage implements Runnable
 	{
 		private IRCClient irc;
 
-//		private int count;
+		private BufferedReader in;
 
-		private PollMessage(IRCClient irc)
+		public PollMessage(IRCClient irc)
 		{
 			this.irc = irc;
+			this.in = new BufferedReader(new InputStreamReader(irc.in));
 		}
 
-		/**
-		 * @see java.lang.Runnable#run()
-		 */
 		public void run()
 		{
-			BufferedReader input = new BufferedReader(new InputStreamReader(irc.in));
 			while (true)
 			{
 				try
 				{
-//					System.out.println("count: " + (++count));
-//					Thread.sleep(20);
-					String str = input.readLine();
+					String str = in.readLine();
 					if (str == null) break;
 
 					irc.onMessage(str);
-//					Thread.yield();
+					Thread.yield();
 				}
 				catch (IOException x)
 				{
-					x.printStackTrace();
+					error(x);
 				}
-//				catch (InterruptedException x)
-//				{
-//					x.printStackTrace();
-//				}
 			}
-			try
-			{
-				input.close();
-				irc.in.close();
-//				irc.out.close();
-			}
-			catch (IOException x)
-			{
-				x.printStackTrace();
-			}
+		}
+
+		public void error(Exception x)
+		{
+			x.printStackTrace();
+		}
+
+		public void close() throws IOException
+		{
+			in.close();
 		}
 	}
 
@@ -460,23 +476,58 @@ public class IRCClient
 	}
 
 	/**
-	 * listThread
+	 * 接続を継続するために PONG を送信します。
 	 */
-	public static void listThread()
+	private static class PingPong
 	{
-		ThreadGroup group = Thread.currentThread().getThreadGroup();
-		while (true)
+		protected IRCClient irc;
+
+		public PingPong(IRCClient irc)
 		{
-			ThreadGroup parent = group.getParent();
-			if (parent == null)
+			this.irc = irc;
+			this.irc.addMessageHandlerAll(this);
+		}
+
+		/**
+		 * 接続を継続するために PONG を送信します。
+		 * 
+		 * @param msg IRCメッセージ
+		 */
+		@Reply("PING")
+		public void ping(IRCMessage msg)
+		{
+			// サーバー名s
+			String server = msg.getTrail();
+			irc.postMessage(String.format("PONG :%s", server));
+		}
+	}
+
+	/**
+	 * IRCサーバーにログインしたら、自動的にJOINします。
+	 */
+	private static class AutoJoin
+	{
+		protected IRCClient irc;
+
+		public AutoJoin(IRCClient irc)
+		{
+			this.irc = irc;
+			this.irc.addMessageHandlerAll(this);
+		}
+
+		/**
+		 * 指定されたチャンネルにJOINします。
+		 * 
+		 * @param msg IRCメッセージ
+		 */
+		@Reply("001")
+		public void welcome(IRCMessage msg)
+		{
+			String channel = irc.getProperty("irc.channel");
+			if (!isEmpty(channel))
 			{
-				break;
-			}
-			else
-			{
-				group = parent;
+				irc.postMessage(String.format("JOIN %s", channel));
 			}
 		}
-		group.list();
 	}
 }
