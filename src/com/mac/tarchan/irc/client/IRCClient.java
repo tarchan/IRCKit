@@ -119,6 +119,8 @@ public class IRCClient
 	 * 
 	 * @param name 設定ファイル名
 	 * @throws IOException 入力エラーが発生した場合
+	 * @see Properties#load(InputStream)
+	 * @see Properties#loadFromXML(InputStream)
 	 */
 	public void load(String name) throws IOException
 	{
@@ -219,7 +221,7 @@ public class IRCClient
 				IRCMessageHandler handler = EventHandler.create(IRCMessageHandler.class, obj, m.getName(), "");
 				addMessageHandler(reply.value(), handler);
 				handlerChain.add(handler);
-				System.out.format("handler: %s: %s\n", reply.value(), handler.getClass());
+//				System.out.format("handler: %s: %s\n", reply.value(), handler.getClass());
 			}
 		}
 		return handlerChain.toArray(new IRCMessageHandler[handlerChain.size()]);
@@ -272,7 +274,14 @@ public class IRCClient
 
 		String encoding = getProperty("irc.encoding");
 		in = con.getInputStream();
-		out = new PrintStream(con.getOutputStream(), true, encoding);
+		if (!isEmpty(encoding))
+		{
+			out = new PrintStream(con.getOutputStream(), true, encoding);
+		}
+		else
+		{
+			out = new PrintStream(con.getOutputStream(), true);
+		}
 //		queue = new ConcurrentLinkedQueue<String>();
 
 		new Thread(new PollMessage(this)).start();
@@ -310,7 +319,7 @@ public class IRCClient
 	{
 		if (out == null || isEmpty(text)) return;
 
-		System.out.format("[POST] %s\n", text);
+//		System.out.format("[POST] %s\n", text);
 //		out.print(str);
 //		out.print(CRLF);
 		postQueue.execute(new PostMessage(out, text));
@@ -467,6 +476,8 @@ public class IRCClient
 
 	/**
 	 * 接続を継続するために PONG を送信します。
+	 * 
+	 * @author tarchan
 	 */
 	public static class PingPong
 	{
@@ -474,7 +485,7 @@ public class IRCClient
 		protected IRCClient irc;
 
 		/**
-		 * PingPongを構築します。
+		 * PingPong を構築します。
 		 * 
 		 * @param irc IRCクライアント
 		 */
@@ -499,7 +510,9 @@ public class IRCClient
 	}
 
 	/**
-	 * IRCサーバーにログインしたら、自動的にJOINします。
+	 * IRCサーバーにログインしたら、自動的に JOIN します。
+	 * 
+	 * @author tarchan
 	 */
 	public static class AutoJoin
 	{
@@ -507,7 +520,7 @@ public class IRCClient
 		protected IRCClient irc;
 
 		/**
-		 * AutoJoinを構築します。
+		 * AutoJoin を構築します。
 		 * 
 		 * @param irc IRCクライアント
 		 */

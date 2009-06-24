@@ -7,16 +7,12 @@ import java.awt.Color;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EventObject;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -34,8 +30,6 @@ public class IRCMessage extends EventObject
 	public static final String ADDRESS_DELIMITER = "[!@]";
 
 	/** CTCPメッセージ */
-//	private static final char CTCP = 0x01;
-//	private static final String CTCP_DELIMITER = String.valueOf(CTCP);
 	private static final String CTCP_DELIMITER = "\0x1";
 
 	/** ボールド表示 */
@@ -49,6 +43,9 @@ public class IRCMessage extends EventObject
 
 	/** アンダーライン表示 */
 	private static final String UNDERLINE_DELIMITER = "\0x1f";
+
+	/** ニューメリックリプライのパターン */
+	private static final Pattern NUMERIC_REPLY_PATTERN = Pattern.compile("[0-9][0-9][0-9]");
 
 	/** 接続が登録されて、すべてのIRCネットワークに認知されたということを表します。 */
 	public static final int RPL_WELCOME = 001;
@@ -324,9 +321,6 @@ public class IRCMessage extends EventObject
 		return _command;
 	}
 
-	/** ニューメリックリプライのパターン */
-	private Pattern NUMERIC_REPLY_PATTERN = Pattern.compile("[0-9][0-9][0-9]");
-
 	/**
 	 * コマンドがニューメリックリプライかどうかを判定します。
 	 * ニューメリックリプライは、送信元のプレフィックスと3桁の数字とリプライのターゲットからなる一つのメッセージとして送られ「なければなりません」。
@@ -507,97 +501,20 @@ public class IRCMessage extends EventObject
 	public static String decode(String input, String encoding)
 	{
 		if (input == null) return null;
-		if (encoding == null) return input;
+		if (encoding == null || encoding.length() == 0) return input;
 
-		// 半角カナ対応
-		input = escapeKana(input);
-
-		Charset charset = Charset.forName(encoding);
-		CharBuffer cb = charset.decode(ByteBuffer.wrap(getRowBytes(input)));
-		return cb.toString();
-	}
-
-//	private static Pattern KANA = Pattern.compile("(\\x1b\\x28\\x4a)([\\xa1-\\xdf]*)(\\x1b\\x28\\x42)");
-	private static Pattern KANA = Pattern.compile("(\\x1b\\(J)(.*?)(\\x1b(\\(B|\\(J|\\$@|\\$B))");
-//	private static Pattern KANA = Pattern.compile("(\\x1b\\(J)(?!\\x1b(\\(B|\\(J|\\$@|\\$B))+(\\x1b(\\(B|\\(J|\\$@|\\$B))");
-
-	private static String escapeKana(String input)
-	{
-		if (input == null) return null;
-
-//		System.out.println("kana=" + input + ",[" + toHexString(getRowBytes(input)) + "]");
-		StringBuffer sb = new StringBuffer();
-		Matcher kana = KANA.matcher(input);
-		int count = 0;
-		while (kana.find())
-		{
-			String g = kana.group();
-			byte[] b = getRowBytes(g);
-			System.out.println("kana" + (count++) + "=" + g + ",[" + toHexString(b) + "]");
-			int end = b.length - 3;
-			// [ESC](J -> [ESC](I
-			b[2] = 'I';
-			for (int i = 3; i < end; i++)
-			{
-				// 0xa1 -> 0x21
-				b[i] = (byte)(b[i] - (0xa1 - 0x21));
-			}
-//			System.out.println("[" + toHexString(b) + "]");
-//			g = "X";
-			g = new String(b);
-			kana.appendReplacement(sb, g);
-		}
-		kana.appendTail(sb);
-		input = sb.toString();
-
-//		String g = null;
-//		if (kana.find()) g = kana.group();
-//		System.out.println("row=" + input + ",[" + g + "]");
-		return input;
-	}
-
-	private static String toHexString(byte[] b)
-	{
-		StringBuilder sb = new StringBuilder();
-		for (byte c : b)
-		{
-			sb.append(String.format("%02X ", c));
-		}
-		return sb.toString();
-	}
-
-	private static byte[] getRowBytes(String input)
-	{
-		if (input == null) return null;
+//		// 半角カナ対応
+//		input = escapeKana(input);
 
 		try
 		{
-			byte[] b = input.getBytes("ISO-8859-1");
-			return b;
+			input = new String(input.getBytes(), encoding);
+			return input;
 		}
 		catch (UnsupportedEncodingException x)
 		{
-			throw new IllegalStateException(x);
+			return input;
 		}
-	}
-
-	/**
-	 * 指定した文字エンコーディングで文字列を変換します。
-	 * 
-	 * @param input 文字列
-	 * @param encoding 文字エンコーディング
-	 * @return 文字列
-	 */
-	public static String encode(String input, String encoding)
-	{
-		if (input == null) return null;
-
-		Charset charset = Charset.forName(encoding);
-//		CharsetEncoder encorder = charset.newEncoder().onMalformedInput(CodingErrorAction.IGNORE).onUnmappableCharacter(CodingErrorAction.IGNORE);
-//		ByteBuffer bb = encorder.encode(CharBuffer.wrap(input));
-		ByteBuffer bb = charset.encode(input);
-		String output = new String(bb.array());
-		return output;
 	}
 
 //	public String getTarget()
