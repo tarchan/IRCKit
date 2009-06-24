@@ -10,7 +10,7 @@ import java.util.EventListener;
  * 
  * @author tarchan
  * @see IRCMessage
- * @see IRCClient#addMessageHandler(String, IRCMessageHandler)
+ * @see IRCClient#addHandler(String, IRCMessageHandler)
 */
 public interface IRCMessageHandler extends EventListener
 {

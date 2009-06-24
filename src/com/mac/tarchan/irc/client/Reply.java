@@ -13,7 +13,7 @@ import java.lang.annotation.Target;
  * 
  * @author tarchan
  * @see IRCMessageHandler#onMessage(IRCMessage)
- * @see IRCClient#addMessageHandlerAll(Object)
+ * @see IRCClient#addAllHandlers(Object)
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)

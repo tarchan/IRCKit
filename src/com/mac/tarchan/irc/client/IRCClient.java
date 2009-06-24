@@ -190,7 +190,7 @@ public class IRCClient
 	 * @param command コマンド
 	 * @param handler メッセージハンドラ
 	 */
-	public void addMessageHandler(String command, IRCMessageHandler handler)
+	public void addHandler(String command, IRCMessageHandler handler)
 	{
 		command = command.toUpperCase();
 		ArrayList<IRCMessageHandler> handlerChain = handlerMap.get(command);
@@ -209,7 +209,7 @@ public class IRCClient
 	 * @return メッセージハンドラの配列
 	 * @see Reply
 	 */
-	public IRCMessageHandler[] addMessageHandlerAll(Object obj)
+	public IRCMessageHandler[] addAllHandlers(Object obj)
 	{
 		ArrayList<IRCMessageHandler> handlerChain = new ArrayList<IRCMessageHandler>();
 		for (Method m : obj.getClass().getMethods())
@@ -219,7 +219,7 @@ public class IRCClient
 				Reply reply = m.getAnnotation(Reply.class);
 //				System.out.format("method: %s: %s: %s\n", m, reply, m.getName());
 				IRCMessageHandler handler = EventHandler.create(IRCMessageHandler.class, obj, m.getName(), "");
-				addMessageHandler(reply.value(), handler);
+				addHandler(reply.value(), handler);
 				handlerChain.add(handler);
 //				System.out.format("handler: %s: %s\n", reply.value(), handler.getClass());
 			}
@@ -233,7 +233,7 @@ public class IRCClient
 	 * @param command コマンド
 	 * @param handler メッセージハンドラ
 	 */
-	public void removeMessageHandler(String command, IRCMessageHandler handler)
+	public void removeHandler(String command, IRCMessageHandler handler)
 	{
 		command = command.toUpperCase();
 		ArrayList<IRCMessageHandler> handlerChain = handlerMap.get(command);
@@ -249,11 +249,11 @@ public class IRCClient
 	 * 
 	 * @param handler メッセージハンドラ
 	 */
-	public void removeMessageHandlerAll(IRCMessageHandler handler)
+	public void removeAllHandlers(IRCMessageHandler handler)
 	{
 		for (String command : handlerMap.keySet())
 		{
-			removeMessageHandler(command, handler);
+			removeHandler(command, handler);
 		}
 	}
 
@@ -492,7 +492,7 @@ public class IRCClient
 		public PingPong(IRCClient irc)
 		{
 			this.irc = irc;
-			this.irc.addMessageHandlerAll(this);
+			this.irc.addAllHandlers(this);
 		}
 
 		/**
@@ -527,7 +527,7 @@ public class IRCClient
 		public AutoJoin(IRCClient irc)
 		{
 			this.irc = irc;
-			this.irc.addMessageHandlerAll(this);
+			this.irc.addAllHandlers(this);
 		}
 
 		/**
