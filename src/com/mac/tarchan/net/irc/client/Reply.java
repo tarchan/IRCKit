@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2009 tarchan. All rights reserved.
  */
-package com.mac.tarchan.irc.client;
+package com.mac.tarchan.net.irc.client;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.RetentionPolicy;

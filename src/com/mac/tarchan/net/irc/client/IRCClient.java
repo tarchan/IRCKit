@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2009 tarchan. All rights reserved.
  */
-package com.mac.tarchan.irc.client;
+package com.mac.tarchan.net.irc.client;
 
 import java.beans.EventHandler;
 import java.io.BufferedReader;
@@ -65,7 +65,7 @@ public class IRCClient
 	static
 	{
 		// IRCプロトコルハンドラを設定
-		setProtocolHandlerPackage("com.mac.tarchan");
+		setProtocolHandlerPackage("com.mac.tarchan.net");
 
 		// システムプロキシーを使用
 		setUseSystemProxies(true);
@@ -153,24 +153,16 @@ public class IRCClient
 	}
 
 	/**
-	 * 環境設定を返します。
-	 * 
-	 * @return 環境設定
-	 */
-	public Properties getProperties()
-	{
-		return props;
-	}
-
-	/**
 	 * 指定されたキーのプロパティーを設定します。
 	 * 
 	 * @param key キー
 	 * @param value プロパティー
+	 * @return このオブジェクト
 	 */
-	public void setProperty(String key, String value)
+	public IRCClient setProperty(String key, String value)
 	{
 		props.setProperty(key, value);
+		return this;
 	}
 
 	/**
@@ -185,12 +177,23 @@ public class IRCClient
 	}
 
 	/**
+	 * 環境設定を返します。
+	 * 
+	 * @return 環境設定
+	 */
+	public Properties getProperties()
+	{
+		return props;
+	}
+
+	/**
 	 * メッセージハンドラを追加します。
 	 * 
 	 * @param command コマンド
 	 * @param handler メッセージハンドラ
+	 * @return このオブジェクト
 	 */
-	public void addHandler(String command, IRCMessageHandler handler)
+	public IRCClient addHandler(String command, IRCMessageHandler handler)
 	{
 		command = command.toUpperCase();
 		ArrayList<IRCMessageHandler> handlerChain = handlerMap.get(command);
@@ -200,16 +203,17 @@ public class IRCClient
 			handlerMap.put(command, handlerChain);
 		}
 		handlerChain.add(handler);
+		return this;
 	}
 
 	/**
 	 * 注釈されたメッセージハンドラをすべて追加します。
 	 * 
 	 * @param obj オブジェクト
-	 * @return メッセージハンドラの配列
+	 * @return このオブジェクト
 	 * @see Reply
 	 */
-	public IRCMessageHandler[] addAllHandlers(Object obj)
+	public IRCClient addAllHandlers(Object obj)
 	{
 		ArrayList<IRCMessageHandler> handlerChain = new ArrayList<IRCMessageHandler>();
 		for (Method m : obj.getClass().getMethods())
@@ -224,7 +228,7 @@ public class IRCClient
 //				System.out.format("handler: %s: %s\n", reply.value(), handler.getClass());
 			}
 		}
-		return handlerChain.toArray(new IRCMessageHandler[handlerChain.size()]);
+		return this;
 	}
 
 	/**
@@ -433,11 +437,6 @@ public class IRCClient
 		public void error(Exception x)
 		{
 			x.printStackTrace();
-		}
-
-		public void close() throws IOException
-		{
-			in.close();
 		}
 	}
 

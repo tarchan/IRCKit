@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2009 tarchan. All rights reserved.
  */
-package com.mac.tarchan.irc;
+package com.mac.tarchan.net.irc;
 
 import java.io.IOException;
 import java.io.InputStream;
