@@ -430,6 +430,7 @@ public class IRCClient
 				catch (IOException x)
 				{
 					error(x);
+					break;
 				}
 			}
 		}
