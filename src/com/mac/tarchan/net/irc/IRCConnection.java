@@ -13,7 +13,7 @@ import java.net.URLConnection;
 /**
  * IRCサーバーへのURL接続です。
  * IRC URL 構文は次のとおりです。
- * <pre>irc://host:port</pre>
+ * <pre>irc://{host}:{port}</pre>
  * 
  * @author tarchan
  * @see Handler#openConnection(URL)
@@ -46,6 +46,7 @@ public class IRCConnection extends URLConnection
 		int port = url.getPort();
 		if (port < 0) port = url.getDefaultPort();
 		socket = new Socket(url.getHost(), port);
+		socket.setSoTimeout(5 * 60 * 1000);
 		System.out.format("[CON] %s\n", socket);
 
 		// 接続済みにする
