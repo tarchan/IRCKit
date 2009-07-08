@@ -100,8 +100,8 @@ public class IRCClient
 	 */
 	public IRCClient()
 	{
-		new PingPong(this);
-		new AutoJoin(this);
+		addAllHandlers(new PingPong());
+		addAllHandlers(new AutoJoin());
 	}
 
 	/**
@@ -295,9 +295,18 @@ public class IRCClient
 	 */
 	public void open() throws IOException
 	{
+		String href = getProperty("irc.url");
 		String host = getProperty("irc.host");
 		String port = getProperty("irc.port");
-		URL url = new URL(String.format("irc://%s:%s", host, port));
+//		System.out.format("[OPEN] %s\n", href);
+//		System.out.format("[OPEN] %s\n", host);
+//		System.out.format("[OPEN] %s\n", port);
+		if (isEmpty(href)) href = String.format("irc://%s:%s", host, port);
+//		System.out.format("[OPEN] %s\n", href);
+		URL url = new URL(href);
+		String channel = url.getPath();
+//		System.out.format("[OPEN] ref=%s\n", ref);
+		if (!isEmpty(channel)) setProperty("irc.channel", channel);
 //		System.out.format("[OPEN] %s\n", url);
 		URLConnection con = url.openConnection();
 		con.connect();
@@ -509,29 +518,15 @@ public class IRCClient
 	 */
 	public static class PingPong
 	{
-		/** IRCクライアント */
-		protected IRCClient irc;
-
-		/**
-		 * PingPong を構築します。
-		 * 
-		 * @param irc IRCクライアント
-		 */
-		public PingPong(IRCClient irc)
-		{
-			this.irc = irc;
-			this.irc.addAllHandlers(this);
-		}
-
 		/**
 		 * 接続を継続するために PONG を送信します。
 		 * 
 		 * @param msg IRCメッセージ
 		 */
 		@Reply("PING")
-		public void ping(IRCMessage msg)
+		public void onPing(IRCMessage msg)
 		{
-			// サーバー名s
+			IRCClient irc = (IRCClient)msg.getSource();
 			String server = msg.getTrail();
 			irc.postMessage(String.format("PONG :%s", server));
 		}
@@ -544,33 +539,35 @@ public class IRCClient
 	 */
 	public static class AutoJoin
 	{
-		/** IRCクライアント */
-		protected IRCClient irc;
-
 		/**
-		 * AutoJoin を構築します。
-		 * 
-		 * @param irc IRCクライアント
-		 */
-		public AutoJoin(IRCClient irc)
-		{
-			this.irc = irc;
-			this.irc.addAllHandlers(this);
-		}
-
-		/**
-		 * 指定されたチャンネルにJOINします。
+		 * 指定されたチャンネルに JOIN します。
 		 * 
 		 * @param msg IRCメッセージ
 		 */
 		@Reply("001")
-		public void welcome(IRCMessage msg)
+		public void onWelcome(IRCMessage msg)
 		{
+			IRCClient irc = (IRCClient)msg.getSource();
 			String channel = irc.getProperty("irc.channel");
 			if (!isEmpty(channel))
 			{
 				irc.postMessage(String.format("JOIN %s", channel));
 			}
+		}
+
+		/**
+		 * ニックネームを変更します。
+		 * 
+		 * @param msg IRCメッセージ
+		 */
+		@Reply("433")
+		public void onNicknameInUse(IRCMessage msg)
+		{
+			IRCClient irc = (IRCClient)msg.getSource();
+			String oldNick = msg.getParam(1);
+			String newNick = String.format("%s_", oldNick).substring(1);
+//			System.out.format("nick=%s -> %s\n", oldNick, newNick);
+			irc.postMessage(String.format("NICK %s", newNick));
 		}
 	}
 }

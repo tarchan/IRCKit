@@ -68,7 +68,7 @@ public class IRCConnection extends URLConnection
 
 		// 接続する
 		int port = url.getPort();
-		if (port < 0) port = url.getDefaultPort();
+		if (port == -1) port = url.getDefaultPort();
 		socket = new Socket(url.getHost(), port);
 		socket.setSoTimeout(5 * 60 * 1000);
 //		System.out.format("[CON] %s\n", socket);

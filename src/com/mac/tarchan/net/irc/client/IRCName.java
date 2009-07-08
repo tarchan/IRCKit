@@ -80,6 +80,16 @@ public class IRCName implements Serializable
 	}
 
 	/**
+	 * チャンネル名かどうか判定します。
+	 * 
+	 * @return チャンネル名の場合は true
+	 */
+	public boolean isChannel()
+	{
+		return name.matches("[&#%]\\S+");
+	}
+
+	/**
 	 * ロングネームを解析します。
 	 */
 	private void parse()
@@ -99,6 +109,8 @@ public class IRCName implements Serializable
 	}
 
 	/**
+	 * ニックネームを返します。
+	 * 
 	 * @return ニックネーム
 	 */
 	public String getNick()
@@ -107,6 +119,8 @@ public class IRCName implements Serializable
 	}
 
 	/**
+	 * ユーザー名を返します。
+	 * 
 	 * @return ユーザー名
 	 */
 	public String getUser()
@@ -115,6 +129,8 @@ public class IRCName implements Serializable
 	}
 
 	/**
+	 * ホスト名を返します。
+	 * 
 	 * @return ホスト名
 	 */
 	public String getHost()

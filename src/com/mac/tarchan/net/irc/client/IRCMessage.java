@@ -97,48 +97,48 @@ public class IRCMessage extends EventObject
 	/** トレーラ */
 	private String _trail;
 
-	/** サーバ名(prefix) */
-	private String _server;
-
-	/** ニックネーム(prefix) */
-	private String _nick;
-
-	/** ユーザ名(prefix) */
-	private String _user;
-
-	/** ホスト名 (prefix) */
-	private String _host;
+//	/** サーバ名(prefix) */
+//	private String _server;
+//
+//	/** ニックネーム(prefix) */
+//	private String _nick;
+//
+//	/** ユーザ名(prefix) */
+//	private String _user;
+//
+//	/** ホスト名 (prefix) */
+//	private String _host;
 
 	/** 文字エンコーディング */
 	private String encoding;
 
 	/**
-	 * IRCメッセージを解析して IRCMessage を作成します。
-	 * 
-	 * @param source メッセージのソース
-	 * @param message メッセージ
-	 */
-	public IRCMessage(Object source, String message)
-	{
-		this(source, message, System.currentTimeMillis());
-	}
+		 * IRCメッセージを解析して IRCMessage を作成します。
+		 * 
+		 * @param source メッセージのソース
+		 * @param message メッセージ
+		 * @param when メッセージを受け取った時間
+		 */
+		public IRCMessage(IRCClient source, String message, long when)
+		{
+			// オリジナルのパラメータを保存する
+			super(source);
+			setMessage(message);
+			setWhen(when);
+	
+			// デバッグ出力
+	//		System.out.println(this);
+		}
 
 	/**
 	 * IRCメッセージを解析して IRCMessage を作成します。
 	 * 
 	 * @param source メッセージのソース
 	 * @param message メッセージ
-	 * @param when メッセージを受け取った時間
 	 */
-	public IRCMessage(Object source, String message, long when)
+	public IRCMessage(IRCClient source, String message)
 	{
-		// オリジナルのパラメータを保存する
-		super(source);
-		setMessage(message);
-		setWhen(when);
-
-		// デバッグ出力
-//		System.out.println(this);
+		this(source, message, System.currentTimeMillis());
 	}
 
 	/**
@@ -237,18 +237,18 @@ public class IRCMessage extends EventObject
 	private void parsePrefix(String prefix)
 	{
 		_prefix = new IRCName(prefix);
-		String[] token = prefix.split(ADDRESS_DELIMITER);
-		if (token.length == 1)
-		{
-			_server = token[0];
-			_nick = token[0];
-		}
-		else
-		{
-			_nick = token[0];
-			_user = token[1];
-			_host = token[2];
-		}
+//		String[] token = prefix.split(ADDRESS_DELIMITER);
+//		if (token.length == 1)
+//		{
+//			_server = token[0];
+//			_nick = token[0];
+//		}
+//		else
+//		{
+//			_nick = token[0];
+//			_user = token[1];
+//			_host = token[2];
+//		}
 
 //		_prefix = prefix;
 //		_server = prefix;
@@ -415,43 +415,47 @@ public class IRCMessage extends EventObject
 	}
 
 	/**
+	 * @deprecated {@link #getPrefix()}
 	 * サーバ名を返します。
 	 * 
 	 * @return サーバ名
 	 */
 	public String getServer()
 	{
-		return _server;
+		return _prefix.toString();
 	}
 
 	/**
+	 * @deprecated {@link #getPrefix()}
 	 * ニックネームを返します。
 	 * 
 	 * @return ニックネーム
 	 */
 	public String getNick()
 	{
-		return _nick;
+		return _prefix.getNick();
 	}
 
 	/**
+	 * @deprecated {@link #getPrefix()}
 	 * ユーザ名を返します。
 	 * 
 	 * @return ユーザ名
 	 */
 	public String getUser()
 	{
-		return _user;
+		return _prefix.getUser();
 	}
 
 	/**
-	 * ホストを返します。
+	 * @deprecated {@link #getPrefix()}
+	 * ホスト名を返します。
 	 * 
-	 * @return ホストまたは null
+	 * @return ホスト名
 	 */
 	public String getHost()
 	{
-		return _host;
+		return _prefix.getHost();
 	}
 
 	/**
@@ -675,7 +679,7 @@ public class IRCMessage extends EventObject
 	 * @param source ソース
 	 * @return メッセージ
 	 */
-	public static IRCMessage valueOf(String str, Object source)
+	public static IRCMessage valueOf(String str, IRCClient source)
 	{
 		return new IRCMessage(source, str);
 	}
