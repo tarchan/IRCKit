@@ -63,4 +63,26 @@ public class Handler extends URLStreamHandler
 	{
 		return 6667;
 	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected void setURL(URL u, String protocol, String host, int port, String authority, String userInfo, String path, String query, String ref)
+	{
+		try
+		{
+			// チャンネル名を設定
+			if (ref != null) path = "#" + ref;
+			else if (path.length() > 1) path = "#" + path.substring(1);
+
+//			System.out.format("[URL] %s://%s:%s, %s, %s, %s, %s, %s\n", protocol, host, port, authority, userInfo, path, query, ref);
+			super.setURL(u, protocol, host, port, authority, userInfo, path, query, ref);
+		}
+		catch (RuntimeException x)
+		{
+			x.printStackTrace();
+			throw x;
+		}
+	}
 }
