@@ -3,4 +3,4 @@
  * 
  * @author tarchan
  */
-package com.mac.tarchan.net.irc.client;
+package com.mac.tarchan.irc.client;
