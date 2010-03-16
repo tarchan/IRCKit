@@ -50,6 +50,8 @@ import java.util.regex.Pattern;
  */
 public class IRCMessage extends EventObject
 {
+	private static final long serialVersionUID = -2706780515981010401L;
+
 	/** アドレス区切り */
 	public static final String ADDRESS_DELIMITER = "[!@]";
 
@@ -771,6 +773,8 @@ public class IRCMessage extends EventObject
 	/** 色コード */
 	public static final HashMap<Integer, Color> COLORS = new HashMap<Integer, Color>()
 	{
+		private static final long serialVersionUID = 7094110028952151277L;
+
 		{
 			put(1, Color.BLACK);			// 1 - Black
 			put(2, new Color(0x000080));	// 2 - Navy Blue
