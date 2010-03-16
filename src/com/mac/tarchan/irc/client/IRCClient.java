@@ -54,6 +54,8 @@ public class IRCClient
 	/** デフォルトの環境設定 */
 	private static final Properties DEFAULTS = new Properties()
 	{
+		private static final long serialVersionUID = -1867062865420845541L;
+
 		{
 			setProperty("irc.host", "localhost");
 			setProperty("irc.port", "6667");
