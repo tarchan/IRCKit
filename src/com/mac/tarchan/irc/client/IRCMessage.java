@@ -1,7 +1,31 @@
 /*
- * Copyright (c) 2009 tarchan. All rights reserved.
+ *  Copyright (c) 2009 tarchan. All rights reserved.
+ *  
+ *  Redistribution and use in source and binary forms, with or without
+ *  modification, are permitted provided that the following conditions are met:
+ *  
+ *  1. Redistributions of source code must retain the above copyright notice,
+ *     this list of conditions and the following disclaimer.
+ *  2. Redistributions in binary form must reproduce the above copyright notice,
+ *     this list of conditions and the following disclaimer in the documentation
+ *     and/or other materials provided with the distribution.
+ *  
+ *  THIS SOFTWARE IS PROVIDED BY TARCHAN ``AS IS'' AND ANY EXPRESS OR
+ *  IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+ *  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
+ *  EVENT SHALL TARCHAN OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+ *  INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+ *  THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *  
+ *  The views and conclusions contained in the software and documentation are
+ *  those of the authors and should not be interpreted as representing official
+ *  policies, either expressed or implied, of tarchan.
  */
-package com.mac.tarchan.net.irc.client;
+package com.mac.tarchan.irc.client;
 
 import java.awt.Color;
 import java.io.UnsupportedEncodingException;
@@ -61,7 +85,8 @@ public class IRCMessage extends EventObject
 
 	// メッセージ解析結果
 	/** プレフィックス */
-	private String _prefix;
+//	private String _prefix;
+	private IRCName _prefix;
 
 	/** コマンド */
 	private String _command;
@@ -72,48 +97,48 @@ public class IRCMessage extends EventObject
 	/** トレーラ */
 	private String _trail;
 
-	/** サーバ名(prefix) */
-	private String _server;
-
-	/** ニックネーム(prefix) */
-	private String _nick;
-
-	/** ユーザ名(prefix) */
-	private String _user;
-
-	/** ホスト名 (prefix) */
-	private String _host;
+//	/** サーバ名(prefix) */
+//	private String _server;
+//
+//	/** ニックネーム(prefix) */
+//	private String _nick;
+//
+//	/** ユーザ名(prefix) */
+//	private String _user;
+//
+//	/** ホスト名 (prefix) */
+//	private String _host;
 
 	/** 文字エンコーディング */
 	private String encoding;
 
 	/**
-	 * IRCメッセージを解析して IRCMessage を作成します。
-	 * 
-	 * @param source メッセージのソース
-	 * @param message メッセージ
-	 */
-	public IRCMessage(Object source, String message)
-	{
-		this(source, message, System.currentTimeMillis());
-	}
+		 * IRCメッセージを解析して IRCMessage を作成します。
+		 * 
+		 * @param source メッセージのソース
+		 * @param message メッセージ
+		 * @param when メッセージを受け取った時間
+		 */
+		public IRCMessage(IRCClient source, String message, long when)
+		{
+			// オリジナルのパラメータを保存する
+			super(source);
+			setMessage(message);
+			setWhen(when);
+	
+			// デバッグ出力
+	//		System.out.println(this);
+		}
 
 	/**
 	 * IRCメッセージを解析して IRCMessage を作成します。
 	 * 
 	 * @param source メッセージのソース
 	 * @param message メッセージ
-	 * @param when メッセージを受け取った時間
 	 */
-	public IRCMessage(Object source, String message, long when)
+	public IRCMessage(IRCClient source, String message)
 	{
-		// オリジナルのパラメータを保存する
-		super(source);
-		setMessage(message);
-		setWhen(when);
-
-		// デバッグ出力
-//		System.out.println(this);
+		this(source, message, System.currentTimeMillis());
 	}
 
 	/**
@@ -211,19 +236,19 @@ public class IRCMessage extends EventObject
 	 */
 	private void parsePrefix(String prefix)
 	{
-		_prefix = prefix;
-		String[] token = prefix.split(ADDRESS_DELIMITER);
-		if (token.length == 1)
-		{
-			_server = token[0];
-			_nick = token[0];
-		}
-		else
-		{
-			_nick = token[0];
-			_user = token[1];
-			_host = token[2];
-		}
+		_prefix = new IRCName(prefix);
+//		String[] token = prefix.split(ADDRESS_DELIMITER);
+//		if (token.length == 1)
+//		{
+//			_server = token[0];
+//			_nick = token[0];
+//		}
+//		else
+//		{
+//			_nick = token[0];
+//			_user = token[1];
+//			_host = token[2];
+//		}
 
 //		_prefix = prefix;
 //		_server = prefix;
@@ -289,6 +314,24 @@ public class IRCMessage extends EventObject
 //		System.out.println("params=" + array);
 		_middle = new String[array.size()];
 		array.toArray(_middle);
+	}
+
+	/**
+	 * IRCClient を返します。
+	 * 
+	 * @return IRCClient
+	 */
+	public IRCClient getClient()
+	{
+		Object source = getSource();
+		if (source instanceof IRCClient)
+		{
+			return (IRCClient)source;
+		}
+		else
+		{
+			return null;
+		}
 	}
 
 	/**
@@ -384,49 +427,53 @@ public class IRCMessage extends EventObject
 	 * 
 	 * @return プレフィックス
 	 */
-	public String getPrefix()
+	public IRCName getPrefix()
 	{
 		return _prefix;
 	}
 
 	/**
+	 * @deprecated {@link #getPrefix()}
 	 * サーバ名を返します。
 	 * 
 	 * @return サーバ名
 	 */
 	public String getServer()
 	{
-		return _server;
+		return _prefix.toString();
 	}
 
 	/**
+	 * @deprecated {@link #getPrefix()}
 	 * ニックネームを返します。
 	 * 
 	 * @return ニックネーム
 	 */
 	public String getNick()
 	{
-		return _nick;
+		return _prefix.getNick();
 	}
 
 	/**
+	 * @deprecated {@link #getPrefix()}
 	 * ユーザ名を返します。
 	 * 
 	 * @return ユーザ名
 	 */
 	public String getUser()
 	{
-		return _user;
+		return _prefix.getUser();
 	}
 
 	/**
-	 * ホストを返します。
+	 * @deprecated {@link #getPrefix()}
+	 * ホスト名を返します。
 	 * 
-	 * @return ホストまたは null
+	 * @return ホスト名
 	 */
 	public String getHost()
 	{
-		return _host;
+		return _prefix.getHost();
 	}
 
 	/**
@@ -650,7 +697,7 @@ public class IRCMessage extends EventObject
 	 * @param source ソース
 	 * @return メッセージ
 	 */
-	public static IRCMessage valueOf(String str, Object source)
+	public static IRCMessage valueOf(String str, IRCClient source)
 	{
 		return new IRCMessage(source, str);
 	}

@@ -1,7 +1,31 @@
 /*
- * Copyright (c) 2009 tarchan. All rights reserved.
+ *  Copyright (c) 2009 tarchan. All rights reserved.
+ *  
+ *  Redistribution and use in source and binary forms, with or without
+ *  modification, are permitted provided that the following conditions are met:
+ *  
+ *  1. Redistributions of source code must retain the above copyright notice,
+ *     this list of conditions and the following disclaimer.
+ *  2. Redistributions in binary form must reproduce the above copyright notice,
+ *     this list of conditions and the following disclaimer in the documentation
+ *     and/or other materials provided with the distribution.
+ *  
+ *  THIS SOFTWARE IS PROVIDED BY TARCHAN ``AS IS'' AND ANY EXPRESS OR
+ *  IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+ *  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
+ *  EVENT SHALL TARCHAN OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+ *  INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+ *  THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *  
+ *  The views and conclusions contained in the software and documentation are
+ *  those of the authors and should not be interpreted as representing official
+ *  policies, either expressed or implied, of tarchan.
  */
-package com.mac.tarchan.net.irc.client;
+package com.mac.tarchan.irc.client;
 
 import java.beans.EventHandler;
 import java.io.BufferedReader;
@@ -65,7 +89,7 @@ public class IRCClient
 	static
 	{
 		// IRCプロトコルハンドラを設定
-		setProtocolHandlerPackage("com.mac.tarchan.net");
+		setProtocolHandlerPackage("com.mac.tarchan");
 
 		// システムプロキシーを使用
 		setUseSystemProxies(true);
@@ -76,8 +100,9 @@ public class IRCClient
 	 */
 	public IRCClient()
 	{
-		new PingPong(this);
-		new AutoJoin(this);
+		addAllHandlers(new PingPong());
+		addAllHandlers(new AutoJoin());
+		addAllHandlers(new AutoNick());
 	}
 
 	/**
@@ -118,11 +143,12 @@ public class IRCClient
 	 * 環境設定を読み込みます。
 	 * 
 	 * @param name 設定ファイル名
+	 * @return このオブジェクト
 	 * @throws IOException 入力エラーが発生した場合
 	 * @see Properties#load(InputStream)
 	 * @see Properties#loadFromXML(InputStream)
 	 */
-	public void load(String name) throws IOException
+	public IRCClient load(String name) throws IOException
 	{
 		props = new Properties(DEFAULTS);
 		File file = new File(name);
@@ -150,6 +176,8 @@ public class IRCClient
 		{
 			in.close();
 		}
+
+		return this;
 	}
 
 	/**
@@ -162,6 +190,46 @@ public class IRCClient
 	public IRCClient setProperty(String key, String value)
 	{
 		props.setProperty(key, value);
+		return this;
+	}
+
+	/**
+	 * ニックネームを設定します。
+	 * 
+	 * @param nickname ニックネーム
+	 * @return このオブジェクト
+	 */
+	public IRCClient setNickname(String nickname)
+	{
+		props.setProperty("irc.nick.name", nickname);
+		return this;
+	}
+
+	/**
+	 * 文字コードを設定します。
+	 * 
+	 * @param encoding 文字コード
+	 * @return このオブジェクト
+	 */
+	public IRCClient setEncoding(String encoding)
+	{
+		props.setProperty("irc.encoding", encoding);
+		return this;
+	}
+
+	/**
+	 * IRCに接続します。
+	 * 
+	 * @param host ホスト
+	 * @param port ポート
+	 * @return このオブジェクト
+	 * @throws IOException 接続できない場合
+	 */
+	public IRCClient open(String host, int port) throws IOException
+	{
+		props.setProperty("irc.host", host);
+		props.setProperty("irc.port", String.valueOf(port));
+		open();
 		return this;
 	}
 
@@ -268,13 +336,22 @@ public class IRCClient
 	 */
 	public void open() throws IOException
 	{
+		String href = getProperty("irc.url");
 		String host = getProperty("irc.host");
 		String port = getProperty("irc.port");
-		URL url = new URL(String.format("irc://%s:%s", host, port));
-		System.out.format("[OPEN] %s\n", url);
+//		System.out.format("[OPEN] %s\n", href);
+//		System.out.format("[OPEN] %s\n", host);
+//		System.out.format("[OPEN] %s\n", port);
+		if (isEmpty(href)) href = String.format("irc://%s:%s", host, port);
+//		System.out.format("[OPEN] %s\n", href);
+		URL url = new URL(href);
+		String channel = url.getPath();
+//		System.out.format("[OPEN] ref=%s\n", ref);
+		if (!isEmpty(channel)) setProperty("irc.channel", channel);
+//		System.out.format("[OPEN] %s\n", url);
 		URLConnection con = url.openConnection();
 		con.connect();
-		System.out.format("[OPEN] %s\n", con);
+//		System.out.format("[OPEN] %s\n", con);
 
 		String encoding = getProperty("irc.encoding");
 		in = con.getInputStream();
@@ -430,8 +507,10 @@ public class IRCClient
 				catch (IOException x)
 				{
 					error(x);
+					break;
 				}
 			}
+			System.err.println("Disconnected.");
 		}
 
 		public void error(Exception x)
@@ -475,34 +554,18 @@ public class IRCClient
 
 	/**
 	 * 接続を継続するために PONG を送信します。
-	 * 
-	 * @author tarchan
 	 */
 	public static class PingPong
 	{
-		/** IRCクライアント */
-		protected IRCClient irc;
-
-		/**
-		 * PingPong を構築します。
-		 * 
-		 * @param irc IRCクライアント
-		 */
-		public PingPong(IRCClient irc)
-		{
-			this.irc = irc;
-			this.irc.addAllHandlers(this);
-		}
-
 		/**
 		 * 接続を継続するために PONG を送信します。
 		 * 
 		 * @param msg IRCメッセージ
 		 */
 		@Reply("PING")
-		public void ping(IRCMessage msg)
+		public void onPing(IRCMessage msg)
 		{
-			// サーバー名s
+			IRCClient irc = (IRCClient)msg.getSource();
 			String server = msg.getTrail();
 			irc.postMessage(String.format("PONG :%s", server));
 		}
@@ -510,37 +573,76 @@ public class IRCClient
 
 	/**
 	 * IRCサーバーにログインしたら、自動的に JOIN します。
-	 * 
-	 * @author tarchan
 	 */
 	public static class AutoJoin
 	{
-		/** IRCクライアント */
-		protected IRCClient irc;
-
 		/**
-		 * AutoJoin を構築します。
-		 * 
-		 * @param irc IRCクライアント
-		 */
-		public AutoJoin(IRCClient irc)
-		{
-			this.irc = irc;
-			this.irc.addAllHandlers(this);
-		}
-
-		/**
-		 * 指定されたチャンネルにJOINします。
+		 * 指定されたチャンネルに JOIN します。
 		 * 
 		 * @param msg IRCメッセージ
 		 */
 		@Reply("001")
-		public void welcome(IRCMessage msg)
+		public void onWelcome(IRCMessage msg)
 		{
+			IRCClient irc = (IRCClient)msg.getSource();
 			String channel = irc.getProperty("irc.channel");
 			if (!isEmpty(channel))
 			{
 				irc.postMessage(String.format("JOIN %s", channel));
+			}
+		}
+
+		/**
+		 * ニックネームを変更します。
+		 * 
+		 * @param msg IRCメッセージ
+		 */
+		@Reply("433")
+		public void onNicknameInUse(IRCMessage msg)
+		{
+			IRCClient irc = (IRCClient)msg.getSource();
+			String oldNick = msg.getParam(1);
+			String newNick = String.format("%s_", oldNick).substring(1);
+//			System.out.format("nick=%s -> %s\n", oldNick, newNick);
+			irc.postMessage(String.format("NICK %s", newNick));
+		}
+	}
+
+	/**
+	 * ニックネームの変更を追跡します。
+	 */
+	public static class AutoNick
+	{
+		/**
+		 * ログインしたときのニックネームを取得します。
+		 * 
+		 * @param msg IRCメッセージ
+		 */
+		@Reply("001")
+		public void onWelcome(IRCMessage msg)
+		{
+			IRCClient irc = msg.getClient();
+			System.out.println("WELCOME: " + msg.toString());
+			String nick = msg.getParam(0);
+			irc.setProperty("irc.nick.name", nick);
+		}
+
+		/**
+		 * 変更したニックネームを取得します。
+		 * 
+		 * @param msg IRCメッセージ
+		 */
+		@Reply("NICK")
+		public void onNick(IRCMessage msg)
+		{
+			IRCClient irc = msg.getClient();
+			System.out.println("NICK: " + msg.toString());
+			String oldNick = msg.getPrefix().getNick();
+			String newNick = msg.getTrail();
+			System.out.println(String.format("NICK: %s -> %s", oldNick, newNick));
+			if (irc.getProperty("irc.nick.name").equals(oldNick))
+			{
+				irc.setProperty("irc.nick.name", newNick);
 			}
 		}
 	}
