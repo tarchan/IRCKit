@@ -44,6 +44,9 @@ import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
  * IRCクライアントを実装します。
  * 
@@ -51,6 +54,9 @@ import java.util.concurrent.Executors;
  */
 public class IRCClient
 {
+	/** ログ */
+	private static final Log log = LogFactory.getLog(IRCClient.class);
+
 	/** デフォルトの環境設定 */
 	private static final Properties DEFAULTS = new Properties()
 	{
@@ -346,16 +352,19 @@ public class IRCClient
 //		System.out.format("[OPEN] %s\n", port);
 		if (isEmpty(href)) href = String.format("irc://%s:%s", host, port);
 //		System.out.format("[OPEN] %s\n", href);
+		log.debug("href=" + href);
 		URL url = new URL(href);
 		String channel = url.getPath();
 //		System.out.format("[OPEN] ref=%s\n", ref);
 		if (!isEmpty(channel)) setProperty("irc.channel", channel);
+		log.debug("channel=" + channel);
 //		System.out.format("[OPEN] %s\n", url);
 		URLConnection con = url.openConnection();
 		con.connect();
 //		System.out.format("[OPEN] %s\n", con);
 
 		String encoding = getProperty("irc.encoding");
+		log.debug("encoding=" + encoding);
 		in = con.getInputStream();
 		if (!isEmpty(encoding))
 		{
@@ -405,6 +414,7 @@ public class IRCClient
 //		System.out.format("[POST] %s\n", text);
 //		out.print(str);
 //		out.print(CRLF);
+		log.debug(text);
 		postQueue.execute(new PostMessage(out, text));
 	}
 
