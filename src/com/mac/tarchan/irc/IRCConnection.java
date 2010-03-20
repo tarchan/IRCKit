@@ -83,8 +83,7 @@ public class IRCConnection extends URLConnection
 	@Override
 	public InputStream getInputStream() throws IOException
 	{
-		if (!connected) return null;
-		return socket.getInputStream();
+		return socket != null ? socket.getInputStream() : null;
 	}
 
 	/**
@@ -93,7 +92,6 @@ public class IRCConnection extends URLConnection
 	@Override
 	public OutputStream getOutputStream() throws IOException
 	{
-		if (!connected) return null;
-		return socket.getOutputStream();
+		return socket != null ? socket.getOutputStream() : null;
 	}
 }
