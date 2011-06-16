@@ -1,9 +1,11 @@
 package com.mac.tarchan.irc;
 
+import java.util.EventListener;
+
 /**
  * IRCHandler
  */
-public interface IRCHandler
+public interface IRCHandler extends EventListener
 {
 	/**
 	 * IRCメッセージを受信します。
