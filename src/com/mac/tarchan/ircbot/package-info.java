@@ -1,4 +1,4 @@
 /**
  * IRCクライアント実装のサンプルです。
  */
-package com.mac.tarchan.irc.test;
+package com.mac.tarchan.ircbot;
