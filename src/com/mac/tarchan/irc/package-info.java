@@ -1,6 +1,4 @@
 /**
- * IRC接続のプロトコルハンドラを提供します。
- * 
- * @author tarchan
+ * IRCクライアントを実装するためのクラスを提供します。
  */
 package com.mac.tarchan.irc;
