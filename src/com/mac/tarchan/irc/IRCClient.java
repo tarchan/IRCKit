@@ -2,6 +2,7 @@ package com.mac.tarchan.irc;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.util.Arrays;
 
 /**
  * IRCClient
@@ -25,6 +26,7 @@ public class IRCClient
 	{
 		this.host = host;
 		this.port = port;
+		this.nick = nick;
 	}
 
 	/**
@@ -89,9 +91,19 @@ public class IRCClient
 	 */
 	public IRCClient connect() throws IOException
 	{
-//		InetAddress inet = InetAddress.getByName(host);
-//		System.out.println("connect: " + inet);
+		InetAddress inet = InetAddress.getByName(host);
+		System.out.printf("connect: %s:%s%n", inet, port);
 		return this;
+	}
+
+	/**
+	 * ログインユーザの現在のニックネームを返します。
+	 * 
+	 * @return ニックネーム
+	 */
+	public String getNick()
+	{
+		return nick;
 	}
 
 	/**
@@ -103,7 +115,7 @@ public class IRCClient
 	 */
 	public IRCClient postMessage(String command, String... args)
 	{
-		return postMessage(String.format("%S: %s", command, args));
+		return postMessage(String.format("%S: %s", command, Arrays.toString(args)));
 	}
 
 	/**

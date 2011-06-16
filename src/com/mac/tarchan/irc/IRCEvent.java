@@ -9,10 +9,10 @@ import java.util.EventObject;
 public class IRCEvent extends EventObject
 {
 	/** クライアント */
-	protected IRCClient source;
+	transient protected IRCClient source;
 
 	/** メッセージ */
-	protected IRCMessage message;
+	transient protected IRCMessage message;
 
 	/**
 	 * IRCEvent
