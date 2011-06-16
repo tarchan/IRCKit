@@ -24,14 +24,10 @@ public class IRCBot implements IRCHandler
 		try
 		{
 			// irc.livedoor.ne.jp、irc6.livedoor.ne.jp、125.6.255.10
-//			String host = "irc.livedoor.ne.jp";
-//			int port = 6667;
-//			String nick = "mybot";
-//			String pass = null;
-			String host = "cafebabe.ddo.jp";
+			String host = "irc.livedoor.ne.jp";
 			int port = 6667;
-			String nick = "tarchan";
-			String pass = "mahotai!";
+			String nick = "mybot";
+			String pass = null;
 			String[] channles = {"#javabreak"};
 			new IRCBot(host, port, nick, pass, channles);
 		}
