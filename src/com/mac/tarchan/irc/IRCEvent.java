@@ -5,14 +5,16 @@ import java.util.EventObject;
 /**
  * IRCEvent
  */
-@SuppressWarnings("serial")
 public class IRCEvent extends EventObject
 {
+	/** serialVersionUID */
+	private static final long serialVersionUID = 2880861890798748708L;
+
 	/** クライアント */
-	protected IRCClient source;
+	transient protected IRCClient source;
 
 	/** メッセージ */
-	protected IRCMessage message;
+	transient protected IRCMessage message;
 
 	/**
 	 * IRCEvent

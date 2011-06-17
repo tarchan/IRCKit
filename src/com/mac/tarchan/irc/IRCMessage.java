@@ -1,9 +1,10 @@
+/*
+ * Copyright (c) 2011 tarchan. All rights reserved.
+ */
 package com.mac.tarchan.irc;
 
-import java.io.UnsupportedEncodingException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 
 /**
  * IRCMessage
@@ -13,8 +14,6 @@ import java.util.regex.Pattern;
 public class IRCMessage
 {
 	String text;
-
-	String encoding;
 
 	String prefix;
 
@@ -27,20 +26,14 @@ public class IRCMessage
 	String[] params;
 
 	/**
-	 * IRCMessage
+	 * IRCMessage を構築します。
 	 * 
 	 * @param text テキスト
+	 * @throws IllegalArgumentException メッセージ形式が不明の場合
 	 */
 	public IRCMessage(String text)
 	{
 		this.text = text;
-		parse();
-	}
-
-	public IRCMessage(String text, String encoding) throws UnsupportedEncodingException
-	{
-		this.text = new String(text.getBytes(), encoding);
-		this.encoding = encoding;
 		parse();
 	}
 
@@ -72,40 +65,56 @@ public class IRCMessage
 		}
 	}
 
+	/**
+	 * プレフィックスを返します。
+	 * 
+	 * @return プレフィックス
+	 */
 	public String getPrefix()
 	{
 		return prefix;
 	}
 
+	/**
+	 * コマンドを返します。
+	 * 
+	 * @return コマンド
+	 */
 	public String getCommand()
 	{
 		return command;
 	}
 
+	/**
+	 * パラメータリストを返します。
+	 * 
+	 * @return パラメータリスト
+	 */
 	public String[] getParams()
 	{
 		return params;
 	}
 
+	/**
+	 * 指定されたインデックスのパラメータを返します。
+	 * 
+	 * @param index インデックス
+	 * @return 指定されたインデックスのパラメータ
+	 */
 	public String getParam(int index)
 	{
 		if (index < 0 || index >= params.length) throw new ArrayIndexOutOfBoundsException("パラメータが見つかりません。: " + index);
 		return params[index];
 	}
 
+	/**
+	 * トレーラーを返します。
+	 * 
+	 * @return トレーラー
+	 */
 	public String getTrailing()
 	{
 		return trailing;
-	}
-
-	/**
-	 * データを返します。
-	 * 
-	 * @return データ
-	 */
-	public byte[] getData()
-	{
-		return text.getBytes();
 	}
 
 	@Override

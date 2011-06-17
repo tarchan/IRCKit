@@ -37,11 +37,6 @@ public class IRCBot implements IRCHandler
 		}
 	}
 
-	public IRCBot()
-	{
-		
-	}
-
 	/**
 	 * IRCBot
 	 * 

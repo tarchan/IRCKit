@@ -11,8 +11,15 @@ import java.util.regex.Pattern;
  */
 public class IRCName
 {
-	static Pattern namePattern = Pattern.compile("([^!]+)(!.*)?");
+	/** プレフィックスパターン */
+	protected static Pattern namePattern = Pattern.compile("([^!]+)(!.*)?");
 
+	/**
+	 * プレフィックスからドメイン名を除いた部分を返します。
+	 * 
+	 * @param name プレフィックス
+	 * @return ドメイン名を除いたプレフィックス
+	 */
 	public static String getSimpleName(String name)
 	{
 		Matcher m = namePattern.matcher(name);

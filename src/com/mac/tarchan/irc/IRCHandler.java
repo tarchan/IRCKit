@@ -1,3 +1,6 @@
+/*
+ * Copyright (c) 2011 tarchan. All rights reserved.
+ */
 package com.mac.tarchan.irc;
 
 import java.util.EventListener;
@@ -8,7 +11,7 @@ import java.util.EventListener;
 public interface IRCHandler extends EventListener
 {
 	/**
-	 * IRCメッセージを受信します。
+	 * IRCイベントを受信します。
 	 * 
 	 * @param event IRCイベント
 	 */
