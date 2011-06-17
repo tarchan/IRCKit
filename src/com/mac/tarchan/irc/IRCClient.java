@@ -1,3 +1,6 @@
+/*
+ * Copyright (c) 2011 tarchan. All rights reserved.
+ */
 package com.mac.tarchan.irc;
 
 import java.io.BufferedReader;
@@ -9,7 +12,6 @@ import java.io.PrintStream;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -112,6 +114,18 @@ public class IRCClient
 	}
 
 	/**
+	 * すべてのコマンドを受け入れるハンドラを追加します。
+	 * 
+	 * @param handler ハンドラ
+	 * @return IRCClient オブジェクト
+	 */
+	public IRCClient on(IRCHandler handler)
+	{
+		handlers.add(handler);
+		return this;
+	}
+
+	/**
 	 * 指定されたコマンドのハンドラを追加します。
 	 * 
 	 * @param command コマンド
@@ -126,30 +140,6 @@ public class IRCClient
 //		handler.onMessage(new IRCEvent(this, message));
 		return this;
 	}
-
-	/**
-	 * すべてのコマンドを受け入れるハンドラを追加します。
-	 * 
-	 * @param handler ハンドラ
-	 * @return IRCClient オブジェクト
-	 */
-	public IRCClient on(IRCHandler handler)
-	{
-		handlers.add(handler);
-		return this;
-	}
-
-//	/**
-//	 * 指定されたコマンドのハンドラを追加します。
-//	 * 
-//	 * @param handler ハンドラ
-//	 * @return IRCClient オブジェクト
-//	 */
-//	public IRCClient on(Object handler)
-//	{
-//		// TODO アノテーションでハンドラを指定
-//		return this;
-//	}
 
 	/**
 	 * IRCサーバに接続します。
@@ -185,6 +175,20 @@ public class IRCClient
 	}
 
 	/**
+	 * IRCサーバの接続をクローズします。
+	 * 
+	 * @return IRCClient
+	 * @throws IOException IRCサーバの接続をクローズできない場合
+	 */
+	public IRCClient close() throws IOException
+	{
+		socket.close();
+		messageQueue.shutdown();
+		System.out.println("disconnected.");
+		return this;
+	}
+
+	/**
 	 * 入力ストリームを返します。
 	 * 
 	 * @return 入力ストリーム
@@ -207,19 +211,6 @@ public class IRCClient
 	}
 
 	/**
-	 * 指定されたコマンドを送信します。
-	 * 
-	 * @param command コマンド名
-	 * @param args コマンド引数
-	 * @return IRCClient
-	 */
-	public IRCClient sendMessage(String command, String... args)
-	{
-		// TODO 指定されたコマンドを送信
-		return sendMessage(String.format("%S: %s", command, Arrays.toString(args)));
-	}
-
-	/**
 	 * 指定されたテキストを送信します。
 	 * 
 	 * @param text テキスト
@@ -232,7 +223,19 @@ public class IRCClient
 	}
 
 	/**
-	 * 指定されたチャンネルに入ります。
+	 * 指定されたコマンドを送信します。
+	 * 
+	 * @param command コマンド書式
+	 * @param args コマンド引数
+	 * @return IRCClient
+	 */
+	public IRCClient sendMessage(String command, Object... args)
+	{
+		return sendMessage(String.format(command, args));
+	}
+
+	/**
+	 * 指定されたチャンネルに参加します。
 	 * IRCサーバに JOIN コマンドを送信します。
 	 * 
 	 * @param channel チャンネル名
@@ -240,10 +243,20 @@ public class IRCClient
 	 */
 	public IRCClient join(String channel)
 	{
-		return sendMessage(String.format("JOIN %s", channel));
+		return sendMessage("JOIN %s", channel);
 	}
 
-	// TODO part
+	/**
+	 * 指定されたチャンネルを離脱します。
+	 * IRCサーバに PART コマンドを送信します。
+	 * 
+	 * @param channel チャンネル名
+	 * @return IRCClient
+	 */
+	public IRCClient part(String channel)
+	{
+		return sendMessage("PART %s", channel);
+	}
 
 	/**
 	 * IRCサーバとの接続を継続します。
@@ -254,11 +267,12 @@ public class IRCClient
 	 */
 	public IRCClient pong(String payload)
 	{
-		return sendMessage(String.format("PONG :%s", payload));
+		return sendMessage("PONG :%s", payload);
 	}
 
 	/**
 	 * 指定されたテキストを送信します。
+	 * IRCサーバに PRIVMSG コマンドを送信します。
 	 * 
 	 * @param receiver テキストの宛先
 	 * @param text テキスト
@@ -266,10 +280,20 @@ public class IRCClient
 	 */
 	public IRCClient privmsg(String receiver, String text)
 	{
-		return sendMessage(String.format("PRIVMSG %s :%s", receiver, text));
+		return sendMessage("PRIVMSG %s :%s", receiver, text);
 	}
 
-	// TODO quit
+	/**
+	 * 指定されたメッセージを送信して、IRCサーバとの接続を終了します。
+	 * IRCサーバに QUIT コマンドを送信します。
+	 * 
+	 * @param text QUITメッセージ
+	 * @return IRCClient
+	 */
+	public IRCClient quit(String text)
+	{
+		return sendMessage("QUIT :%s", text);
+	}
 
 	/**
 	 * 指定されたテキストを解析して、ハンドラに送信します。
@@ -342,6 +366,17 @@ class InputTask implements Runnable
 		catch (IOException x)
 		{
 			x.printStackTrace();
+		}
+		finally
+		{
+			try
+			{
+				client.close();
+			}
+			catch (IOException x)
+			{
+				x.printStackTrace();
+			}
 		}
 	}
 }

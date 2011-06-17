@@ -1,3 +1,6 @@
+/*
+ * Copyright (c) 2011 tarchan. All rights reserved.
+ */
 package com.mac.tarchan.irc;
 
 import java.util.EventObject;

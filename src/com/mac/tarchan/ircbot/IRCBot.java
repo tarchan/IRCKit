@@ -12,7 +12,7 @@ import com.mac.tarchan.irc.IRCMessage;
  */
 public class IRCBot implements IRCHandler
 {
-	String[] channels;
+	private String[] channels;
 
 	/**
 	 * @param args <ホストアドレス> <ポート番号>
@@ -58,7 +58,7 @@ public class IRCBot implements IRCHandler
 		System.out.println("接続: " + irc);
 	}
 
-	void join(IRCClient irc)
+	private void join(IRCClient irc)
 	{
 		if (channels != null)
 		{
@@ -93,17 +93,21 @@ public class IRCBot implements IRCHandler
 			String nick = message.getPrefix();
 			String chan = message.getParam(0);
 			String msg = message.getTrailing();
-			if (msg.contains(" ?hi ?"))
+			if (msg.matches(".*hi.*"))
 			{
 				irc.privmsg(chan, String.format("hi %s!", nick));
 			}
-			if (msg.contains("time"))
+			if (msg.matches(".*time.*"))
 			{
-				irc.privmsg(chan, String.format("it's %tT", System.currentTimeMillis()));
+				irc.privmsg(chan, String.format("%tT now!", System.currentTimeMillis()));
 			}
-			if (msg.contains("date"))
+			if (msg.matches(".*date.*"))
 			{
-				irc.privmsg(chan, String.format("it's %tF", System.currentTimeMillis()));
+				irc.privmsg(chan, String.format("%tF now!", System.currentTimeMillis()));
+			}
+			if (msg.matches(".*bye.*"))
+			{
+				irc.quit("サヨウナラ");
 			}
 		}
 		else if (command.equals("PING"))
