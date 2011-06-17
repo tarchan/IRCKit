@@ -22,7 +22,7 @@
 	<target name="jar" depends="compile">
 		<jar basedir="${build.bin}" destfile="${build.jar}">
 			<manifest>
-				<attribute name="Main-Class" value="com.mac.tarchan.irc.client.IRCClient" />
+				<attribute name="Main-Class" value="com.mac.tarchan.ircbot.IRCBot" />
 				<attribute name="Specification-Title" value="${manifest.title}" />
 				<attribute name="Specification-Version" value="${manifest.version}" />
 				<attribute name="Specification-Vendor" value="${manifest.vendor}" />

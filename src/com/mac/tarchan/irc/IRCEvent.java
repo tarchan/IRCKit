@@ -3,19 +3,25 @@ package com.mac.tarchan.irc;
 import java.util.EventObject;
 
 /**
- * IRCEvent
+ * IRCメッセージの受信イベントです。
+ * 
+ * @see IRCClient
+ * @see IRCMessage
+ * @see IRCHandler
  */
-@SuppressWarnings("serial")
 public class IRCEvent extends EventObject
 {
+	/** serialVersionUID */
+	private static final long serialVersionUID = 2880861890798748708L;
+
 	/** クライアント */
-	protected IRCClient source;
+	transient protected IRCClient source;
 
 	/** メッセージ */
-	protected IRCMessage message;
+	transient protected IRCMessage message;
 
 	/**
-	 * IRCEvent
+	 * IRCEvent を構築します。
 	 * 
 	 * @param source {@link IRCClient}
 	 * @param message {@link IRCMessage}
