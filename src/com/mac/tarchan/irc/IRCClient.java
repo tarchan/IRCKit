@@ -16,7 +16,7 @@ import java.util.concurrent.Executors;
 import com.mac.tarchan.irc.util.KanaInputFilter;
 
 /**
- * IRCClient
+ * IRCクライアントを実装します。
  */
 public class IRCClient
 {
@@ -152,10 +152,10 @@ public class IRCClient
 //	}
 
 	/**
-	 * サーバーに接続します。
+	 * IRCサーバに接続します。
 	 * 
 	 * @return IRCClient
-	 * @throws IOException サーバーに接続できない場合
+	 * @throws IOException IRCサーバに接続できない場合
 	 */
 	public IRCClient connect() throws IOException
 	{
@@ -237,7 +237,7 @@ public class IRCClient
 
 	/**
 	 * 指定されたチャンネルに入ります。
-	 * サーバーに JOIN コマンドを送信します。
+	 * IRCサーバに JOIN コマンドを送信します。
 	 * 
 	 * @param channel チャンネル名
 	 * @return IRCClient
@@ -250,8 +250,8 @@ public class IRCClient
 	// TODO part
 
 	/**
-	 * サーバーとの接続を継続します。
-	 * サーバーに PONG コマンドを送信します。
+	 * IRCサーバとの接続を継続します。
+	 * IRCサーバに PONG コマンドを送信します。
 	 * 
 	 * @param payload ペイロード
 	 * @return IRCClient

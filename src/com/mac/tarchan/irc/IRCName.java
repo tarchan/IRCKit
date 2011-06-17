@@ -7,29 +7,29 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * IRCName
+ * IRCメッセージのプレフィックスを、サーバ名、ニックネーム、ユーザ名、ホスト名に分割する機能を提供します。
  */
 public class IRCName
 {
-	/** プレフィックスパターン */
-	protected static Pattern namePattern = Pattern.compile("([^!]+)(!.*)?");
+	/** プレフィックス形式 */
+	protected static Pattern prefixPattern = Pattern.compile("([^!]+)(!.+)?(@.+)?");
 
 	/**
-	 * プレフィックスからドメイン名を除いた部分を返します。
+	 * プレフィックスから、サーバ名またはニックネームのみを返します。
 	 * 
-	 * @param name プレフィックス
-	 * @return ドメイン名を除いたプレフィックス
+	 * @param prefix プレフィックス
+	 * @return サーバ名またはニックネーム
 	 */
-	public static String getSimpleName(String name)
+	public static String getSimpleName(String prefix)
 	{
-		Matcher m = namePattern.matcher(name);
+		Matcher m = prefixPattern.matcher(prefix);
 		if (m.find())
 		{
 			return m.group(1);
 		}
 		else
 		{
-			throw new IllegalArgumentException("IRCネームが不正です。: " + name);
+			throw new IllegalArgumentException("プレフィックスが不正です。: " + prefix);
 		}
 	}
 }

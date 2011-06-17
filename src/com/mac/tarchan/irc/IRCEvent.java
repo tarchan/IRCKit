@@ -3,7 +3,11 @@ package com.mac.tarchan.irc;
 import java.util.EventObject;
 
 /**
- * IRCEvent
+ * IRCメッセージの受信イベントです。
+ * 
+ * @see IRCClient
+ * @see IRCMessage
+ * @see IRCHandler
  */
 public class IRCEvent extends EventObject
 {
@@ -17,7 +21,7 @@ public class IRCEvent extends EventObject
 	transient protected IRCMessage message;
 
 	/**
-	 * IRCEvent
+	 * IRCEvent を構築します。
 	 * 
 	 * @param source {@link IRCClient}
 	 * @param message {@link IRCMessage}

@@ -7,8 +7,13 @@ import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import com.mac.tarchan.irc.IRCClient;
+
 /**
- * KanaInputFilter
+ * 入力ストリームに、半角カナを修正する機能を追加します。
+ * 入力ストリームの文字コードが JIS ではない場合は、使用できません。
+ * 
+ * @see IRCClient
  */
 public class KanaInputFilter extends FilterInputStream
 {
@@ -31,12 +36,13 @@ public class KanaInputFilter extends FilterInputStream
 		return eof;
 	}
 
-	/** 半角カナにマッチする正規表現 */
+//	/** 半角カナにマッチする正規表現 */
 //	private static Pattern KANA = Pattern.compile("(\\x1b\\(J)(.*?)(\\x1b(\\(B|\\(J|\\$@|\\$B))");
 //	private static Pattern KANA = Pattern.compile("(\\x1b\\x28\\x4a)([\\xa1-\\xdf]*)(\\x1b\\x28\\x42)");
 //	private static Pattern KANA = Pattern.compile("(?<=\\x1b\\(J)(.*)");
 
-	static final byte ESC = 0x1b;
+	/** エスケープコード */
+	protected static final byte ESC = 0x1b;
 
 	/**
 	 * 	指定されたバイト配列の半角カナを修正します。

@@ -7,7 +7,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * IRCMessage
+ * IRCメッセージを生成します。
  * 
  * @see <a href="http://www.haun.org/kent/lib/rfc1459-irc-ja.html#c2.3.1">RFC1459: Internet Relay Chat Protocol (IRC)</a>
  */
