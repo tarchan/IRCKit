@@ -167,11 +167,11 @@ public class IRCClient
 //		out = new PrintStream(socket.getOutputStream(), true);
 		if (pass != null && pass.trim().length() != 0)
 		{
-			postMessage(String.format("PASS %s", pass));
+			sendMessage(String.format("PASS %s", pass));
 		}
-		postMessage(String.format("NICK %s", nick));
+		sendMessage(String.format("NICK %s", nick));
 //		postMessage(String.format("USER %s %d %s :%s", nick, 0, host, nick));
-		postMessage(String.format("USER %s %s bla :%s", nick, host, nick));
+		sendMessage(String.format("USER %s %s bla :%s", nick, host, nick));
 //		BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 //		while (true)
 //		{
@@ -213,9 +213,10 @@ public class IRCClient
 	 * @param args コマンド引数
 	 * @return IRCClient
 	 */
-	public IRCClient postMessage(String command, String... args)
+	public IRCClient sendMessage(String command, String... args)
 	{
-		return postMessage(String.format("%S: %s", command, Arrays.toString(args)));
+		// TODO 指定されたコマンドを送信
+		return sendMessage(String.format("%S: %s", command, Arrays.toString(args)));
 	}
 
 	/**
@@ -224,14 +225,9 @@ public class IRCClient
 	 * @param text テキスト
 	 * @return IRCClient
 	 */
-	public IRCClient postMessage(String text)
+	public IRCClient sendMessage(String text)
 	{
-//		System.out.println("send: " + text);
-//		if (out != null)
-//		{
-//			out.println(text);
-//		}
-		messageQueue.execute(new OutputTask(this, text));
+		if (text != null && text.trim().length() > 0) messageQueue.execute(new OutputTask(this, text));
 		return this;
 	}
 
@@ -244,7 +240,7 @@ public class IRCClient
 	 */
 	public IRCClient join(String channel)
 	{
-		return postMessage(String.format("JOIN %s", channel));
+		return sendMessage(String.format("JOIN %s", channel));
 	}
 
 	// TODO part
@@ -258,7 +254,7 @@ public class IRCClient
 	 */
 	public IRCClient pong(String payload)
 	{
-		return postMessage(String.format("PONG :%s", payload));
+		return sendMessage(String.format("PONG :%s", payload));
 	}
 
 	/**
@@ -270,7 +266,7 @@ public class IRCClient
 	 */
 	public IRCClient privmsg(String receiver, String text)
 	{
-		return postMessage(String.format("PRIVMSG %s :%s", receiver, text));
+		return sendMessage(String.format("PRIVMSG %s :%s", receiver, text));
 	}
 
 	// TODO quit
