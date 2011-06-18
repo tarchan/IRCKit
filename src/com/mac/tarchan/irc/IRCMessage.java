@@ -15,6 +15,8 @@ public class IRCMessage
 {
 	String text;
 
+	long when;
+
 	String prefix;
 
 	String command;
@@ -34,6 +36,7 @@ public class IRCMessage
 	public IRCMessage(String text)
 	{
 		this.text = text;
+		this.when = System.currentTimeMillis();
 		parse();
 	}
 
@@ -63,6 +66,16 @@ public class IRCMessage
 		{
 			throw new IllegalArgumentException("メッセージ形式が不明です。: " + text);
 		}
+	}
+
+	/**
+	 * メッセージを作成した時間を返します。
+	 * 
+	 * @return メッセージを作成した時間
+	 */
+	public long getWhen()
+	{
+		return when;
 	}
 
 	/**

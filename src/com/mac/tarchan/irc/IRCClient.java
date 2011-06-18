@@ -22,6 +22,8 @@ import com.mac.tarchan.irc.util.KanaInputFilter;
  */
 public class IRCClient
 {
+	Socket socket;
+
 	String host;
 
 	int port;
@@ -30,9 +32,7 @@ public class IRCClient
 
 	String pass;
 
-	Socket socket;
-
-//	PrintStream out;
+	int mode;
 
 	ExecutorService messageQueue = Executors.newFixedThreadPool(2);
 
@@ -157,11 +157,11 @@ public class IRCClient
 //		out = new PrintStream(socket.getOutputStream(), true);
 		if (pass != null && pass.trim().length() != 0)
 		{
-			sendMessage(String.format("PASS %s", pass));
+			sendMessage("PASS %s", pass);
 		}
-		sendMessage(String.format("NICK %s", nick));
-//		postMessage(String.format("USER %s %d %s :%s", nick, 0, host, nick));
-		sendMessage(String.format("USER %s %s bla :%s", nick, host, nick));
+		sendMessage("NICK %s", nick);
+		sendMessage("USER %s %d %s :%s", nick, mode, host, nick);
+//		sendMessage("USER %s %s bla :%s", nick, host, nick);
 //		BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 //		while (true)
 //		{
