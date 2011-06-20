@@ -56,12 +56,13 @@ public class KanaInputFilter extends FilterInputStream
 	void shiftKana(byte[] data, int off, int len) throws IOException
 	{
 		boolean shiftKana = false;
-//		int startKana = 0;
+		int startKana = 0;
 		for (int i = 0; i < data.length; i++)
 		{
 			byte b0 = data[i];
 			if (b0 == ESC)
 			{
+				startKana = i;
 				// 「[ESC] ( J」かどうか判定
 				if (i + 2 < data.length && data[i + 1] == '(' && data[i + 2] == 'J')
 				{
@@ -94,7 +95,18 @@ public class KanaInputFilter extends FilterInputStream
 			}
 			if ((b0 & 0x80) != 0)
 			{
-				throw new IOException(String.format("不正な文字です。 (%02X)", b0));
+				int endKana = data.length;
+				for (int j = i; j < data.length; j++)
+				{
+					if (data[j] == ESC)
+					{
+						endKana = j;
+						break;
+					}
+				}
+				String str = new String(data, startKana, endKana - startKana, "JIS");
+				throw new IOException(String.format("不正な文字です。: %s (%02X)", str, b0));
+//				System.err.println(String.format("不正な文字です。 (%02X)", b0));
 			}
 		}
 //		System.out.println();
