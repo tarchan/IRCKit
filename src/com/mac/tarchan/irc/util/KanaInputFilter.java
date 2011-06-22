@@ -105,8 +105,9 @@ public class KanaInputFilter extends FilterInputStream
 					}
 				}
 				String str = new String(data, startKana, endKana - startKana, "JIS");
-				throw new IOException(String.format("不正な文字です。: %s (%02X)", str, b0));
-//				System.err.println(String.format("不正な文字です。 (%02X)", b0));
+//				throw new IOException(String.format("不正な文字です。: %s (%02X)", str, b0));
+				System.err.println(String.format("不正な文字です。: %s (%02X)", str, b0));
+				data[i] = (byte)(b0 - 0x80);
 			}
 		}
 //		System.out.println();
