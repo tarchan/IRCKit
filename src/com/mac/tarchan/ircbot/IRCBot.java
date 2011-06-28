@@ -79,6 +79,7 @@ public class IRCBot implements IRCHandler
 //			.on("notice", this)
 //			.on("ping", this)
 			.connect();
+		irc.on("ping", HandlerBuilder.create(irc, "pong", "message.trailing"));
 		System.out.println("接続: " + irc);
 	}
 
@@ -150,12 +151,12 @@ public class IRCBot implements IRCHandler
 				irc.quit("サヨウナラ");
 			}
 		}
-		else if (command.equals("PING"))
-		{
-			// ping
-			String payload = message.getTrailing();
-			irc.pong(payload);
-		}
+//		else if (command.equals("PING"))
+//		{
+//			// ping
+//			String payload = message.getTrailing();
+//			irc.pong(payload);
+//		}
 		else if (command.equals("ERROR"))
 		{
 			// error
