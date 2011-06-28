@@ -62,6 +62,7 @@ public class IRCBot implements IRCHandler
 //			.on(this)
 			.on("001", HandlerBuilder.create(this, "ready", "client"))
 			.on("privmsg", HandlerBuilder.create(this, "privmsg", ""))
+			.on("error", HandlerBuilder.create(this, "error", "message.trailing"))
 //			.on("notice", this)
 //			.on("ping", this)
 			.connect();
@@ -109,6 +110,11 @@ public class IRCBot implements IRCHandler
 		{
 			irc.quit("サヨウナラ");
 		}
+	}
+
+	public void error(String text)
+	{
+		System.err.println(text);
 	}
 
 //	private void join(IRCClient irc)
