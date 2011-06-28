@@ -1,7 +1,7 @@
 /*
  * IRCClient.java
  * IRCKit
- *
+ * 
  * Created by tarchan on 2008/11/27.
  * Copyright (c) 2008 tarchan. All rights reserved.
  */
@@ -297,6 +297,19 @@ public class IRCClient
 	public IRCClient privmsg(String receiver, String text)
 	{
 		return sendMessage("PRIVMSG %s :%s", receiver, text);
+	}
+
+	/**
+	 * 指定されたテキストを送信します。
+	 * IRCサーバに NOTICE コマンドを送信します。
+	 * 
+	 * @param receiver テキストの宛先
+	 * @param text テキスト
+	 * @return IRCクライアント
+	 */
+	public IRCClient notice(String receiver, String text)
+	{
+		return sendMessage("NOTICE %s :%s", receiver, text);
 	}
 
 	/**

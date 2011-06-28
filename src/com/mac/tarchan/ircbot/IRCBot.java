@@ -1,7 +1,7 @@
 /*
  * IRCBot.java
  * IRCKit
- *
+ * 
  * Created by tarchan on 2011/06/16.
  * Copyright (c) 2011 tarchan. All rights reserved.
  */
@@ -59,27 +59,13 @@ public class IRCBot implements IRCHandler
 	{
 		this.channels = channels;
 		IRCClient irc = IRCClient.createClient(host, port, nick, pass)
-			.on(this)
-			// welcome
-//			.on("001", new IRCHandler()
-//			{
-//				public void onMessage(IRCEvent event)
-//				{
-//					if (IRCBot.this.channels != null)
-//					{
-//						for (String channel : IRCBot.this.channels)
-//						{
-//							event.getClient().join(channel);
-//						}
-//					}
-//				}
-//			})
-			.on("001", HandlerBuilder.create(this, "welcome", "client"))
-//			.on("privmsg", this)
+//			.on(this)
+			.on("001", HandlerBuilder.create(this, "ready", "client"))
+			.on("privmsg", HandlerBuilder.create(this, "privmsg", ""))
 //			.on("notice", this)
 //			.on("ping", this)
 			.connect();
-		irc.on("ping", HandlerBuilder.create(irc, "pong", "message.trailing"));
+//		irc.on("ping", HandlerBuilder.create(irc, "pong", "message.trailing"));
 		System.out.println("接続: " + irc);
 	}
 
@@ -88,7 +74,7 @@ public class IRCBot implements IRCHandler
 	 * 
 	 * @param irc IRCクライアント
 	 */
-	public void welcome(IRCClient irc)
+	public void ready(IRCClient irc)
 	{
 		if (channels != null)
 		{
@@ -96,6 +82,32 @@ public class IRCBot implements IRCHandler
 			{
 				irc.join(channel);
 			}
+		}
+	}
+
+	public void privmsg(IRCEvent event)
+	{
+		IRCMessage message = event.getMessage();
+		IRCClient irc = event.getClient();
+
+		String nick = message.getPrefix();
+		String chan = message.getParam(0);
+		String msg = message.getTrailing();
+		if (msg.matches(".*hi.*"))
+		{
+			irc.notice(chan, String.format("hi %s!", nick));
+		}
+		if (msg.matches(".*time.*"))
+		{
+			irc.notice(chan, String.format("%tT now!", System.currentTimeMillis()));
+		}
+		if (msg.matches(".*date.*"))
+		{
+			irc.notice(chan, String.format("%tF now!", System.currentTimeMillis()));
+		}
+		if (msg.matches(".*bye.*"))
+		{
+			irc.quit("サヨウナラ");
 		}
 	}
 
