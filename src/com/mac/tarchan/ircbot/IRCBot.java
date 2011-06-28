@@ -1,3 +1,10 @@
+/*
+ * IRCBot.java
+ * IRCKit
+ *
+ * Created by tarchan on 2011/06/16.
+ * Copyright (c) 2011 tarchan. All rights reserved.
+ */
 package com.mac.tarchan.ircbot;
 
 import java.io.IOException;
@@ -15,7 +22,9 @@ public class IRCBot implements IRCHandler
 	private String[] channels;
 
 	/**
-	 * @param args <ホストアドレス> <ポート番号>
+	 * IRCサーバに接続します。
+	 * 
+	 * @param args <ホストアドレス> <ポート番号> <ニックネーム> <チャンネル名>
 	 */
 	public static void main(String[] args)
 	{

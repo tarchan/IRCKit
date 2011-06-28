@@ -1,4 +1,8 @@
 /*
+ * KanaInputFilter.java
+ * IRCKit
+ *
+ * Created by tarchan on 2011/06/17.
  * Copyright (c) 2011 tarchan. All rights reserved.
  */
 package com.mac.tarchan.irc.util;

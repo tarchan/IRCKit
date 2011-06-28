@@ -1,5 +1,9 @@
 /*
- * Copyright (c) 2011 tarchan. All rights reserved.
+ * IRCName.java
+ * IRCKit
+ *
+ * Created by tarchan on 2010/03/17.
+ * Copyright (c) 2010 tarchan. All rights reserved.
  */
 package com.mac.tarchan.irc;
 
