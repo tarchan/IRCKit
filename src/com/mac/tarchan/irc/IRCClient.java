@@ -22,26 +22,34 @@ import com.mac.tarchan.irc.util.KanaInputFilter;
  */
 public class IRCClient
 {
-	Socket socket;
+	/** 入出力ソケット */
+	protected Socket socket;
 
-	String host;
+	/** ホスト名 */
+	protected String host;
 
-	int port;
+	/** ポート番号 */
+	protected int port;
 
-	String nick;
+	/** ニックネーム */
+	protected String nick;
 
-	String pass;
+	/** パスワード */
+	protected String pass;
 
-	int mode;
+	/** 接続モード */
+	protected int mode;
 
-	ExecutorService messageQueue = Executors.newFixedThreadPool(2);
+	/** メッセージキュー */
+	protected ExecutorService messageQueue = Executors.newFixedThreadPool(2);
 
-	ArrayList<IRCHandler> handlers = new ArrayList<IRCHandler>();
+	/** メッセージハンドラ */
+	protected ArrayList<IRCHandler> handlers = new ArrayList<IRCHandler>();
 
 	/**
 	 * IRCClient を構築します。
 	 * 
-	 * @param host ホストアドレス
+	 * @param host ホスト名
 	 * @param port ポート番号
 	 * @param nick ニックネーム
 	 * @param pass パスワード
@@ -57,7 +65,7 @@ public class IRCClient
 	/**
 	 * IRCClient を作成します。
 	 * 
-	 * @param host ホストアドレス
+	 * @param host ホスト名
 	 * @param port ポート番号
 	 * @param nick ニックネーム
 	 * @return IRCClient
@@ -70,11 +78,11 @@ public class IRCClient
 	/**
 	 * IRCClient を作成します。
 	 * 
-	 * @param host ホストアドレス
+	 * @param host ホスト名
 	 * @param port ポート番号
 	 * @param nick ニックネーム
 	 * @param pass パスワード
-	 * @return IRCClient
+	 * @return IRCクライアント
 	 */
 	public static IRCClient createClient(String host, int port, String nick, String pass)
 	{
@@ -84,9 +92,9 @@ public class IRCClient
 	}
 
 	/**
-	 * ホストアドレスを返します。
+	 * ホスト名を返します。
 	 * 
-	 * @return ホストアドレス
+	 * @return ホスト名
 	 */
 	public String getHost()
 	{
@@ -114,10 +122,10 @@ public class IRCClient
 	}
 
 	/**
-	 * すべてのコマンドを受け入れるハンドラを追加します。
+	 * すべてのコマンドを受け入れるメッセージハンドラを追加します。
 	 * 
-	 * @param handler ハンドラ
-	 * @return IRCClient オブジェクト
+	 * @param handler メッセージハンドラ
+	 * @return IRCクライアント
 	 */
 	public IRCClient on(IRCHandler handler)
 	{
@@ -126,25 +134,29 @@ public class IRCClient
 	}
 
 	/**
-	 * 指定されたコマンドのハンドラを追加します。
+	 * 指定されたコマンドのメッセージハンドラを追加します。
 	 * 
 	 * @param command コマンド
-	 * @param handler ハンドラ
-	 * @return IRCClient オブジェクト
+	 * @param handler メッセージハンドラ
+	 * @return IRCクライアント
 	 */
 	public IRCClient on(String command, IRCHandler handler)
 	{
-//		command = command.toUpperCase();
-//		IRCMessage message = new IRCMessage(command);
-//		handler.onMessage(IRCMessage.createMessage(this, command));
-//		handler.onMessage(new IRCEvent(this, message));
-		return this;
+		final String _command = command.toUpperCase();
+		final IRCHandler _handler = handler;
+		return on(new IRCHandler()
+		{
+			public void onMessage(IRCEvent event)
+			{
+				if (event.getMessage().getCommand().equals(_command)) _handler.onMessage(event);
+			}
+		});
 	}
 
 	/**
 	 * IRCサーバに接続します。
 	 * 
-	 * @return IRCClient
+	 * @return IRCクライアント
 	 * @throws IOException IRCサーバに接続できない場合
 	 */
 	public IRCClient connect() throws IOException
@@ -177,7 +189,7 @@ public class IRCClient
 	/**
 	 * IRCサーバの接続をクローズします。
 	 * 
-	 * @return IRCClient
+	 * @return IRCクライアント
 	 * @throws IOException IRCサーバの接続をクローズできない場合
 	 */
 	public IRCClient close() throws IOException
@@ -214,7 +226,7 @@ public class IRCClient
 	 * 指定されたテキストを送信します。
 	 * 
 	 * @param text テキスト
-	 * @return IRCClient
+	 * @return IRCクライアント
 	 */
 	public IRCClient sendMessage(String text)
 	{
@@ -227,7 +239,7 @@ public class IRCClient
 	 * 
 	 * @param command コマンド書式
 	 * @param args コマンド引数
-	 * @return IRCClient
+	 * @return IRCクライアント
 	 */
 	public IRCClient sendMessage(String command, Object... args)
 	{
@@ -239,7 +251,7 @@ public class IRCClient
 	 * IRCサーバに JOIN コマンドを送信します。
 	 * 
 	 * @param channel チャンネル名
-	 * @return IRCClient
+	 * @return IRCクライアント
 	 */
 	public IRCClient join(String channel)
 	{
@@ -251,7 +263,7 @@ public class IRCClient
 	 * IRCサーバに PART コマンドを送信します。
 	 * 
 	 * @param channel チャンネル名
-	 * @return IRCClient
+	 * @return IRCクライアント
 	 */
 	public IRCClient part(String channel)
 	{
@@ -263,7 +275,7 @@ public class IRCClient
 	 * IRCサーバに PONG コマンドを送信します。
 	 * 
 	 * @param payload ペイロード
-	 * @return IRCClient
+	 * @return IRCクライアント
 	 */
 	public IRCClient pong(String payload)
 	{
@@ -276,7 +288,7 @@ public class IRCClient
 	 * 
 	 * @param receiver テキストの宛先
 	 * @param text テキスト
-	 * @return IRCClient
+	 * @return IRCクライアント
 	 */
 	public IRCClient privmsg(String receiver, String text)
 	{
@@ -288,7 +300,7 @@ public class IRCClient
 	 * IRCサーバに QUIT コマンドを送信します。
 	 * 
 	 * @param text QUITメッセージ
-	 * @return IRCClient
+	 * @return IRCクライアント
 	 */
 	public IRCClient quit(String text)
 	{

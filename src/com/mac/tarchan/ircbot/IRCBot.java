@@ -50,7 +50,20 @@ public class IRCBot implements IRCHandler
 		this.channels = channels;
 		IRCClient irc = IRCClient.createClient(host, port, nick, pass)
 			.on(this)
-//			.on("001", this)
+			// welcome
+			.on("001", new IRCHandler()
+			{
+				public void onMessage(IRCEvent event)
+				{
+					if (IRCBot.this.channels != null)
+					{
+						for (String channel : IRCBot.this.channels)
+						{
+							event.getClient().join(channel);
+						}
+					}
+				}
+			})
 //			.on("privmsg", this)
 //			.on("notice", this)
 //			.on("ping", this)
@@ -58,16 +71,16 @@ public class IRCBot implements IRCHandler
 		System.out.println("接続: " + irc);
 	}
 
-	private void join(IRCClient irc)
-	{
-		if (channels != null)
-		{
-			for (String channel : channels)
-			{
-				irc.join(channel);
-			}
-		}
-	}
+//	private void join(IRCClient irc)
+//	{
+//		if (channels != null)
+//		{
+//			for (String channel : channels)
+//			{
+//				irc.join(channel);
+//			}
+//		}
+//	}
 
 //	void readLines(IRCClient irc) throws IOException
 //	{
@@ -121,10 +134,10 @@ public class IRCBot implements IRCHandler
 			// error
 			throw new RuntimeException("IRCエラー: " + message);
 		}
-		else if (command.equals("001"))
-		{
-			// welcome
-			join(irc);
-		}
+//		else if (command.equals("001"))
+//		{
+//			// welcome
+//			join(irc);
+//		}
 	}
 }
