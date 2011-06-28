@@ -13,6 +13,7 @@ import com.mac.tarchan.irc.IRCClient;
 import com.mac.tarchan.irc.IRCEvent;
 import com.mac.tarchan.irc.IRCHandler;
 import com.mac.tarchan.irc.IRCMessage;
+import com.mac.tarchan.irc.util.HandlerBuilder;
 
 /**
  * IRCClient Test
@@ -60,24 +61,41 @@ public class IRCBot implements IRCHandler
 		IRCClient irc = IRCClient.createClient(host, port, nick, pass)
 			.on(this)
 			// welcome
-			.on("001", new IRCHandler()
-			{
-				public void onMessage(IRCEvent event)
-				{
-					if (IRCBot.this.channels != null)
-					{
-						for (String channel : IRCBot.this.channels)
-						{
-							event.getClient().join(channel);
-						}
-					}
-				}
-			})
+//			.on("001", new IRCHandler()
+//			{
+//				public void onMessage(IRCEvent event)
+//				{
+//					if (IRCBot.this.channels != null)
+//					{
+//						for (String channel : IRCBot.this.channels)
+//						{
+//							event.getClient().join(channel);
+//						}
+//					}
+//				}
+//			})
+			.on("001", HandlerBuilder.create(this, "welcome", "client"))
 //			.on("privmsg", this)
 //			.on("notice", this)
 //			.on("ping", this)
 			.connect();
 		System.out.println("接続: " + irc);
+	}
+
+	/**
+	 * 接続したIRCネットワークのチャンネルに参加します。
+	 * 
+	 * @param irc IRCクライアント
+	 */
+	public void welcome(IRCClient irc)
+	{
+		if (channels != null)
+		{
+			for (String channel : channels)
+			{
+				irc.join(channel);
+			}
+		}
 	}
 
 //	private void join(IRCClient irc)
