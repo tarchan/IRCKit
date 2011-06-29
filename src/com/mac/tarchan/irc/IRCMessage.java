@@ -17,6 +17,9 @@ import java.util.regex.Pattern;
  */
 public class IRCMessage
 {
+	/** CTCPメッセージの区切り文字 */
+	public static final String CTCP ="\\x01";
+
 	String text;
 
 	long when;

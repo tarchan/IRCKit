@@ -86,6 +86,11 @@ public class IRCBot implements IRCHandler
 		}
 	}
 
+	/**
+	 * 受信したメッセージに対応したコマンドを返信します。
+	 * 
+	 * @param event IRCイベント
+	 */
 	public void privmsg(IRCEvent event)
 	{
 		IRCMessage message = event.getMessage();
@@ -112,9 +117,14 @@ public class IRCBot implements IRCHandler
 		}
 	}
 
+	/**
+	 * エラーメッセージを表示します。
+	 * 
+	 * @param text エラーメッセージ
+	 */
 	public void error(String text)
 	{
-		System.err.println(text);
+		System.err.println("IRCエラー: " + text);
 	}
 
 //	private void join(IRCClient irc)

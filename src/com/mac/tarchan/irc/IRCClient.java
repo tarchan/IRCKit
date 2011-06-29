@@ -313,6 +313,32 @@ public class IRCClient
 	}
 
 	/**
+	 * CTCPクエリを送信します。
+	 * 
+	 * @param receiver テキストの宛先
+	 * @param text テキスト
+	 * @return IRCクライアント
+	 * @see #privmsg(String, String)
+	 */
+	public IRCClient ctcpQuery(String receiver, String text)
+	{
+		return privmsg(receiver, String.format("%1$s%2$s%1$s", IRCMessage.CTCP, text));
+	}
+
+	/**
+	 * CTCPリプライを送信します。
+	 * 
+	 * @param receiver テキストの宛先
+	 * @param text テキスト
+	 * @return IRCクライアント
+	 * @see #notice(String, String)
+	 */
+	public IRCClient ctcpReply(String receiver, String text)
+	{
+		return notice(receiver, String.format("%1$s%2$s%1$s", IRCMessage.CTCP, text));
+	}
+
+	/**
 	 * 指定されたメッセージを送信して、IRCサーバとの接続を終了します。
 	 * IRCサーバに QUIT コマンドを送信します。
 	 * 
