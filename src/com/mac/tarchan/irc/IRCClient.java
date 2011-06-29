@@ -322,7 +322,7 @@ public class IRCClient
 	 */
 	public IRCClient ctcpQuery(String receiver, String text)
 	{
-		return privmsg(receiver, String.format("%1$s%2$s%1$s", IRCMessage.CTCP, text));
+		return privmsg(receiver, IRCMessage.wrapCTCP(text));
 	}
 
 	/**
@@ -335,7 +335,7 @@ public class IRCClient
 	 */
 	public IRCClient ctcpReply(String receiver, String text)
 	{
-		return notice(receiver, String.format("%1$s%2$s%1$s", IRCMessage.CTCP, text));
+		return notice(receiver, IRCMessage.wrapCTCP(text));
 	}
 
 	/**

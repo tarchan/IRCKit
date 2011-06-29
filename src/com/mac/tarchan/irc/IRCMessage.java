@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
 public class IRCMessage
 {
 	/** CTCPメッセージの区切り文字 */
-	public static final String CTCP ="\\x01";
+	public static final String CTCP = "\u0001";
 
 	String text;
 
@@ -135,6 +135,45 @@ public class IRCMessage
 	public String getTrailing()
 	{
 		return trailing;
+	}
+
+	/**
+	 * CTCPメッセージかどうか判定します。
+	 * 
+	 * @return CTCPメッセージの場合は true
+	 */
+	public boolean isCTCP()
+	{
+		return trailing != null && trailing.contains(CTCP);
+	}
+
+	/**
+	 * CTCPメッセージを区切り文字で分割します。
+	 * 
+	 * @return CTCPメッセージの配列
+	 * @see CTCP
+	 */
+	public String[] splitCTCP()
+	{
+		if (isCTCP())
+		{
+			return trailing.substring(1).split(CTCP);
+		}
+		else
+		{
+			return null;
+		}
+	}
+
+	/**
+	 * 指定されたテキストをCTCPメッセージに変換します。
+	 * 
+	 * @param text テキスト
+	 * @return CTCPメッセージ
+	 */
+	public static String wrapCTCP(String text)
+	{
+		return String.format("%1$s%2$s%1$s", CTCP, text);
 	}
 
 	@Override

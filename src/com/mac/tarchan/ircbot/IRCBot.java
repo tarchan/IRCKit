@@ -98,22 +98,48 @@ public class IRCBot implements IRCHandler
 
 		String nick = message.getPrefix();
 		String chan = message.getParam(0);
-		String msg = message.getTrailing();
-		if (msg.matches(".*hi.*"))
+		String text = message.getTrailing();
+//		System.out.println("text: " + text);
+		if (text.matches(".*hi.*"))
 		{
 			irc.notice(chan, String.format("hi %s!", nick));
 		}
-		if (msg.matches(".*time.*"))
+		if (text.matches(".*time.*"))
 		{
 			irc.notice(chan, String.format("%tT now!", System.currentTimeMillis()));
 		}
-		if (msg.matches(".*date.*"))
+		if (text.matches(".*date.*"))
 		{
 			irc.notice(chan, String.format("%tF now!", System.currentTimeMillis()));
 		}
-		if (msg.matches(".*bye.*"))
+		if (text.matches(".*bye.*"))
 		{
 			irc.quit("サヨウナラ");
+		}
+//		if (text.contains(IRCMessage.CTCP))
+//		{
+//			System.out.println("CTCP1: " + text);
+//		}
+//		if (text.indexOf(IRCMessage.CTCP) >= 0)
+//		{
+//			System.out.println("CTCP2: " + text);
+//		}
+		if (message.isCTCP())
+		{
+//			System.out.println("CTCP3: " + text);
+			int i = 0;
+			for (String ctcp : message.splitCTCP())
+			{
+				System.out.printf("CTCP[%s]=%s%n", i++, ctcp);
+				if (ctcp.contains("PING"))
+				{
+					irc.ctcpReply(nick, text);
+				}
+				else
+				{
+					irc.ctcpQuery(nick, ctcp);
+				}
+			}
 		}
 	}
 
