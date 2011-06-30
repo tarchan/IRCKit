@@ -27,6 +27,7 @@ public class IRCBot implements IRCHandler
 	 * 
 	 * @param args <ホストアドレス> <ポート番号> <ニックネーム> <チャンネル名>
 	 */
+	@Deprecated
 	public static void main(String[] args)
 	{
 		try
@@ -47,6 +48,13 @@ public class IRCBot implements IRCHandler
 
 	/**
 	 * IRCBot
+	 */
+	public IRCBot()
+	{
+	}
+
+	/**
+	 * IRCBot
 	 * 
 	 * @param host ホストアドレス
 	 * @param port ポート番号
@@ -55,6 +63,7 @@ public class IRCBot implements IRCHandler
 	 * @param channels チャンネルリスト
 	 * @throws IOException IRCサーバに接続できない場合
 	 */
+	@Deprecated
 	public IRCBot(String host, int port, String nick, String pass, String[] channels) throws IOException
 	{
 		this.channels = channels;
@@ -71,10 +80,29 @@ public class IRCBot implements IRCHandler
 	}
 
 	/**
+	 * IRCネットワークにログインします。
+	 * 
+	 * @param host ホストアドレス
+	 * @param port ポート番号
+	 * @param nick ニックネーム
+	 * @param pass パスワード
+	 * @throws IOException IRCネットワークにログインできない場合
+	 */
+	public void login(String host, int port, String nick, String pass) throws IOException
+	{
+		if (irc != null) irc.quit("再接続します。");
+
+		irc = IRCClient.createClient(host, port, nick, pass)
+				.on("001", HandlerBuilder.create(this, "onStart"))
+				.connect();
+	}
+
+	/**
 	 * 接続したIRCネットワークのチャンネルに参加します。
 	 * 
 	 * @param irc IRCクライアント
 	 */
+	@Deprecated
 	public void ready(IRCClient irc)
 	{
 		if (channels != null)
@@ -91,6 +119,7 @@ public class IRCBot implements IRCHandler
 	 * 
 	 * @param event IRCイベント
 	 */
+	@Deprecated
 	public void privmsg(IRCEvent event)
 	{
 		IRCMessage message = event.getMessage();
@@ -122,6 +151,7 @@ public class IRCBot implements IRCHandler
 	 * 
 	 * @param text エラーメッセージ
 	 */
+	@Deprecated
 	public void error(String text)
 	{
 		System.err.println("IRCエラー: " + text);
@@ -150,6 +180,7 @@ public class IRCBot implements IRCHandler
 //		}
 //	}
 
+	@Deprecated
 	public void onMessage(IRCEvent event)
 	{
 		IRCMessage message = event.getMessage();
@@ -195,5 +226,190 @@ public class IRCBot implements IRCHandler
 //			// welcome
 //			join(irc);
 //		}
+	}
+
+	/** IRCクライアント */
+	private IRCClient irc;
+
+	/**
+	 * 接続中のIRCクライアントを返します。
+	 * 
+	 * @return IRCクライアント
+	 * @throws NullPointerException IRCネットワークに接続していない場合
+	 */
+	protected IRCClient getClient()
+	{
+		if (irc != null)
+		{
+			return irc;
+		}
+		else
+		{
+			throw new NullPointerException("IRCネットワークに接続していません。");
+		}
+	}
+
+	/**
+	 * 新しいニックネームを設定します。
+	 * 
+	 * @param newNick 新しいニックネーム
+	 */
+	public void setUserNick(String newNick)
+	{
+		getClient().sendMessage("NICK %s", newNick);
+	}
+
+	/**
+	 * 指定されたニックネームがユーザ自身かどうか判定します。
+	 * 
+	 * @param nick ニックネーム
+	 * @return ユーザのニックネームの場合は true
+	 */
+	public boolean isUserNick(String nick)
+	{
+		String userNick = irc.getNick();
+		return userNick.equals(nick);
+	}
+
+	/**
+	 * IRCネットワークの接続が確立したときに呼び出されます。
+	 */
+	public void onStart()
+	{
+	}
+
+	/**
+	 * ニックネームが衝突したときに呼び出されます。
+	 * ニックネームの変更ができませんでした。
+	 * 接続前の場合は直ちに新しいニックネームを設定する必要があります。
+	 * 
+	 * @param conflictNick 衝突したニックネーム
+	 */
+	public void onNickConflict(String conflictNick)
+	{
+	}
+
+	/**
+	 * ニックネームが変更されたときに呼び出されます。
+	 * 
+	 * @param oldNick 古いニックネーム
+	 * @param newNick 新しいニックネーム
+	 */
+	public void onNickChanged(String oldNick, String newNick)
+	{
+	}
+
+	/**
+	 * IRCネットワークの接続を継続します。
+	 * 自動継続したくないときは、このメソッドをオーバーライドしてください。
+	 * 
+	 * @param text テキスト
+	 */
+	public void onPing(String text)
+	{
+		getClient().pong(text);
+	}
+
+	/**
+	 * チャンネルに参加したときに呼び出されます。
+	 */
+	public void onJoin()
+	{
+	}
+
+	/**
+	 * チャンネルを離脱したときに呼び出されます。
+	 */
+	public void onPart()
+	{
+	}
+
+	/**
+	 * 終了したときに呼び出されます。
+	 */
+	public void onQuit()
+	{
+	}
+
+	/**
+	 * ユーザーのモードが変更されたときに呼び出されます。
+	 */
+	public void onUserMode()
+	{
+	}
+
+	/**
+	 * チャンネルのモードが変更されたときに呼び出されます。
+	 */
+	public void onChannelMode()
+	{
+	}
+
+	/**
+	 * メッセージが届いたときに呼び出されます。
+	 * 
+	 * @param message IRCメッセージ
+	 */
+	public void onMessage(IRCMessage message)
+	{
+	}
+
+	/**
+	 * プライベートメッセージが届いたときに呼び出されます。
+	 * 
+	 * @param message IRCメッセージ
+	 */
+	public void onPrivateMessage(IRCMessage message)
+	{
+	}
+
+	/**
+	 * お知らせメッセージが届いたときに呼び出されます。
+	 * 
+	 * @param message IRCメッセージ
+	 */
+	public void onNotice(IRCMessage message)
+	{
+	}
+
+	/**
+	 * CTCP問い合わせメッセージが届いたときに呼び出されます。
+	 * 
+	 * @param message IRCメッセージ
+	 */
+	public void onCtcpQuery(IRCMessage message)
+	{
+	}
+
+	/**
+	 * CTCPお知らせメッセージが届いたときに呼び出されます。
+	 * 
+	 * @param message IRCメッセージ
+	 */
+	public void onCtcpReply(IRCMessage message)
+	{
+	}
+
+	/**
+	 * ファイル送信メッセージが届いたときに呼び出されます。
+	 * 
+	 * @param message IRCメッセージ
+	 */
+	public void onDccSend(IRCMessage message)
+	{
+	}
+
+	/**
+	 * IRCネットワークが切断したときに呼び出されます。
+	 */
+	public void onStop()
+	{
+	}
+
+	/**
+	 * IRCネットワークの再接続を止めたときに呼び出されます。
+	 */
+	public void onDestroy()
+	{
 	}
 }
