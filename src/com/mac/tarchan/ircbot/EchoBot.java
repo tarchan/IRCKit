@@ -9,13 +9,21 @@ package com.mac.tarchan.ircbot;
 
 import java.io.IOException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.mac.tarchan.irc.IRCMessage;
+import com.mac.tarchan.irc.util.IRCBotAdapter;
 
 /**
  * EchoBot
  */
-public class EchoBot extends IRCBot
+public class EchoBot extends IRCBotAdapter
 {
+	/** ログ */
+	private static final Log log = LogFactory.getLog(EchoBot.class);
+
+	/** チャンネル */
 	private String[] channels;
 
 	/**
@@ -54,9 +62,10 @@ public class EchoBot extends IRCBot
 	@Override
 	public void onStart()
 	{
+		log.info("接続しました。");
 		for (String channel : channels)
 		{
-			getClient().join(channel);
+			getIRC().join(channel);
 		}
 	}
 
@@ -65,22 +74,39 @@ public class EchoBot extends IRCBot
 	{
 		String nick = message.getPrefix();
 		String chan = message.getParam(0);
-		String msg = message.getTrailing();
-		if (msg.matches(".*hi.*"))
+		String text = message.getTrailing();
+		if (text.matches(".*hi.*"))
 		{
-			getClient().privmsg(chan, String.format("hi %s!", nick));
+			getIRC().privmsg(chan, String.format("hi %s!", nick));
 		}
-		if (msg.matches(".*time.*"))
+		if (text.matches(".*time.*"))
 		{
-			getClient().privmsg(chan, String.format("%tT now!", System.currentTimeMillis()));
+			getIRC().privmsg(chan, String.format("%tT now!", System.currentTimeMillis()));
 		}
-		if (msg.matches(".*date.*"))
+		if (text.matches(".*date.*"))
 		{
-			getClient().privmsg(chan, String.format("%tF now!", System.currentTimeMillis()));
+			getIRC().privmsg(chan, String.format("%tF now!", System.currentTimeMillis()));
 		}
-		if (msg.matches(".*bye.*"))
+		if (text.matches(".*bye.*"))
 		{
-			getClient().quit("サヨウナラ");
+			getIRC().quit("サヨウナラ");
+		}
+		if (message.isCTCP())
+		{
+//			System.out.println("CTCP3: " + text);
+			int i = 0;
+			for (String ctcp : message.splitCTCP())
+			{
+				System.out.printf("CTCP[%s]=%s%n", i++, ctcp);
+				if (ctcp.contains("PING"))
+				{
+					getIRC().ctcpReply(nick, ctcp);
+				}
+				else
+				{
+					getIRC().ctcpQuery(nick, ctcp);
+				}
+			}
 		}
 	}
 }
