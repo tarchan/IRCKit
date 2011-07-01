@@ -22,7 +22,7 @@ import com.mac.tarchan.irc.IRCMessage;
 public abstract class IRCBotAdapter
 {
 	/** IRCクライアント */
-	private IRCClient irc;
+	protected IRCClient irc;
 
 	/**
 	 * IRCネットワークにログインします。
@@ -38,7 +38,6 @@ public abstract class IRCBotAdapter
 		if (irc != null) irc.quit("再接続します。");
 
 		irc = IRCClient.createClient(host, port, nick, pass)
-			.on("001", HandlerBuilder.create(this, "onStart"))
 //			.on("privmsg", HandlerBuilder.create(this, "onMessage", "message"))
 			.on("privmsg", new IRCHandler()
 			{
@@ -46,7 +45,12 @@ public abstract class IRCBotAdapter
 				public void onMessage(IRCEvent event)
 				{
 					IRCMessage message = event.getMessage();
-					if (!message.isCTCP())
+					String chan = message.getParam0();
+					if (isUserNick(chan))
+					{
+						IRCBotAdapter.this.onDirectMessage(message);
+					}
+					else if (!message.isCTCP())
 					{
 						IRCBotAdapter.this.onMessage(message);
 					}
@@ -74,6 +78,8 @@ public abstract class IRCBotAdapter
 			})
 			.on("ping", HandlerBuilder.create(this, "onPing", "message.trailing"))
 			.on("error", HandlerBuilder.create(this, "onError", "message.trailing"))
+			.on("001", HandlerBuilder.create(this, "onStart"))
+			.on("433", HandlerBuilder.create(this, "onNickConflict", "message.param1"))
 			.connect();
 	}
 
@@ -102,7 +108,7 @@ public abstract class IRCBotAdapter
 	 */
 	public void setUserNick(String newNick)
 	{
-		getIRC().sendMessage("NICK %s", newNick);
+		getIRC().nick(newNick);
 	}
 
 	/**
@@ -144,6 +150,7 @@ public abstract class IRCBotAdapter
 	 */
 	public void onNickChanged(String oldNick, String newNick)
 	{
+		// TODO NICK
 	}
 
 	/**
@@ -151,6 +158,7 @@ public abstract class IRCBotAdapter
 	 */
 	public void onJoin()
 	{
+		// TODO JOIN
 	}
 
 	/**
@@ -158,6 +166,7 @@ public abstract class IRCBotAdapter
 	 */
 	public void onPart()
 	{
+		// TODO PART
 	}
 
 	/**
@@ -165,6 +174,7 @@ public abstract class IRCBotAdapter
 	 */
 	public void onQuit()
 	{
+		// TODO QUIT
 	}
 
 	/**
@@ -172,6 +182,7 @@ public abstract class IRCBotAdapter
 	 */
 	public void onUserMode()
 	{
+		// TODO MODE
 	}
 
 	/**
@@ -179,6 +190,7 @@ public abstract class IRCBotAdapter
 	 */
 	public void onChannelMode()
 	{
+		// TODO MODE
 	}
 
 	/**
@@ -255,6 +267,7 @@ public abstract class IRCBotAdapter
 	 */
 	public void onError(String text)
 	{
+		// TODO 切断したときに onStop を呼び出す
 	}
 
 	/**
@@ -262,6 +275,7 @@ public abstract class IRCBotAdapter
 	 */
 	public void onStop()
 	{
+		// TODO 切断したときに再接続する
 	}
 
 	/**

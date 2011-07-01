@@ -7,7 +7,7 @@
  */
 package com.mac.tarchan.ircbot;
 
-import java.io.IOException;
+import java.util.Arrays;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -27,23 +27,29 @@ public class EchoBot extends IRCBotAdapter
 	private String[] channels;
 
 	/**
-	 * IRCサーバに接続します。
+	 * IRCネットワークにログインします。
 	 * 
-	 * @param args <ホストアドレス> <ポート番号> <ニックネーム> <チャンネル名>
+	 * @param args <ホスト名> <ポート番号> <ニックネーム> <パスワード> [<チャンネル名> ...]
 	 */
 	public static void main(String[] args)
 	{
-		// irc.livedoor.ne.jp、irc6.livedoor.ne.jp、125.6.255.10
-		String host = "irc.livedoor.ne.jp";
-		int port = 6667;
-		String nick = "mybot";
-		String pass = "";
-		String[] channles = {"#javabreak"};
 		try
 		{
+			log.debug("args=" + Arrays.toString(args));
+			if (args.length < 4)
+			{
+				System.out.println("Usage: EchoBot <ホスト名> <ポート番号> <ニックネーム> <パスワード> <チャンネル名>");
+				throw new IllegalArgumentException("引数が不足しています。: " + args.length);
+			}
+			String host = args[0];
+			int port = Integer.parseInt(args[1]);
+			String nick = args[2];
+			String pass = args[3];
+			String[] channles = Arrays.asList(args).subList(4, args.length).toArray(new String[]{});
+			log.debug("channles=" + Arrays.toString(channles));
 			new EchoBot(channles).login(host, port, nick, pass);
 		}
-		catch (IOException x)
+		catch (Throwable x)
 		{
 			throw new RuntimeException("IRCネットワークにログインできません。", x);
 		}
@@ -65,7 +71,7 @@ public class EchoBot extends IRCBotAdapter
 		log.info("接続しました。");
 		for (String channel : channels)
 		{
-			getIRC().join(channel);
+			irc.join(channel);
 		}
 	}
 
@@ -73,41 +79,31 @@ public class EchoBot extends IRCBotAdapter
 	public void onMessage(IRCMessage message)
 	{
 		String nick = message.getPrefix();
-		String chan = message.getParam(0);
+		String chan = message.getParam0();
 		String text = message.getTrailing();
+		log.debug("channel: " + chan);
 		if (text.matches(".*hi.*"))
 		{
-			getIRC().privmsg(chan, String.format("hi %s!", nick));
+			irc.privmsg(chan, String.format("hi %s!", nick));
 		}
 		if (text.matches(".*time.*"))
 		{
-			getIRC().privmsg(chan, String.format("%tT now!", System.currentTimeMillis()));
+			irc.privmsg(chan, String.format("%tT now!", System.currentTimeMillis()));
 		}
 		if (text.matches(".*date.*"))
 		{
-			getIRC().privmsg(chan, String.format("%tF now!", System.currentTimeMillis()));
+			irc.privmsg(chan, String.format("%tF now!", System.currentTimeMillis()));
 		}
 		if (text.matches(".*bye.*"))
 		{
-			getIRC().quit("サヨウナラ");
+			irc.quit("サヨウナラ");
 		}
-//		if (message.isCTCP())
-//		{
-////			System.out.println("CTCP3: " + text);
-//			int i = 0;
-//			for (String ctcp : message.splitCTCP())
-//			{
-//				System.out.printf("CTCP[%s]=%s%n", i++, ctcp);
-//				if (ctcp.contains("PING"))
-//				{
-//					getIRC().ctcpReply(nick, ctcp);
-//				}
-//				else
-//				{
-//					getIRC().ctcpQuery(nick, ctcp);
-//				}
-//			}
-//		}
+	}
+
+	@Override
+	public void onDirectMessage(IRCMessage message)
+	{
+		log.info("DM: " + message);
 	}
 
 	@Override
@@ -121,14 +117,35 @@ public class EchoBot extends IRCBotAdapter
 		for (String ctcp : message.splitCTCP())
 		{
 			log.debug(String.format("CTCP[%s]=%s%n", i++, ctcp));
-			if (ctcp.contains("PING"))
+			if (ctcp.startsWith("PING"))
 			{
-				getIRC().ctcpReply(nick, ctcp);
+				irc.ctcpReply(nick, ctcp);
+			}
+			else if (ctcp.startsWith("TIME"))
+			{
+				irc.ctcpReply(nick, String.format("TIME %tc", System.currentTimeMillis()));
+			}
+			else if (ctcp.startsWith("VERSION"))
+			{
+				irc.ctcpReply(nick, "VERSION IRCKit for Pure Java");
 			}
 			else
 			{
-				getIRC().ctcpQuery(nick, ctcp);
+				irc.ctcpQuery(nick, ctcp);
 			}
 		}
+	}
+
+	@Override
+	public void onNickConflict(String conflictNick)
+	{
+		irc.nick(conflictNick + "_");
+	}
+
+	@Override
+	public void onPing(String text)
+	{
+		log.info("接続確認: " + text);
+//		super.onPing(text);
 	}
 }

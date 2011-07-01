@@ -19,6 +19,9 @@ import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.mac.tarchan.irc.util.KanaInputFilter;
 
 /**
@@ -26,8 +29,8 @@ import com.mac.tarchan.irc.util.KanaInputFilter;
  */
 public class IRCClient
 {
-	/** 入出力ソケット */
-	protected Socket socket;
+	/** ログ */
+	private static final Log log = LogFactory.getLog(IRCClient.class);
 
 	/** ホスト名 */
 	protected String host;
@@ -43,6 +46,12 @@ public class IRCClient
 
 	/** 接続モード */
 	protected int mode;
+
+	/** 文字コード */
+	protected String encoding;
+
+	/** 入出力ソケット */
+	protected Socket socket;
 
 	/** メッセージキュー */
 	protected ExecutorService messageQueue = Executors.newFixedThreadPool(2);
@@ -64,6 +73,7 @@ public class IRCClient
 		this.port = port;
 		this.nick = nick;
 		this.pass = pass;
+		this.encoding = "JIS";
 	}
 
 	/**
@@ -126,6 +136,16 @@ public class IRCClient
 	}
 
 	/**
+	 * 文字コードを返します。
+	 * 
+	 * @return 文字コード
+	 */
+	public String getEncoding()
+	{
+		return encoding;
+	}
+
+	/**
 	 * すべてのコマンドを受け入れるメッセージハンドラを追加します。
 	 * 
 	 * @param handler メッセージハンドラ
@@ -167,14 +187,11 @@ public class IRCClient
 	{
 		InetAddress inet = InetAddress.getByName(host);
 		socket = new Socket(host, port);
-		System.out.println("connect: " + inet);
+		log.info("connect: " + inet);
 //		new Thread(new InputListener(this)).start();
 		messageQueue.execute(new InputTask(this));
 //		out = new PrintStream(socket.getOutputStream(), true);
-		if (pass != null && pass.trim().length() != 0)
-		{
-			sendMessage("PASS %s", pass);
-		}
+		if (pass != null && pass.trim().length() != 0) sendMessage("PASS %s", pass);
 		sendMessage("NICK %s", nick);
 		sendMessage("USER %s %d %s :%s", nick, mode, host, nick);
 //		sendMessage("USER %s %s bla :%s", nick, host, nick);
@@ -185,7 +202,7 @@ public class IRCClient
 //			if (line == null) break;
 //			System.out.println(new String(line.getBytes(), "JIS"));
 //		}
-		System.out.println("connected: " + host);
+//		log.info("connected: " + host);
 //		socket.close();
 		return this;
 	}
@@ -200,7 +217,7 @@ public class IRCClient
 	{
 		socket.close();
 		messageQueue.shutdown();
-		System.out.println("disconnected.");
+		log.info("disconnected. " + socket.isConnected() + ", " + socket.isClosed());
 		return this;
 	}
 
@@ -248,6 +265,17 @@ public class IRCClient
 	public IRCClient sendMessage(String command, Object... args)
 	{
 		return sendMessage(String.format(command, args));
+	}
+
+	/**
+	 * 新しいニックネームを設定します。
+	 * 
+	 * @param nick 新しいニックネーム
+	 * @return IRCクライアント
+	 */
+	public IRCClient nick(String nick)
+	{
+		return sendMessage("NICK %s", nick);
 	}
 
 	/**
@@ -374,13 +402,14 @@ public class IRCClient
 				}
 				catch (Throwable x)
 				{
+					log.error("IRCハンドラの実行中にエラーが発生しました。", x);
 					x.printStackTrace();
 				}
 			}
 		}
 		catch (Throwable x)
 		{
-			x.printStackTrace();
+			log.error("IRCメッセージの処理を中止しました。: " + text, x);
 		}
 	}
 }
@@ -390,19 +419,20 @@ public class IRCClient
  */
 class InputTask implements Runnable
 {
-	IRCClient client;
+	IRCClient irc;
 
 	BufferedReader in;
 
 //	String encoding;
 
-	InputTask(IRCClient client) throws IOException
+	InputTask(IRCClient irc) throws IOException
 	{
-		this.client = client;
+		this.irc = irc;
 //		in = new BufferedReader(new InputStreamReader(client.getInputStream()));
-		String encoding = "JIS";
+//		String encoding = "JIS";
+		String encoding = irc.getEncoding();
 //		in = new BufferedReader(new InputStreamReader(client.getInputStream(), encoding));
-		in = new BufferedReader(new InputStreamReader(new KanaInputFilter(client.getInputStream()), encoding));
+		in = new BufferedReader(new InputStreamReader(new KanaInputFilter(irc.getInputStream()), encoding));
 	}
 
 	public void run()
@@ -414,7 +444,7 @@ class InputTask implements Runnable
 				String line = in.readLine();
 				if (line == null) break;
 //				System.out.println(new String(line.getBytes(), encoding));
-				client.fireMessage(line);
+				irc.fireMessage(line);
 				Thread.yield();
 			}
 		}
@@ -426,7 +456,7 @@ class InputTask implements Runnable
 		{
 			try
 			{
-				client.close();
+				irc.close();
 			}
 			catch (IOException x)
 			{
@@ -441,15 +471,18 @@ class InputTask implements Runnable
  */
 class OutputTask implements Runnable
 {
-	IRCClient client;
+	/** ログ */
+	private static final Log log = LogFactory.getLog(OutputTask.class);
+
+	IRCClient irc;
 
 	String text;
 
 	PrintStream out;
 
-	OutputTask(IRCClient client, String text)
+	OutputTask(IRCClient irc, String text)
 	{
-		this.client = client;
+		this.irc = irc;
 		this.text = text;
 	}
 
@@ -457,9 +490,9 @@ class OutputTask implements Runnable
 	{
 		try
 		{
-			System.out.println("send: " + text);
+			log.info(text);
 //			client.out.println(text);
-			out = new PrintStream(client.getOutputStream(), true, "JIS");
+			out = new PrintStream(irc.getOutputStream(), true, "JIS");
 			out.println(text);
 //			out.close();
 		}

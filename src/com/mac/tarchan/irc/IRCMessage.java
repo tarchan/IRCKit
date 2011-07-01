@@ -10,6 +10,9 @@ package com.mac.tarchan.irc;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
  * IRCメッセージを生成します。
  * 
@@ -17,6 +20,9 @@ import java.util.regex.Pattern;
  */
 public class IRCMessage
 {
+	/** ログ */
+	private static final Log log = LogFactory.getLog(IRCMessage.class);
+
 	/** CTCPメッセージの区切り文字 */
 	public static final String CTCP = "\u0001";
 
@@ -67,7 +73,7 @@ public class IRCMessage
 			}
 			middle = middle.trim();
 			params = middle.split(" ");
-			System.out.printf("(%s):%s/%s/:%s%n", command, prefix, middle, trailing);
+			log.debug(String.format("(%s):%s/%s/:%s", command, prefix, middle, trailing));
 		}
 		else
 		{
@@ -125,6 +131,16 @@ public class IRCMessage
 	{
 		if (index < 0 || index >= params.length) throw new ArrayIndexOutOfBoundsException("パラメータが見つかりません。: " + index);
 		return params[index];
+	}
+
+	public String getParam0()
+	{
+		return getParam(0);
+	}
+
+	public String getParam1()
+	{
+		return getParam(1);
 	}
 
 	/**
