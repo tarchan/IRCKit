@@ -10,6 +10,8 @@ package com.mac.tarchan.irc.util;
 import java.io.IOException;
 
 import com.mac.tarchan.irc.IRCClient;
+import com.mac.tarchan.irc.IRCEvent;
+import com.mac.tarchan.irc.IRCHandler;
 import com.mac.tarchan.irc.IRCMessage;
 
 /**
@@ -37,7 +39,39 @@ public abstract class IRCBotAdapter
 
 		irc = IRCClient.createClient(host, port, nick, pass)
 			.on("001", HandlerBuilder.create(this, "onStart"))
-			.on("privmsg", HandlerBuilder.create(this, "onMessage", "message"))
+//			.on("privmsg", HandlerBuilder.create(this, "onMessage", "message"))
+			.on("privmsg", new IRCHandler()
+			{
+				@Override
+				public void onMessage(IRCEvent event)
+				{
+					IRCMessage message = event.getMessage();
+					if (!message.isCTCP())
+					{
+						IRCBotAdapter.this.onMessage(message);
+					}
+					else
+					{
+						IRCBotAdapter.this.onCtcpQuery(message);
+					}
+				}
+			})
+			.on("notice", new IRCHandler()
+			{
+				@Override
+				public void onMessage(IRCEvent event)
+				{
+					IRCMessage message = event.getMessage();
+					if (!message.isCTCP())
+					{
+						IRCBotAdapter.this.onNotice(message);
+					}
+					else
+					{
+						IRCBotAdapter.this.onCtcpReply(message);
+					}
+				}
+			})
 			.on("ping", HandlerBuilder.create(this, "onPing", "message.trailing"))
 			.on("error", HandlerBuilder.create(this, "onError", "message.trailing"))
 			.connect();

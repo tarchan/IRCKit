@@ -91,21 +91,43 @@ public class EchoBot extends IRCBotAdapter
 		{
 			getIRC().quit("サヨウナラ");
 		}
-		if (message.isCTCP())
+//		if (message.isCTCP())
+//		{
+////			System.out.println("CTCP3: " + text);
+//			int i = 0;
+//			for (String ctcp : message.splitCTCP())
+//			{
+//				System.out.printf("CTCP[%s]=%s%n", i++, ctcp);
+//				if (ctcp.contains("PING"))
+//				{
+//					getIRC().ctcpReply(nick, ctcp);
+//				}
+//				else
+//				{
+//					getIRC().ctcpQuery(nick, ctcp);
+//				}
+//			}
+//		}
+	}
+
+	@Override
+	public void onCtcpQuery(IRCMessage message)
+	{
+		String nick = message.getPrefix();
+//		String chan = message.getParam(0);
+		String text = message.getTrailing();
+		log.debug(String.format("CTCP: %s: %s", nick, text));
+		int i = 0;
+		for (String ctcp : message.splitCTCP())
 		{
-//			System.out.println("CTCP3: " + text);
-			int i = 0;
-			for (String ctcp : message.splitCTCP())
+			log.debug(String.format("CTCP[%s]=%s%n", i++, ctcp));
+			if (ctcp.contains("PING"))
 			{
-				System.out.printf("CTCP[%s]=%s%n", i++, ctcp);
-				if (ctcp.contains("PING"))
-				{
-					getIRC().ctcpReply(nick, ctcp);
-				}
-				else
-				{
-					getIRC().ctcpQuery(nick, ctcp);
-				}
+				getIRC().ctcpReply(nick, ctcp);
+			}
+			else
+			{
+				getIRC().ctcpQuery(nick, ctcp);
 			}
 		}
 	}
