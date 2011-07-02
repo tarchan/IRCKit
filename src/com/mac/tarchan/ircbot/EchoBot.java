@@ -82,6 +82,7 @@ public class EchoBot extends IRCBotAdapter
 		log.error(text);
 	}
 
+<<<<<<< HEAD
 	@Override
 	public void onMessage(IRCMessage message)
 	{
@@ -106,6 +107,32 @@ public class EchoBot extends IRCBotAdapter
 			irc.quit("サヨウナラ");
 		}
 	}
+=======
+//	@Override
+//	public void onMessage(IRCMessage message)
+//	{
+//		String nick = message.getPrefix();
+//		String chan = message.getParam0();
+//		String text = message.getTrailing();
+//		log.debug("channel: " + chan);
+//		if (text.matches(".*hi.*"))
+//		{
+//			irc.privmsg(chan, String.format("hi %s!", nick));
+//		}
+//		if (text.matches(".*time.*"))
+//		{
+//			irc.privmsg(chan, String.format("%tT now!", System.currentTimeMillis()));
+//		}
+//		if (text.matches(".*date.*"))
+//		{
+//			irc.privmsg(chan, String.format("%tF now!", System.currentTimeMillis()));
+//		}
+//		if (text.matches(".*bye.*"))
+//		{
+//			irc.quit("サヨウナラ");
+//		}
+//	}
+>>>>>>> PARTコマンドのハンドラを追加
 
 	@Override
 	public void onDirectMessage(IRCMessage message)
@@ -157,14 +184,30 @@ public class EchoBot extends IRCBotAdapter
 	}
 
 	@Override
+<<<<<<< HEAD
 	public void onJoin(String channel, IRCPrefix prefix)
+=======
+	public void onTopic(String channel, String topic)
+	{
+		log.info(String.format("%s topic is %s", channel, topic));
+	}
+
+	@Override
+	public void onJoin(String channel, String user)
+>>>>>>> PARTコマンドのハンドラを追加
 	{
 		log.info(String.format("%3$s join %1$s (%2$s)", channel, prefix, prefix.getNick()));
 	}
 
 	@Override
-	public void onTopic(String channel, String topic)
+	public void onPart(String channel, String user)
 	{
-		log.info(String.format("%s topic is %s", channel, topic));
+		log.info(String.format("%3$s has left channel %1$s (%2$s)", channel, user, IRCName.getSimpleName(user)));
+	}
+
+	@Override
+	public void onQuit(String user, String text)
+	{
+		log.info(String.format("%3$s has left IRC %1$s (%2$s)", text, user, IRCName.getSimpleName(user)));
 	}
 }

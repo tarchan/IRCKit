@@ -102,6 +102,28 @@ public abstract class IRCBotAdapter
 					IRCBotAdapter.this.onJoin(channel, prefix);
 				}
 			})
+			.on("part", new IRCHandler()
+			{
+				@Override
+				public void onMessage(IRCEvent event)
+				{
+					IRCMessage message = event.getMessage();
+					String channel = message.getParam1();
+					String user = message.getPrefix();
+					IRCBotAdapter.this.onPart(channel, user);
+				}
+			})
+			.on("quit", new IRCHandler()
+			{
+				@Override
+				public void onMessage(IRCEvent event)
+				{
+					IRCMessage message = event.getMessage();
+					String text = message.getTrailing();
+					String user = message.getPrefix();
+					IRCBotAdapter.this.onQuit(user, text);
+				}
+			})
 			.on("topic", new IRCHandler()
 			{
 				@Override
@@ -236,17 +258,18 @@ public abstract class IRCBotAdapter
 	/**
 	 * チャンネルを離脱したときに呼び出されます。
 	 */
-	public void onPart()
+	public void onPart(String channel, String user)
 	{
-		// TODO PART
 	}
 
 	/**
 	 * 終了したときに呼び出されます。
+	 * 
+	 * @param user ユーザー
+	 * @param text 終了メッセージ
 	 */
-	public void onQuit()
+	public void onQuit(String user, String text)
 	{
-		// TODO QUIT
 	}
 
 	/**
