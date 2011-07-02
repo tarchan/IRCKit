@@ -76,6 +76,12 @@ public class EchoBot extends IRCBotAdapter
 	}
 
 	@Override
+	public void onError(String text)
+	{
+		log.error(text);
+	}
+
+	@Override
 	public void onMessage(IRCMessage message)
 	{
 		String nick = message.getPrefix();
