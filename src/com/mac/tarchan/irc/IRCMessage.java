@@ -133,11 +133,21 @@ public class IRCMessage
 		return params[index];
 	}
 
+	/**
+	 * 0番目のパラメータを返します。
+	 * 
+	 * @return 0番目のパラメータ
+	 */
 	public String getParam0()
 	{
 		return getParam(0);
 	}
 
+	/**
+	 * 1番目のパラメータを返します。
+	 * 
+	 * @return 1番目のパラメータ
+	 */
 	public String getParam1()
 	{
 		return getParam(1);

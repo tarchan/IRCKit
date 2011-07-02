@@ -13,6 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.mac.tarchan.irc.IRCMessage;
+import com.mac.tarchan.irc.IRCName;
 import com.mac.tarchan.irc.util.IRCBotAdapter;
 
 /**
@@ -152,6 +153,18 @@ public class EchoBot extends IRCBotAdapter
 	public void onPing(String text)
 	{
 		log.info("接続確認: " + text);
-//		super.onPing(text);
+		super.onPing(text);
+	}
+
+	@Override
+	public void onJoin(String channel, String user)
+	{
+		log.info(String.format("%3$s join %1$s (%2$s)", channel, user, IRCName.getSimpleName(user)));
+	}
+
+	@Override
+	public void onTopic(String channel, String topic)
+	{
+		log.info(String.format("%s topic is %s", channel, topic));
 	}
 }

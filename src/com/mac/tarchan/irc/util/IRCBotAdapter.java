@@ -76,6 +76,39 @@ public abstract class IRCBotAdapter
 					}
 				}
 			})
+			.on("join", new IRCHandler()
+			{
+				@Override
+				public void onMessage(IRCEvent event)
+				{
+					IRCMessage message = event.getMessage();
+					String channel = message.getTrailing();
+					String user = message.getPrefix();
+					IRCBotAdapter.this.onJoin(channel, user);
+				}
+			})
+			.on("topic", new IRCHandler()
+			{
+				@Override
+				public void onMessage(IRCEvent event)
+				{
+					IRCMessage message = event.getMessage();
+					String channel = message.getParam0();
+					String topic = message.getTrailing();
+					IRCBotAdapter.this.onTopic(channel, topic);
+				}
+			})
+			.on("332", new IRCHandler()
+			{
+				@Override
+				public void onMessage(IRCEvent event)
+				{
+					IRCMessage message = event.getMessage();
+					String channel = message.getParam1();
+					String topic = message.getTrailing();
+					IRCBotAdapter.this.onTopic(channel, topic);
+				}
+			})
 			.on("ping", HandlerBuilder.create(this, "onPing", "message.trailing"))
 			.on("error", HandlerBuilder.create(this, "onError", "message.trailing"))
 			.on("001", HandlerBuilder.create(this, "onStart"))
@@ -155,10 +188,22 @@ public abstract class IRCBotAdapter
 
 	/**
 	 * チャンネルに参加したときに呼び出されます。
+	 * 
+	 * @param channel チャンネル
+	 * @param user ユーザー
 	 */
-	public void onJoin()
+	public void onJoin(String channel, String user)
 	{
-		// TODO JOIN
+	}
+
+	/**
+	 * トピックが変更されたときに呼び出されます。
+	 * 
+	 * @param channel チャンネル
+	 * @param topic トピック
+	 */
+	public void onTopic(String channel, String topic)
+	{
 	}
 
 	/**
