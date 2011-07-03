@@ -37,6 +37,8 @@ public class IRCPrefix
 	 */
 	public IRCPrefix(String prefix)
 	{
+		if (prefix == null) return;
+
 		this.prefix = prefix;
 		Matcher m = prefixPattern.matcher(prefix);
 		if (m.find())
@@ -95,25 +97,5 @@ public class IRCPrefix
 	public String toString()
 	{
 		return prefix;
-	}
-
-	/**
-	 * プレフィックスから、サーバ名またはニックネームのみを返します。
-	 * 
-	 * @param prefix プレフィックス
-	 * @return サーバ名またはニックネーム
-	 */
-	@Deprecated
-	public static String getSimpleName(String prefix)
-	{
-		Matcher m = prefixPattern.matcher(prefix);
-		if (m.find())
-		{
-			return m.group(1);
-		}
-		else
-		{
-			throw new IllegalArgumentException("プレフィックスが不正です。: " + prefix);
-		}
 	}
 }

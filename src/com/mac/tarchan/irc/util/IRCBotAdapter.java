@@ -109,8 +109,8 @@ public abstract class IRCBotAdapter
 				{
 					IRCMessage message = event.getMessage();
 					String channel = message.getParam1();
-					String user = message.getPrefix();
-					IRCBotAdapter.this.onPart(channel, user);
+					IRCPrefix prefix = message.getPrefix();
+					IRCBotAdapter.this.onPart(channel, prefix);
 				}
 			})
 			.on("quit", new IRCHandler()
@@ -120,8 +120,8 @@ public abstract class IRCBotAdapter
 				{
 					IRCMessage message = event.getMessage();
 					String text = message.getTrailing();
-					String user = message.getPrefix();
-					IRCBotAdapter.this.onQuit(user, text);
+					IRCPrefix prefix = message.getPrefix();
+					IRCBotAdapter.this.onQuit(prefix, text);
 				}
 			})
 			.on("topic", new IRCHandler()
@@ -152,7 +152,7 @@ public abstract class IRCBotAdapter
 				public void onMessage(IRCEvent event)
 				{
 					IRCMessage message = event.getMessage();
-					String oldNick = message.getSimpleName();
+					String oldNick = message.getPrefix().getNick();
 					String newNick = message.getTrailing();
 					IRCBotAdapter.this.onNick(oldNick, newNick);
 				}
@@ -269,17 +269,17 @@ public abstract class IRCBotAdapter
 	/**
 	 * チャンネルを離脱したときに呼び出されます。
 	 */
-	public void onPart(String channel, String user)
+	public void onPart(String channel, IRCPrefix prefix)
 	{
 	}
 
 	/**
 	 * 終了したときに呼び出されます。
 	 * 
-	 * @param user ユーザー
+	 * @param prefix ユーザー
 	 * @param text 終了メッセージ
 	 */
-	public void onQuit(String user, String text)
+	public void onQuit(IRCPrefix prefix, String text)
 	{
 	}
 

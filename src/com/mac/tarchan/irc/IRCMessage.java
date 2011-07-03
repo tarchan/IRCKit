@@ -112,17 +112,6 @@ public class IRCMessage
 	}
 
 	/**
-	 * プレフィックスのニックネーム部分を返します。
-	 * 
-	 * @return ニックネームを返します。
-	 * @see #getPrefix()
-	 */
-	public String getSimpleName()
-	{
-		return IRCName.getSimpleName(getPrefix());
-	}
-
-	/**
 	 * コマンドを返します。
 	 * 
 	 * @return コマンド
