@@ -159,7 +159,7 @@ public class EchoBot extends IRCBotAdapter
 	@Override
 	public void onJoin(String channel, IRCPrefix prefix)
 	{
-		log.info(String.format("%3$s join %1$s (%2$s)", channel, prefix, prefix.getNick()));
+		log.info(String.format("%3$s has joined %1$s (%2$s)", channel, prefix, prefix.getNick()));
 	}
 
 	@Override
@@ -172,5 +172,17 @@ public class EchoBot extends IRCBotAdapter
 	public void onQuit(IRCPrefix prefix, String text)
 	{
 		log.info(String.format("%3$s has left IRC %1$s (%2$s)", text, prefix, prefix.getNick()));
+	}
+
+	@Override
+	public void onTopic(String channel, String topic)
+	{
+		log.info(String.format("%1$s has set topic %2$s", channel, topic));
+	}
+
+	@Override
+	public void onNames(String channel, String[] names)
+	{
+		log.info(String.format("%1$s (%3$s) names %2$s", channel, Arrays.asList(names), names.length));
 	}
 }

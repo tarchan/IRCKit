@@ -8,6 +8,8 @@
 package com.mac.tarchan.irc.util;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import com.mac.tarchan.irc.IRCClient;
 import com.mac.tarchan.irc.IRCEvent;
@@ -24,6 +26,9 @@ public abstract class IRCBotAdapter
 {
 	/** IRCクライアント */
 	protected IRCClient irc;
+
+	/** ニックネームリスト */
+	ArrayList<String> nicklist = new ArrayList<String>();
 
 	/**
 	 * IRCネットワークにログインします。
@@ -122,6 +127,28 @@ public abstract class IRCBotAdapter
 					String text = message.getTrailing();
 					IRCPrefix prefix = message.getPrefix();
 					IRCBotAdapter.this.onQuit(prefix, text);
+				}
+			})
+			.on("353", new IRCHandler()
+			{
+				@Override
+				public void onMessage(IRCEvent event)
+				{
+					IRCMessage message = event.getMessage();
+					String[] names = message.getTrailing().split(" ");
+					nicklist.addAll(Arrays.asList(names));
+				}
+			})
+			.on("366", new IRCHandler()
+			{
+				@Override
+				public void onMessage(IRCEvent event)
+				{
+					IRCMessage message = event.getMessage();
+					String channel = message.getParam(1);
+					String[] names = nicklist.toArray(new String[]{});
+					nicklist.clear();
+					IRCBotAdapter.this.onNames(channel, names);
 				}
 			})
 			.on("topic", new IRCHandler()
@@ -253,6 +280,16 @@ public abstract class IRCBotAdapter
 	 * @param prefix プレフィックス
 	 */
 	public void onJoin(String channel, IRCPrefix prefix)
+	{
+	}
+
+	/**
+	 * ニックネームリストが変更されたときに呼び出されます。
+	 * 
+	 * @param channel チャンネル名
+	 * @param names ニックネームリスト
+	 */
+	public void onNames(String channel, String[] names)
 	{
 	}
 

@@ -81,7 +81,7 @@ public class IRCMessage
 				trailing = middle.substring(pos + 2);
 				middle = middle.substring(0, pos);
 			}
-//			middle = middle.trim();
+			middle = middle.trim();
 			params = middle.split(" ");
 			log.debug(String.format("(%s):%s/%s/:%s", command, prefix, middle, trailing));
 		}
