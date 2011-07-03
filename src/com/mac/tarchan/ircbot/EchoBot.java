@@ -82,10 +82,18 @@ public class EchoBot extends IRCBotAdapter
 		log.error(text);
 	}
 
-//	@Override
-//	public void onMessage(IRCMessage message)
-//	{
-//		String nick = message.getPrefix();
+	@Override
+	public void onMessage(IRCMessage message)
+	{
+		String nick = message.getPrefix().getNick();
+		if (isUserNick(nick))
+		{
+			log.info("self: " + message.getTrailing());
+		}
+		else
+		{
+			log.info("other: " + message.getTrailing());
+		}
 //		String chan = message.getParam0();
 //		String text = message.getTrailing();
 //		log.debug("channel: " + chan);
@@ -105,7 +113,7 @@ public class EchoBot extends IRCBotAdapter
 //		{
 //			irc.quit("サヨウナラ");
 //		}
-//	}
+	}
 
 	@Override
 	public void onDirectMessage(IRCMessage message)

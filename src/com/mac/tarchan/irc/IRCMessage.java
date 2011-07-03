@@ -26,6 +26,9 @@ public class IRCMessage
 	/** CTCPメッセージの区切り文字 */
 	public static final String CTCP = "\u0001";
 
+	/** ニューメリックリプライのパターン */
+	protected Pattern NUMERIC_REPLY_PATTERN = Pattern.compile("\\d{3}");
+
 	/** オリジナルテキスト */
 	protected String text;
 
@@ -191,6 +194,16 @@ public class IRCMessage
 	public String getTrailing()
 	{
 		return trailing;
+	}
+
+	/**
+	 * ニューメリックリプライかどうか判定します。
+	 * 
+	 * @return ニューメリックリプライの場合は true
+	 */
+	public boolean isNumelic()
+	{
+		return NUMERIC_REPLY_PATTERN.matcher(getCommand()).matches();
 	}
 
 	/**

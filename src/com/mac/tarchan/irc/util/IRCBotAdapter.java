@@ -207,6 +207,15 @@ public abstract class IRCBotAdapter
 			.on("error", HandlerBuilder.create(this, "onError", "message.trailing"))
 			.on("001", HandlerBuilder.create(this, "onStart"))
 			.on("433", HandlerBuilder.create(this, "onNickConflict", "message.param1"))
+			.on(new IRCHandler()
+			{
+				@Override
+				public void onMessage(IRCEvent event)
+				{
+					IRCMessage message = event.getMessage();
+					if (message.isNumelic()) IRCBotAdapter.this.onNumelicReply(message);
+				}
+			})
 			.start();
 	}
 
@@ -235,7 +244,7 @@ public abstract class IRCBotAdapter
 	 */
 	public void setUserNick(String newNick)
 	{
-		getIRC().nick(newNick);
+		irc.nick(newNick);
 	}
 
 	/**
@@ -406,6 +415,15 @@ public abstract class IRCBotAdapter
 	}
 
 	/**
+	 * ニューメリックリプライを受け取ったときに呼び出されます。
+	 * 
+	 * @param message IRCメッセージ
+	 */
+	public void onNumelicReply(IRCMessage message)
+	{
+	}
+
+	/**
 	 * ファイル送信メッセージを受け取ったときに呼び出されます。
 	 * 
 	 * @param message IRCメッセージ
@@ -424,7 +442,7 @@ public abstract class IRCBotAdapter
 	 */
 	public void onPing(String text)
 	{
-		getIRC().pong(text);
+		irc.pong(text);
 	}
 
 	/**
