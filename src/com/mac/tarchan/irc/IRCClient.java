@@ -206,7 +206,7 @@ public class IRCClient
 //		log.info("connect: " + inet);
 ////		new Thread(new InputListener(this)).start();
 //		messageQueue.execute(new InputTask(this));
-		connect(host, port);
+		connect(host, port, encoding);
 //		out = new PrintStream(socket.getOutputStream(), true);
 //		if (pass != null && pass.trim().length() != 0) sendMessage("PASS %s", pass);
 //		sendMessage("NICK %s", nick);
@@ -230,16 +230,17 @@ public class IRCClient
 	 * 
 	 * @param host ホスト名
 	 * @param port ポート番号
+	 * @param encoding 文字コード
 	 * @return IRCクライアント
 	 * @throws IOException IRCサーバに接続できない場合
 	 */
-	public IRCClient connect(String host, int port) throws IOException
+	public IRCClient connect(String host, int port, String encoding) throws IOException
 	{
 		InetAddress inet = InetAddress.getByName(host);
 		socket = new Socket(host, port);
 		log.info("接続します。: " + inet);
 //		new Thread(new InputListener(this)).start();
-		messageQueue.execute(new InputTask(this));
+		messageQueue.execute(new InputTask(this, encoding));
 		return this;
 	}
 
@@ -479,12 +480,12 @@ class InputTask implements Runnable
 
 //	String encoding;
 
-	InputTask(IRCClient irc) throws IOException
+	InputTask(IRCClient irc, String encoding) throws IOException
 	{
 		this.irc = irc;
 //		in = new BufferedReader(new InputStreamReader(client.getInputStream()));
 //		String encoding = "JIS";
-		String encoding = irc.getEncoding();
+//		String encoding = irc.getEncoding();
 //		in = new BufferedReader(new InputStreamReader(client.getInputStream(), encoding));
 		in = new BufferedReader(new InputStreamReader(new KanaInputFilter(irc.getInputStream()), encoding));
 	}
