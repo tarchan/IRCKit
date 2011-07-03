@@ -26,19 +26,30 @@ public class IRCMessage
 	/** CTCPメッセージの区切り文字 */
 	public static final String CTCP = "\u0001";
 
-	String text;
+	/** オリジナルテキスト */
+	protected String text;
 
-	long when;
+	/** メッセージオブジェクトの作成時間 */
+	protected long when;
 
-	IRCPrefix prefix;
+	/** プレフィックス */
+	protected IRCPrefix prefix;
 
-	String command;
+	/** コマンド */
+	protected String command;
 
-	String middle;
+	/** 分割前のパラメータ */
+	protected String middle;
 
-	String trailing;
+	/** パラメータ配列 */
+	protected String[] params;
 
-	String[] params;
+	/** トレーラー */
+	protected String trailing;
+
+	/** 疑似BNFによるメッセージ形式 */
+//	protected static final Pattern IRC_PBNF = Pattern.compile("(?::([^ ]+) )?([^ ]+)([^:]+)(?::(.+))?");
+	protected static final Pattern IRC_PBNF = Pattern.compile("(?::([^ ]+) )?([^ ]+)(.*)");
 
 	/**
 	 * IRCMessage を構築します。
@@ -53,11 +64,10 @@ public class IRCMessage
 		parse();
 	}
 
-	/** 疑似BNFによるメッセージ形式 */
-//	static final Pattern IRC_PBNF = Pattern.compile("(?::([^ ]+) )?([^ ]+)([^:]+)(?::(.+))?");
-	static final Pattern IRC_PBNF = Pattern.compile("(?::([^ ]+) )?([^ ]+)(.*)");
-
-	void parse()
+	/**
+	 * IRCメッセージを解析します。
+	 */
+	protected void parse()
 	{
 		Matcher prefix_m = IRC_PBNF.matcher(text);
 		if (prefix_m.find())
@@ -71,13 +81,13 @@ public class IRCMessage
 				trailing = middle.substring(pos + 2);
 				middle = middle.substring(0, pos);
 			}
-			middle = middle.trim();
+//			middle = middle.trim();
 			params = middle.split(" ");
 			log.debug(String.format("(%s):%s/%s/:%s", command, prefix, middle, trailing));
 		}
 		else
 		{
-			throw new IllegalArgumentException("メッセージ形式が不明です。: " + text);
+			throw new IllegalArgumentException("メッセージ形式が不正です。: " + text);
 		}
 	}
 

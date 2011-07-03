@@ -128,7 +128,7 @@ public abstract class IRCBotAdapter
 			.on("error", HandlerBuilder.create(this, "onError", "message.trailing"))
 			.on("001", HandlerBuilder.create(this, "onStart"))
 			.on("433", HandlerBuilder.create(this, "onNickConflict", "message.param1"))
-			.connect();
+			.start();
 	}
 
 	/**

@@ -199,14 +199,14 @@ public class IRCClient
 	 * @return IRCクライアント
 	 * @throws IOException IRCサーバに接続できない場合
 	 */
-	public IRCClient connect() throws IOException
+	public IRCClient start() throws IOException
 	{
 //		InetAddress inet = InetAddress.getByName(host);
 //		socket = new Socket(host, port);
 //		log.info("connect: " + inet);
 ////		new Thread(new InputListener(this)).start();
 //		messageQueue.execute(new InputTask(this));
-		connect(host, port, encoding);
+		connect(host, port);
 //		out = new PrintStream(socket.getOutputStream(), true);
 //		if (pass != null && pass.trim().length() != 0) sendMessage("PASS %s", pass);
 //		sendMessage("NICK %s", nick);
@@ -222,6 +222,22 @@ public class IRCClient
 //		}
 //		log.info("connected: " + host);
 //		socket.close();
+		start(encoding);
+		return this;
+	}
+
+	/**
+	 * 入力ストリームをオープンして、イベントループを開始します。
+	 * 
+	 * @param encoding 文字コード
+	 * @return IRCクライアント
+	 * @throws IOException 入力ストリームをオープンできない場合
+	 * @see #fireMessage(String)
+	 */
+	protected IRCClient start(String encoding) throws IOException
+	{
+		log.info("イベントループを開始します。");
+		messageQueue.execute(new InputTask(this, encoding));
 		return this;
 	}
 
@@ -230,17 +246,16 @@ public class IRCClient
 	 * 
 	 * @param host ホスト名
 	 * @param port ポート番号
-	 * @param encoding 文字コード
 	 * @return IRCクライアント
 	 * @throws IOException IRCサーバに接続できない場合
 	 */
-	public IRCClient connect(String host, int port, String encoding) throws IOException
+	protected IRCClient connect(String host, int port) throws IOException
 	{
 		InetAddress inet = InetAddress.getByName(host);
 		socket = new Socket(host, port);
 		log.info("接続します。: " + inet);
 //		new Thread(new InputListener(this)).start();
-		messageQueue.execute(new InputTask(this, encoding));
+//		messageQueue.execute(new InputTask(this, encoding));
 		return this;
 	}
 
@@ -286,7 +301,7 @@ public class IRCClient
 	 * @param text テキスト
 	 * @return IRCクライアント
 	 */
-	public IRCClient sendMessage(String text)
+	public IRCClient postMessage(String text)
 	{
 		if (text != null && text.trim().length() > 0) messageQueue.execute(new OutputTask(this, text));
 		return this;
@@ -299,9 +314,9 @@ public class IRCClient
 	 * @param args コマンド引数
 	 * @return IRCクライアント
 	 */
-	public IRCClient sendMessage(String command, Object... args)
+	public IRCClient postMessage(String command, Object... args)
 	{
-		return sendMessage(String.format(command, args));
+		return postMessage(String.format(command, args));
 	}
 
 	/**
@@ -314,11 +329,12 @@ public class IRCClient
 	 * @param pass パスワード
 	 * @return IRCクライアント
 	 */
-	public IRCClient login(String nick, String user, String real, int mode, String pass)
+	protected IRCClient login(String nick, String user, String real, int mode, String pass)
 	{
-		if (pass != null && pass.length() != 0) sendMessage("PASS %s", pass);
-		sendMessage("NICK %s", nick);
-		sendMessage("USER %s %d * :%s", user, mode, real);
+		log.info("ログインします。: " + nick);
+		if (pass != null && pass.length() != 0) postMessage("PASS %s", pass);
+		postMessage("NICK %s", nick);
+		postMessage("USER %s %d * :%s", user, mode, real);
 		return this;
 	}
 
@@ -330,7 +346,7 @@ public class IRCClient
 	 */
 	public IRCClient nick(String nick)
 	{
-		return sendMessage("NICK %s", nick);
+		return postMessage("NICK %s", nick);
 	}
 
 	/**
@@ -342,7 +358,7 @@ public class IRCClient
 	 */
 	public IRCClient join(String channel)
 	{
-		return sendMessage("JOIN %s", channel);
+		return postMessage("JOIN %s", channel);
 	}
 
 	/**
@@ -354,7 +370,7 @@ public class IRCClient
 	 */
 	public IRCClient part(String channel)
 	{
-		return sendMessage("PART %s", channel);
+		return postMessage("PART %s", channel);
 	}
 
 	/**
@@ -366,7 +382,7 @@ public class IRCClient
 	 */
 	public IRCClient pong(String payload)
 	{
-		return sendMessage("PONG :%s", payload);
+		return postMessage("PONG :%s", payload);
 	}
 
 	/**
@@ -379,7 +395,7 @@ public class IRCClient
 	 */
 	public IRCClient privmsg(String receiver, String text)
 	{
-		return sendMessage("PRIVMSG %s :%s", receiver, text);
+		return postMessage("PRIVMSG %s :%s", receiver, text);
 	}
 
 	/**
@@ -392,7 +408,7 @@ public class IRCClient
 	 */
 	public IRCClient notice(String receiver, String text)
 	{
-		return sendMessage("NOTICE %s :%s", receiver, text);
+		return postMessage("NOTICE %s :%s", receiver, text);
 	}
 
 	/**
@@ -430,7 +446,7 @@ public class IRCClient
 	 */
 	public IRCClient quit(String text)
 	{
-		return sendMessage("QUIT :%s", text);
+		return postMessage("QUIT :%s", text);
 	}
 
 	/**
