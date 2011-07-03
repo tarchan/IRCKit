@@ -152,6 +152,18 @@ public class IRCClient
 	}
 
 	/**
+	 * ユーザのニックネームを設定します。
+	 * 
+	 * @param nick ニックネーム
+	 * @return IRCクライアント
+	 */
+	public IRCClient setNick(String nick)
+	{
+		this.nick = nick;
+		return this;
+	}
+
+	/**
 	 * 文字コードを返します。
 	 * 
 	 * @return 文字コード

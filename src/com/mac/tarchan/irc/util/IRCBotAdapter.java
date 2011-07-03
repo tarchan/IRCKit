@@ -146,6 +146,17 @@ public abstract class IRCBotAdapter
 					IRCBotAdapter.this.onTopic(channel, topic);
 				}
 			})
+			.on("nick", new IRCHandler()
+			{
+				@Override
+				public void onMessage(IRCEvent event)
+				{
+					IRCMessage message = event.getMessage();
+					String oldNick = message.getSimpleName();
+					String newNick = message.getTrailing();
+					IRCBotAdapter.this.onNick(oldNick, newNick);
+				}
+			})
 			.on("ping", HandlerBuilder.create(this, "onPing", "message.trailing"))
 			.on("error", HandlerBuilder.create(this, "onError", "message.trailing"))
 			.on("001", HandlerBuilder.create(this, "onStart"))
@@ -230,9 +241,9 @@ public abstract class IRCBotAdapter
 	 * @param oldNick 古いニックネーム
 	 * @param newNick 新しいニックネーム
 	 */
-	public void onNickChanged(String oldNick, String newNick)
+	public void onNick(String oldNick, String newNick)
 	{
-		// TODO NICK
+		if (isUserNick(oldNick)) irc.setNick(newNick);
 	}
 
 	/**
