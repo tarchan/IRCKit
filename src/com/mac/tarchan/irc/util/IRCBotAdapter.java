@@ -36,9 +36,24 @@ public abstract class IRCBotAdapter
 	 */
 	public void login(String host, int port, String nick, String pass) throws IOException
 	{
+		login(host, port, nick, pass, "JIS");
+	}
+
+	/**
+	 * IRCネットワークにログインします。
+	 * 
+	 * @param host ホストアドレス
+	 * @param port ポート番号
+	 * @param nick ニックネーム
+	 * @param pass パスワード
+	 * @param encoding 文字コード
+	 * @throws IOException IRCネットワークにログインできない場合
+	 */
+	public void login(String host, int port, String nick, String pass, String encoding) throws IOException
+	{
 		if (irc != null) irc.quit("再接続します。");
 
-		irc = IRCClient.createClient(host, port, nick, pass)
+		irc = IRCClient.createClient(host, port, nick, pass, encoding)
 //			.on("privmsg", HandlerBuilder.create(this, "onMessage", "message"))
 			.on("privmsg", new IRCHandler()
 			{
@@ -46,8 +61,7 @@ public abstract class IRCBotAdapter
 				public void onMessage(IRCEvent event)
 				{
 					IRCMessage message = event.getMessage();
-					String chan = message.getParam0();
-					if (isUserNick(chan))
+					if (isDM(message))
 					{
 						IRCBotAdapter.this.onDirectMessage(message);
 					}
@@ -156,6 +170,18 @@ public abstract class IRCBotAdapter
 	{
 		String userNick = irc.getUserNick();
 		return userNick.equals(nick);
+	}
+
+	/**
+	 * 指定されたメッセージがダイレクトメッセージかどうか判定します。
+	 * 
+	 * @param message メッセージ
+	 * @return ダイレクトメッセージの場合は true
+	 */
+	public boolean isDM(IRCMessage message)
+	{
+		String channel = message.getParam0();
+		return isUserNick(channel);
 	}
 
 	/**
