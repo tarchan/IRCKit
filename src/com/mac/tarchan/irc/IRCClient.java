@@ -44,7 +44,7 @@ public class IRCClient
 	/** パスワード */
 	protected String pass;
 
-	/** 接続モード */
+	/** 接続モード (if the bit 2 is set, the user mode 'w' will be set and if the bit 3 is set, the user mode 'i' will be set.) */
 	protected int mode;
 
 	/** 文字コード */
@@ -66,14 +66,15 @@ public class IRCClient
 	 * @param port ポート番号
 	 * @param nick ニックネーム
 	 * @param pass パスワード
+	 * @param encoding 文字コード
 	 */
-	protected IRCClient(String host, int port, String nick, String pass)
+	protected IRCClient(String host, int port, String nick, String pass, String encoding)
 	{
 		this.host = host;
 		this.port = port;
 		this.nick = nick;
 		this.pass = pass;
-		this.encoding = "JIS";
+		this.encoding = encoding;
 	}
 
 	/**
@@ -100,7 +101,22 @@ public class IRCClient
 	 */
 	public static IRCClient createClient(String host, int port, String nick, String pass)
 	{
-		IRCClient client = new IRCClient(host, port, nick, pass);
+		return createClient(host, port, nick, pass, "JIS");
+	}
+
+	/**
+	 * IRCClient を作成します。
+	 * 
+	 * @param host ホスト名
+	 * @param port ポート番号
+	 * @param nick ニックネーム
+	 * @param pass パスワード
+	 * @param encoding 文字コード
+	 * @return IRCクライアント
+	 */
+	public static IRCClient createClient(String host, int port, String nick, String pass, String encoding)
+	{
+		IRCClient client = new IRCClient(host, port, nick, pass, encoding);
 		// TODO ホストアドレス毎にキャッシュする
 		return client;
 	}
@@ -185,15 +201,17 @@ public class IRCClient
 	 */
 	public IRCClient connect() throws IOException
 	{
-		InetAddress inet = InetAddress.getByName(host);
-		socket = new Socket(host, port);
-		log.info("connect: " + inet);
-//		new Thread(new InputListener(this)).start();
-		messageQueue.execute(new InputTask(this));
+//		InetAddress inet = InetAddress.getByName(host);
+//		socket = new Socket(host, port);
+//		log.info("connect: " + inet);
+////		new Thread(new InputListener(this)).start();
+//		messageQueue.execute(new InputTask(this));
+		connect(host, port);
 //		out = new PrintStream(socket.getOutputStream(), true);
-		if (pass != null && pass.trim().length() != 0) sendMessage("PASS %s", pass);
-		sendMessage("NICK %s", nick);
-		sendMessage("USER %s %d %s :%s", nick, mode, host, nick);
+//		if (pass != null && pass.trim().length() != 0) sendMessage("PASS %s", pass);
+//		sendMessage("NICK %s", nick);
+//		sendMessage("USER %s %d %s :%s", nick, mode, host, nick);
+		login(nick, nick, nick, mode, pass);
 //		sendMessage("USER %s %s bla :%s", nick, host, nick);
 //		BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 //		while (true)
@@ -204,6 +222,24 @@ public class IRCClient
 //		}
 //		log.info("connected: " + host);
 //		socket.close();
+		return this;
+	}
+
+	/**
+	 * IRCサーバに接続します。
+	 * 
+	 * @param host ホスト名
+	 * @param port ポート番号
+	 * @return IRCクライアント
+	 * @throws IOException IRCサーバに接続できない場合
+	 */
+	public IRCClient connect(String host, int port) throws IOException
+	{
+		InetAddress inet = InetAddress.getByName(host);
+		socket = new Socket(host, port);
+		log.info("接続します。: " + inet);
+//		new Thread(new InputListener(this)).start();
+		messageQueue.execute(new InputTask(this));
 		return this;
 	}
 
@@ -265,6 +301,24 @@ public class IRCClient
 	public IRCClient sendMessage(String command, Object... args)
 	{
 		return sendMessage(String.format(command, args));
+	}
+
+	/**
+	 * IRCネットワークにログインします。
+	 * 
+	 * @param nick ニックネーム
+	 * @param user ユーザ名
+	 * @param real 本名
+	 * @param mode 接続モード
+	 * @param pass パスワード
+	 * @return IRCクライアント
+	 */
+	public IRCClient login(String nick, String user, String real, int mode, String pass)
+	{
+		if (pass != null && pass.length() != 0) sendMessage("PASS %s", pass);
+		sendMessage("NICK %s", nick);
+		sendMessage("USER %s %d * :%s", user, mode, real);
+		return this;
 	}
 
 	/**
