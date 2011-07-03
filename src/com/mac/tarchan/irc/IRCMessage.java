@@ -132,6 +132,16 @@ public class IRCMessage
 	}
 
 	/**
+	 * パラメータの数を返します。
+	 * 
+	 * @return パラメータの数
+	 */
+	public int getParamsCount()
+	{
+		return params.length;
+	}
+
+	/**
 	 * 指定されたインデックスのパラメータを返します。
 	 * 
 	 * @param index インデックス
@@ -161,6 +171,16 @@ public class IRCMessage
 	public String getParam1()
 	{
 		return getParam(1);
+	}
+
+	/**
+	 * 2番目のパラメータを返します。
+	 * 
+	 * @return 2番目のパラメータ
+	 */
+	public String getParam2()
+	{
+		return getParam(2);
 	}
 
 	/**

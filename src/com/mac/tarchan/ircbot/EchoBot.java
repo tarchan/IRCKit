@@ -185,4 +185,16 @@ public class EchoBot extends IRCBotAdapter
 	{
 		log.info(String.format("%1$s (%3$s) names %2$s", channel, Arrays.asList(names), names.length));
 	}
+
+	@Override
+	public void onChannelMode(String channel, String mode)
+	{
+		log.info(String.format("%1$s has changed channel mode %2$s", channel, mode));
+	}
+
+	@Override
+	public void onUserMode(String channel, String mode, String nick)
+	{
+		log.info(String.format("%1$s/%3$s has changed user mode %2$s", channel, mode, nick));
+	}
 }

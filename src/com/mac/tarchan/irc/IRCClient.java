@@ -157,7 +157,7 @@ public class IRCClient
 	 * @param nick ニックネーム
 	 * @return IRCクライアント
 	 */
-	public IRCClient setNick(String nick)
+	public IRCClient setUserNick(String nick)
 	{
 		this.nick = nick;
 		return this;
@@ -213,29 +213,7 @@ public class IRCClient
 	 */
 	public IRCClient start() throws IOException
 	{
-//		InetAddress inet = InetAddress.getByName(host);
-//		socket = new Socket(host, port);
-//		log.info("connect: " + inet);
-////		new Thread(new InputListener(this)).start();
-//		messageQueue.execute(new InputTask(this));
-		connect(host, port);
-//		out = new PrintStream(socket.getOutputStream(), true);
-//		if (pass != null && pass.trim().length() != 0) sendMessage("PASS %s", pass);
-//		sendMessage("NICK %s", nick);
-//		sendMessage("USER %s %d %s :%s", nick, mode, host, nick);
-		login(nick, nick, nick, mode, pass);
-//		sendMessage("USER %s %s bla :%s", nick, host, nick);
-//		BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-//		while (true)
-//		{
-//			String line = in.readLine();
-//			if (line == null) break;
-//			System.out.println(new String(line.getBytes(), "JIS"));
-//		}
-//		log.info("connected: " + host);
-//		socket.close();
-		start(encoding);
-		return this;
+		return connect(host, port).login(nick, nick, nick, mode, pass).start(encoding);
 	}
 
 	/**

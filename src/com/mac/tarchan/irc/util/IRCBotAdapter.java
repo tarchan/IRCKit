@@ -66,17 +66,17 @@ public abstract class IRCBotAdapter
 				public void onMessage(IRCEvent event)
 				{
 					IRCMessage message = event.getMessage();
-					if (isDM(message))
+					if (message.isCTCP())
+					{
+						IRCBotAdapter.this.onCtcpQuery(message);
+					}
+					else if (isDM(message))
 					{
 						IRCBotAdapter.this.onDirectMessage(message);
 					}
-					else if (!message.isCTCP())
-					{
-						IRCBotAdapter.this.onMessage(message);
-					}
 					else
 					{
-						IRCBotAdapter.this.onCtcpQuery(message);
+						IRCBotAdapter.this.onMessage(message);
 					}
 				}
 			})
@@ -86,13 +86,13 @@ public abstract class IRCBotAdapter
 				public void onMessage(IRCEvent event)
 				{
 					IRCMessage message = event.getMessage();
-					if (!message.isCTCP())
+					if (message.isCTCP())
 					{
-						IRCBotAdapter.this.onNotice(message);
+						IRCBotAdapter.this.onCtcpReply(message);
 					}
 					else
 					{
-						IRCBotAdapter.this.onCtcpReply(message);
+						IRCBotAdapter.this.onNotice(message);
 					}
 				}
 			})
@@ -127,6 +127,25 @@ public abstract class IRCBotAdapter
 					String text = message.getTrailing();
 					IRCPrefix prefix = message.getPrefix();
 					IRCBotAdapter.this.onQuit(prefix, text);
+				}
+			})
+			.on("mode", new IRCHandler()
+			{
+				@Override
+				public void onMessage(IRCEvent event)
+				{
+					IRCMessage message = event.getMessage();
+					String channel = message.getParam0();
+					String mode = message.getParam1();
+					if (message.getParamsCount() < 3)
+					{
+						IRCBotAdapter.this.onChannelMode(channel, mode);
+					}
+					else
+					{
+						String nick = message.getParam2();
+						IRCBotAdapter.this.onUserMode(channel, mode, nick);
+					}
 				}
 			})
 			.on("353", new IRCHandler()
@@ -270,7 +289,7 @@ public abstract class IRCBotAdapter
 	 */
 	public void onNick(String oldNick, String newNick)
 	{
-		if (isUserNick(oldNick)) irc.setNick(newNick);
+		if (isUserNick(oldNick)) irc.setUserNick(newNick);
 	}
 
 	/**
@@ -321,19 +340,24 @@ public abstract class IRCBotAdapter
 	}
 
 	/**
-	 * ユーザーのモードが変更されたときに呼び出されます。
+	 * チャンネルのモードが変更されたときに呼び出されます。
+	 * 
+	 * @param channel チャンネル名
+	 * @param mode チャンネルモード
 	 */
-	public void onUserMode()
+	public void onChannelMode(String channel, String mode)
 	{
-		// TODO MODE
 	}
 
 	/**
-	 * チャンネルのモードが変更されたときに呼び出されます。
+	 * ユーザーのモードが変更されたときに呼び出されます。
+	 * 
+	 * @param channel チャンネル名
+	 * @param mode チャンネルモード
+	 * @param nick ニックネーム
 	 */
-	public void onChannelMode()
+	public void onUserMode(String channel, String mode, String nick)
 	{
-		// TODO MODE
 	}
 
 	/**
