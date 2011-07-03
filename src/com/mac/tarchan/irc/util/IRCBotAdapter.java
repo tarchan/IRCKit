@@ -13,6 +13,7 @@ import com.mac.tarchan.irc.IRCClient;
 import com.mac.tarchan.irc.IRCEvent;
 import com.mac.tarchan.irc.IRCHandler;
 import com.mac.tarchan.irc.IRCMessage;
+import com.mac.tarchan.irc.IRCPrefix;
 
 /**
  * IRCメッセージを受け取る抽象アダプタクラスです。
@@ -83,8 +84,8 @@ public abstract class IRCBotAdapter
 				{
 					IRCMessage message = event.getMessage();
 					String channel = message.getTrailing();
-					String user = message.getPrefix();
-					IRCBotAdapter.this.onJoin(channel, user);
+					IRCPrefix prefix = message.getPrefix();
+					IRCBotAdapter.this.onJoin(channel, prefix);
 				}
 			})
 			.on("topic", new IRCHandler()
@@ -149,11 +150,11 @@ public abstract class IRCBotAdapter
 	 * 
 	 * @param nick ニックネーム
 	 * @return ユーザのニックネームの場合は true
-	 * @see IRCClient#getNick()
+	 * @see IRCClient#getUserNick()
 	 */
 	public boolean isUserNick(String nick)
 	{
-		String userNick = irc.getNick();
+		String userNick = irc.getUserNick();
 		return userNick.equals(nick);
 	}
 
@@ -189,17 +190,17 @@ public abstract class IRCBotAdapter
 	/**
 	 * チャンネルに参加したときに呼び出されます。
 	 * 
-	 * @param channel チャンネル
-	 * @param user ユーザー
+	 * @param channel チャンネル名
+	 * @param prefix プレフィックス
 	 */
-	public void onJoin(String channel, String user)
+	public void onJoin(String channel, IRCPrefix prefix)
 	{
 	}
 
 	/**
 	 * トピックが変更されたときに呼び出されます。
 	 * 
-	 * @param channel チャンネル
+	 * @param channel チャンネル名
 	 * @param topic トピック
 	 */
 	public void onTopic(String channel, String topic)

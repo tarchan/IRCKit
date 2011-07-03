@@ -13,7 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.mac.tarchan.irc.IRCMessage;
-import com.mac.tarchan.irc.IRCName;
+import com.mac.tarchan.irc.IRCPrefix;
 import com.mac.tarchan.irc.util.IRCBotAdapter;
 
 /**
@@ -85,7 +85,7 @@ public class EchoBot extends IRCBotAdapter
 	@Override
 	public void onMessage(IRCMessage message)
 	{
-		String nick = message.getPrefix();
+		String nick = message.getPrefix().getNick();
 		String chan = message.getParam0();
 		String text = message.getTrailing();
 		log.debug("channel: " + chan);
@@ -116,7 +116,7 @@ public class EchoBot extends IRCBotAdapter
 	@Override
 	public void onCtcpQuery(IRCMessage message)
 	{
-		String nick = message.getPrefix();
+		String nick = message.getPrefix().getNick();
 //		String chan = message.getParam(0);
 		String text = message.getTrailing();
 		log.debug(String.format("CTCP: %s: %s", nick, text));
@@ -157,9 +157,9 @@ public class EchoBot extends IRCBotAdapter
 	}
 
 	@Override
-	public void onJoin(String channel, String user)
+	public void onJoin(String channel, IRCPrefix prefix)
 	{
-		log.info(String.format("%3$s join %1$s (%2$s)", channel, user, IRCName.getSimpleName(user)));
+		log.info(String.format("%3$s join %1$s (%2$s)", channel, prefix, prefix.getNick()));
 	}
 
 	@Override

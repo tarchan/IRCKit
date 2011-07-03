@@ -30,7 +30,7 @@ public class IRCMessage
 
 	long when;
 
-	String prefix;
+	IRCPrefix prefix;
 
 	String command;
 
@@ -62,7 +62,7 @@ public class IRCMessage
 		Matcher prefix_m = IRC_PBNF.matcher(text);
 		if (prefix_m.find())
 		{
-			prefix = prefix_m.group(1);
+			prefix = new IRCPrefix(prefix_m.group(1));
 			command = prefix_m.group(2);
 			middle = prefix_m.group(3);
 			int pos = middle.indexOf(" :");
@@ -96,7 +96,7 @@ public class IRCMessage
 	 * 
 	 * @return プレフィックス
 	 */
-	public String getPrefix()
+	public IRCPrefix getPrefix()
 	{
 		return prefix;
 	}
@@ -177,7 +177,7 @@ public class IRCMessage
 	 * CTCPメッセージを区切り文字で分割します。
 	 * 
 	 * @return CTCPメッセージの配列
-	 * @see CTCP
+	 * @see #CTCP
 	 */
 	public String[] splitCTCP()
 	{
@@ -196,6 +196,7 @@ public class IRCMessage
 	 * 
 	 * @param text テキスト
 	 * @return CTCPメッセージ
+	 * @see #CTCP
 	 */
 	public static String wrapCTCP(String text)
 	{

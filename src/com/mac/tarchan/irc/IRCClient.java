@@ -130,7 +130,7 @@ public class IRCClient
 	 * 
 	 * @return ニックネーム
 	 */
-	public String getNick()
+	public String getUserNick()
 	{
 		return nick;
 	}
