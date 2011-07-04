@@ -116,9 +116,7 @@ public class IRCClient
 	 */
 	public static IRCClient createClient(String host, int port, String nick, String pass, String encoding)
 	{
-		IRCClient client = new IRCClient(host, port, nick, pass, encoding);
-		// TODO ホストアドレス毎にキャッシュする
-		return client;
+		return new IRCClient(host, port, nick, pass, encoding);
 	}
 
 	/**

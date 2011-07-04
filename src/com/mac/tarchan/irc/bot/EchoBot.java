@@ -7,7 +7,11 @@
  */
 package com.mac.tarchan.irc.bot;
 
+import java.io.IOException;
+import java.math.BigInteger;
+import java.net.InetAddress;
 import java.util.Arrays;
+import java.util.Locale;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -187,15 +191,41 @@ public class EchoBot extends BotAdapter
 			}
 			else if (ctcp.startsWith("TIME"))
 			{
-				irc.ctcpReply(nick, String.format("TIME %tc", System.currentTimeMillis()));
+				irc.ctcpReply(nick, String.format(Locale.ENGLISH, "TIME %tc", System.currentTimeMillis()));
 			}
 			else if (ctcp.startsWith("VERSION"))
 			{
-				irc.ctcpReply(nick, "VERSION IRCKit for Pure Java");
+				irc.ctcpReply(nick, "VERSION IRCKit for Java");
+			}
+			else if (ctcp.startsWith("USERINFO"))
+			{
+				irc.ctcpReply(nick, "USERINFO " + irc.getUserNick());
+			}
+			else if (ctcp.startsWith("CLIENTINFO"))
+			{
+				irc.ctcpReply(nick, "CLIENTINFO PING TIME VERSION USERINFO CLIENTINFO DCC");
+			}
+			else if (ctcp.startsWith("DCC SEND"))
+			{
+				try
+				{
+					// TODO DCC SEND
+					String[] params = ctcp.substring("DCC SEND ".length()).split(" ");
+					String file = params[0];
+					byte[] addr = new BigInteger(params[1]).toByteArray();
+					InetAddress inet = InetAddress.getByAddress(addr);
+					int port = Integer.parseInt(params[2]);
+					long size = Long.parseLong(params[3]);
+					log.info(String.format("%s %,d bytes %s %s", file, size, inet, port));
+				}
+				catch (IOException x)
+				{
+					log.error(x);
+				}
 			}
 			else
 			{
-				irc.ctcpQuery(nick, ctcp);
+				// ignore
 			}
 		}
 	}

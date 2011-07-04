@@ -222,8 +222,8 @@ public abstract class BotAdapter
 					}
 				}
 			})
-			.on("ping", HandlerBuilder.create(this, "onPing", "message.trailing"))
-			.on("error", HandlerBuilder.create(this, "onError", "message.trailing"))
+			.on("ping", HandlerBuilder.create(this, "onPing", "message.trail"))
+			.on("error", HandlerBuilder.create(this, "onError", "message.trail"))
 			.on("001", HandlerBuilder.create(this, "onStart"))
 			.on("433", HandlerBuilder.create(this, "onNickConflict", "message.param1"))
 			.on(new IRCHandler()
