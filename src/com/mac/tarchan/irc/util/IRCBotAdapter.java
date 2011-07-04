@@ -19,8 +19,7 @@ import com.mac.tarchan.irc.IRCPrefix;
 
 /**
  * IRCメッセージを受け取る抽象アダプタクラスです。
- * このクラスはIRCボットの作成を容易にするためのものです。
- * IRCEvent リスナーを作成するには、このクラスを拡張して関係のあるイベントに対するメソッドをオーバーライドします。
+ * IRCボットを作成するには、このクラスを拡張して関係のあるイベントに対するメソッドをオーバーライドします。
  */
 public abstract class IRCBotAdapter
 {
@@ -37,7 +36,7 @@ public abstract class IRCBotAdapter
 	protected boolean autoPingPong = true;
 
 	/** 自動再接続 */
-	protected boolean autoRecconect = true;
+	protected boolean autoRecconection = true;
 
 	/**
 	 * IRCネットワークにログインします。
@@ -135,10 +134,10 @@ public abstract class IRCBotAdapter
 					IRCMessage message = event.getMessage();
 					String trail = message.getTrail();
 					IRCPrefix prefix = message.getPrefix();
-					IRCBotAdapter.this.onQuit(prefix, trail);
+					IRCBotAdapter.this.onQuit(trail, prefix);
 					if (trail.equals("Killed"))
 					{
-						IRCBotAdapter.this.onKilled(prefix, trail);
+						IRCBotAdapter.this.onKilled(trail, prefix);
 					}
 				}
 			})
@@ -233,7 +232,7 @@ public abstract class IRCBotAdapter
 				public void onMessage(IRCEvent event)
 				{
 					IRCMessage message = event.getMessage();
-					if (message.isNumelic()) IRCBotAdapter.this.onNumelicReply(message);
+					if (message.isNumeric()) IRCBotAdapter.this.onNumericReply(message);
 				}
 			})
 			.start();
@@ -322,16 +321,6 @@ public abstract class IRCBotAdapter
 	}
 
 	/**
-	 * チャンネルに参加したときに呼び出されます。
-	 * 
-	 * @param channel チャンネル名
-	 * @param prefix プレフィックス
-	 */
-	public void onJoin(String channel, IRCPrefix prefix)
-	{
-	}
-
-	/**
 	 * ニックネームリストが変更されたときに呼び出されます。
 	 * 
 	 * @param channel チャンネル名
@@ -352,37 +341,6 @@ public abstract class IRCBotAdapter
 	}
 
 	/**
-	 * チャンネルを離脱したときに呼び出されます。
-	 * 
-	 * @param channel チャンネル名
-	 * @param prefix ユーザー
-	 */
-	public void onPart(String channel, IRCPrefix prefix)
-	{
-	}
-
-	/**
-	 * 終了したときに呼び出されます。
-	 * 
-	 * @param prefix ユーザー
-	 * @param trail 終了メッセージ
-	 */
-	public void onQuit(IRCPrefix prefix, String trail)
-	{
-	}
-
-	/**
-	 * 	ニックネームが衝突してサーバから強制的に排除されたときに呼び出されます。
-	 * 
-	 * @param prefix ユーザー
-	 * @param trail 終了メッセージ
-	 * @see <a href="http://yoshino.tripod.com/73th/data/irccode.htm#quitmessage">server が付加する Quit Message</a>
-	 */
-	public void onKilled(IRCPrefix prefix, String trail)
-	{
-	}
-
-	/**
 	 * チャンネルのモードが変更されたときに呼び出されます。
 	 * 
 	 * @param channel チャンネル名
@@ -393,13 +351,112 @@ public abstract class IRCBotAdapter
 	}
 
 	/**
-	 * ユーザーのモードが変更されたときに呼び出されます。
+	 * ユーザのモードが変更されたときに呼び出されます。
 	 * 
 	 * @param channel チャンネル名
-	 * @param mode チャンネルモード
+	 * @param mode ユーザモード
 	 * @param nick ニックネーム
 	 */
 	public void onUserMode(String channel, String mode, String nick)
+	{
+	}
+
+	/**
+	 * チャンネルに参加したときに呼び出されます。
+	 * 
+	 * @param channel チャンネル名
+	 * @param prefix ユーザ名
+	 */
+	public void onJoin(String channel, IRCPrefix prefix)
+	{
+	}
+
+	/**
+	 * チャンネルを離脱したときに呼び出されます。
+	 * 
+	 * @param channel チャンネル名
+	 * @param prefix ユーザ名
+	 */
+	public void onPart(String channel, IRCPrefix prefix)
+	{
+	}
+
+	/**
+	 * 終了したときに呼び出されます。
+	 * 
+	 * @param trail 終了メッセージ
+	 * @param prefix ユーザ名
+	 */
+	public void onQuit(String trail, IRCPrefix prefix)
+	{
+	}
+
+	/**
+	 * 	ニックネームが衝突してサーバから強制的に排除されたときに呼び出されます。
+	 * 
+	 * @param trail 終了メッセージ
+	 * @param prefix ユーザ名
+	 * @see <a href="http://yoshino.tripod.com/73th/data/irccode.htm#quitmessage">server が付加する Quit Message</a>
+	 */
+	public void onKilled(String trail, IRCPrefix prefix)
+	{
+	}
+
+	/**
+	 * IRCネットワークの接続を確認するメッセージを受け取ったときに呼び出されます。
+	 * デフォルトの実装は、IRCネットワークの接続を継続します。
+	 * 自動継続したくないときは、このメソッドをオーバーライドしてください。
+	 * 
+	 * @param trail テキスト
+	 * @see IRCClient#pong(String)
+	 */
+	public void onPing(String trail)
+	{
+		if (autoPingPong) irc.pong(trail);
+	}
+
+	/**
+	 * エラーメッセージを受け取ったときに呼び出されます。
+	 * IRCネットワークが切断したときは {@link #onStop()} を呼び出します。
+	 * 
+	 * @param trail エラーメッセージ
+	 * @see IRCClient#isClosed()
+	 * @see #onStop()
+	 */
+	public void onError(String trail)
+	{
+		if (irc.isClosed()) onStop();
+	}
+
+	/**
+	 * IRCネットワークが切断したときに呼び出されます。
+	 * 
+	 * @see IRCClient#start()
+	 * @see #onDestroy()
+	 */
+	public void onStop()
+	{
+		if (autoRecconection)
+		{
+			try
+			{
+				irc.start();
+			}
+			catch (IOException x)
+			{
+				throw new RuntimeException("IRCネットワークに再接続できません。", x);
+			}
+		}
+		else
+		{
+			onDestroy();
+		}
+	}
+
+	/**
+	 * IRCネットワークの再接続を止めたときに呼び出されます。
+	 */
+	public void onDestroy()
 	{
 	}
 
@@ -431,6 +488,15 @@ public abstract class IRCBotAdapter
 	}
 
 	/**
+	 * ニュメリックリプライを受け取ったときに呼び出されます。
+	 * 
+	 * @param message IRCメッセージ
+	 */
+	public void onNumericReply(IRCMessage message)
+	{
+	}
+
+	/**
 	 * CTCP問い合わせメッセージを受け取ったときに呼び出されます。
 	 * 
 	 * @param message IRCメッセージ
@@ -449,78 +515,11 @@ public abstract class IRCBotAdapter
 	}
 
 	/**
-	 * ニューメリックリプライを受け取ったときに呼び出されます。
-	 * 
-	 * @param message IRCメッセージ
-	 */
-	public void onNumelicReply(IRCMessage message)
-	{
-	}
-
-	/**
 	 * ファイル送信メッセージを受け取ったときに呼び出されます。
 	 * 
 	 * @param message IRCメッセージ
 	 */
 	public void onDccSend(IRCMessage message)
-	{
-	}
-
-	/**
-	 * IRCネットワークの接続を確認するメッセージを受け取ったときに呼び出されます。
-	 * デフォルトの実装は、IRCネットワークの接続を継続します。
-	 * 自動継続したくないときは、このメソッドをオーバーライドしてください。
-	 * 
-	 * @param text テキスト
-	 * @see IRCClient#pong(String)
-	 */
-	public void onPing(String text)
-	{
-		if (autoPingPong) irc.pong(text);
-	}
-
-	/**
-	 * エラーメッセージを受け取ったときに呼び出されます。
-	 * IRCネットワークが切断したときは {@link #onStop()} を呼び出します。
-	 * 
-	 * @param text エラーメッセージ
-	 * @see IRCClient#isClosed()
-	 * @see #onStop()
-	 */
-	public void onError(String text)
-	{
-		if (irc.isClosed()) onStop();
-	}
-
-	/**
-	 * IRCネットワークが切断したときに呼び出されます。
-	 * 
-	 * @see IRCClient#start()
-	 * @see #onDestroy()
-	 */
-	public void onStop()
-	{
-		if (autoRecconect)
-		{
-			try
-			{
-				irc.start();
-			}
-			catch (IOException x)
-			{
-				throw new RuntimeException("IRCネットワークに再接続できません。", x);
-			}
-		}
-		else
-		{
-			onDestroy();
-		}
-	}
-
-	/**
-	 * IRCネットワークの再接続を止めたときに呼び出されます。
-	 */
-	public void onDestroy()
 	{
 	}
 }

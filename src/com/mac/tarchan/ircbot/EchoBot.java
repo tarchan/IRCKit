@@ -77,16 +77,16 @@ public class EchoBot extends IRCBotAdapter
 	}
 
 	@Override
-	public void onPing(String text)
+	public void onPing(String trail)
 	{
-		log.info("接続確認: " + text);
-		super.onPing(text);
+		log.info("接続確認: " + trail);
+		super.onPing(trail);
 	}
 
 	@Override
-	public void onError(String text)
+	public void onError(String trail)
 	{
-		log.error(text);
+		log.error(trail);
 	}
 
 	@Override
@@ -102,9 +102,9 @@ public class EchoBot extends IRCBotAdapter
 	}
 
 	@Override
-	public void onQuit(IRCPrefix prefix, String text)
+	public void onQuit(String trail, IRCPrefix prefix)
 	{
-		log.info(String.format("%3$s has left IRC %1$s (%2$s)", text, prefix, prefix.getNick()));
+		log.info(String.format("%3$s has left IRC %1$s (%2$s)", trail, prefix, prefix.getNick()));
 	}
 
 	@Override
