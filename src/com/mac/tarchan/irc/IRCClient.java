@@ -264,6 +264,16 @@ public class IRCClient
 	}
 
 	/**
+	 * 接続がクローズしているかどうか判定します。
+	 * 
+	 * @return 接続がクローズしている場合は true
+	 */
+	public boolean isClosed()
+	{
+		return socket != null && socket.isClosed();
+	}
+
+	/**
 	 * 入力ストリームを返します。
 	 * 
 	 * @return 入力ストリーム

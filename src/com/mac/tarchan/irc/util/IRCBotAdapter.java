@@ -28,7 +28,16 @@ public abstract class IRCBotAdapter
 	protected IRCClient irc;
 
 	/** ニックネームリスト */
-	ArrayList<String> nicklist = new ArrayList<String>();
+	protected ArrayList<String> nicklist = new ArrayList<String>();
+
+	/** 自動ニックネーム */
+	protected boolean autoNickname = true;
+
+	/** 自動継続 */
+	protected boolean autoPingPong = true;
+
+	/** 自動再接続 */
+	protected boolean autoRecconect = true;
 
 	/**
 	 * IRCネットワークにログインします。
@@ -200,7 +209,14 @@ public abstract class IRCBotAdapter
 					IRCMessage message = event.getMessage();
 					String oldNick = message.getPrefix().getNick();
 					String newNick = message.getTrailing();
-					IRCBotAdapter.this.onNick(oldNick, newNick);
+					try
+					{
+						IRCBotAdapter.this.onNick(oldNick, newNick);
+					}
+					finally
+					{
+						if (isUserNick(oldNick)) irc.setUserNick(newNick);
+					}
 				}
 			})
 			.on("ping", HandlerBuilder.create(this, "onPing", "message.trailing"))
@@ -288,7 +304,7 @@ public abstract class IRCBotAdapter
 	 */
 	public void onNickConflict(String conflictNick)
 	{
-		irc.nick(conflictNick + "_");
+		if (autoNickname) irc.nick(conflictNick + "_");
 	}
 
 	/**
@@ -299,7 +315,6 @@ public abstract class IRCBotAdapter
 	 */
 	public void onNick(String oldNick, String newNick)
 	{
-		if (isUserNick(oldNick)) irc.setUserNick(newNick);
 	}
 
 	/**
@@ -446,25 +461,45 @@ public abstract class IRCBotAdapter
 	 */
 	public void onPing(String text)
 	{
-		irc.pong(text);
+		if (autoPingPong) irc.pong(text);
 	}
 
 	/**
 	 * エラーメッセージを受け取ったときに呼び出されます。
+	 * IRCネットワークが切断したときは {@link #onStop()} を呼び出します。
 	 * 
 	 * @param text エラーメッセージ
+	 * @see IRCClient#isClosed()
+	 * @see #onStop()
 	 */
 	public void onError(String text)
 	{
-		// TODO 切断したときに onStop を呼び出す
+		if (irc.isClosed()) onStop();
 	}
 
 	/**
 	 * IRCネットワークが切断したときに呼び出されます。
+	 * 
+	 * @see IRCClient#start()
+	 * @see #onDestroy()
 	 */
 	public void onStop()
 	{
-		// TODO 切断したときに再接続する
+		if (autoRecconect)
+		{
+			try
+			{
+				irc.start();
+			}
+			catch (IOException x)
+			{
+				throw new RuntimeException("IRCネットワークに再接続できません。", x);
+			}
+		}
+		else
+		{
+			onDestroy();
+		}
 	}
 
 	/**
