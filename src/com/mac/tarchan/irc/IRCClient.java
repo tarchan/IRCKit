@@ -339,9 +339,10 @@ public class IRCClient
 	}
 
 	/**
-	 * 新しいニックネームを設定します。
+	 * 指定されたニックネームに変更します。
+	 * 他のクライアントが使っているニックネームと同一であることが判明した場合は、無視されます。
 	 * 
-	 * @param nick 新しいニックネーム
+	 * @param nick ニックネーム
 	 * @return IRCクライアント
 	 */
 	public IRCClient nick(String nick)
@@ -350,8 +351,28 @@ public class IRCClient
 	}
 
 	/**
+	 * クライアントのセッションを、デフォルトメッセージと共に終了します。
+	 * 
+	 * @return IRCクライアント
+	 */
+	public IRCClient quit()
+	{
+		return postMessage("QUIT");
+	}
+
+	/**
+	 * クライアントのセッションを、終了メッセージと共に終了します。
+	 * 
+	 * @param message 終了メッセージ
+	 * @return IRCクライアント
+	 */
+	public IRCClient quit(String message)
+	{
+		return postMessage("QUIT :%s", message);
+	}
+
+	/**
 	 * 指定されたチャンネルに参加します。
-	 * IRCサーバに JOIN コマンドを送信します。
 	 * 
 	 * @param channel チャンネル名
 	 * @return IRCクライアント
@@ -362,8 +383,20 @@ public class IRCClient
 	}
 
 	/**
-	 * 指定されたチャンネルを離脱します。
-	 * IRCサーバに PART コマンドを送信します。
+	 * 指定されたチャンネルに参加します。
+	 * キーワードが設定されているチャンネルに入るときは、キーワードを正しく入力しなくてはいけません。
+	 * 
+	 * @param channel チャンネル名
+	 * @param keyword キーワード
+	 * @return IRCクライアント
+	 */
+	public IRCClient join(String channel, String keyword)
+	{
+		return postMessage("JOIN %s %s", channel, keyword);
+	}
+
+	/**
+	 * 指定されたチャンネルから離脱します。
 	 * 
 	 * @param channel チャンネル名
 	 * @return IRCクライアント
@@ -374,79 +407,147 @@ public class IRCClient
 	}
 
 	/**
-	 * IRCサーバとの接続を継続します。
-	 * IRCサーバに PONG コマンドを送信します。
+	 * 指定されたチャンネルから離脱メッセージと共に離脱します。
 	 * 
-	 * @param payload ペイロード
+	 * @param channel チャンネル名
+	 * @param message 離脱メッセージ
 	 * @return IRCクライアント
 	 */
-	public IRCClient pong(String payload)
+	public IRCClient part(String channel, String message)
 	{
-		return postMessage("PONG :%s", payload);
+		return postMessage("PART %s :%s", channel, message);
 	}
 
 	/**
-	 * 指定されたテキストを送信します。
-	 * IRCサーバに PRIVMSG コマンドを送信します。
+	 * 指定されたターゲットのモードを変更します。
 	 * 
-	 * @param receiver テキストの宛先
-	 * @param text テキスト
+	 * @param target チャンネル名またはニックネーム
+	 * @param mode モード
 	 * @return IRCクライアント
 	 */
-	public IRCClient privmsg(String receiver, String text)
+	public IRCClient mode(String target, String mode)
 	{
-		return postMessage("PRIVMSG %s :%s", receiver, text);
+		return postMessage("MODE %s %s", target, mode);
 	}
 
 	/**
-	 * 指定されたテキストを送信します。
-	 * IRCサーバに NOTICE コマンドを送信します。
+	 * 指定されたチャンネルのトピックを取得します。
 	 * 
-	 * @param receiver テキストの宛先
+	 * @param channel チャンネル名
+	 * @return IRCクライアント
+	 */
+	public IRCClient topic(String channel)
+	{
+		return postMessage("TOPIC %s", channel);
+	}
+
+	/**
+	 * 指定されたチャンネルのトピックを変更します。
+	 * 
+	 * @param channel チャンネル名
+	 * @param topic トピック
+	 * @return IRCクライアント
+	 */
+	public IRCClient topic(String channel, String topic)
+	{
+		return postMessage("TOPIC %s :%s", channel, topic);
+	}
+
+	/**
+	 * 指定されたチャンネルの情報を取得します。
+	 * 
+	 * @param channel チャンネル名
+	 * @return IRCクライアント
+	 */
+	public IRCClient list(String channel)
+	{
+		return postMessage("LIST %s", channel);
+	}
+
+	/**
+	 * 指定されたチャンネルにクライアントを招待します。
+	 * 
+	 * @param nick ニックネーム
+	 * @param channel チャンネル名
+	 * @return IRCクライアント
+	 */
+	public IRCClient invite(String nick, String channel)
+	{
+		return postMessage("INVITE %s %s", nick, channel);
+	}
+
+	/**
+	 * 指定されたチャンネルからクライアントを追放します。
+	 * 
+	 * @param channel チャンネル名
+	 * @param user クライアント
+	 * @param comment 追放メッセージ
+	 * @return IRCクライアント
+	 */
+	public IRCClient kick(String channel, String user, String comment)
+	{
+		return postMessage("KICK %s %s :%s", channel, user, comment);
+	}
+
+	/**
+	 * 指定されたターゲットにテキストを送信します。
+	 * 
+	 * @param target チャンネル名またはニックネーム
 	 * @param text テキスト
 	 * @return IRCクライアント
 	 */
-	public IRCClient notice(String receiver, String text)
+	public IRCClient privmsg(String target, String text)
 	{
-		return postMessage("NOTICE %s :%s", receiver, text);
+		return postMessage("PRIVMSG %s :%s", target, text);
+	}
+
+	/**
+	 * 指定されたターゲットにテキストを送信します。
+	 * 
+	 * @param target チャンネル名またはニックネーム
+	 * @param text テキスト
+	 * @return IRCクライアント
+	 */
+	public IRCClient notice(String target, String text)
+	{
+		return postMessage("NOTICE %s :%s", target, text);
 	}
 
 	/**
 	 * CTCPクエリを送信します。
 	 * 
-	 * @param receiver テキストの宛先
+	 * @param target チャンネル名またはニックネーム
 	 * @param text テキスト
 	 * @return IRCクライアント
 	 * @see #privmsg(String, String)
 	 */
-	public IRCClient ctcpQuery(String receiver, String text)
+	public IRCClient ctcpQuery(String target, String text)
 	{
-		return privmsg(receiver, IRCMessage.wrapCTCP(text));
+		return privmsg(target, IRCMessage.wrapCTCP(text));
 	}
 
 	/**
 	 * CTCPリプライを送信します。
 	 * 
-	 * @param receiver テキストの宛先
+	 * @param target チャンネル名またはニックネーム
 	 * @param text テキスト
 	 * @return IRCクライアント
 	 * @see #notice(String, String)
 	 */
-	public IRCClient ctcpReply(String receiver, String text)
+	public IRCClient ctcpReply(String target, String text)
 	{
-		return notice(receiver, IRCMessage.wrapCTCP(text));
+		return notice(target, IRCMessage.wrapCTCP(text));
 	}
 
 	/**
-	 * 指定されたメッセージを送信して、IRCサーバとの接続を終了します。
-	 * IRCサーバに QUIT コマンドを送信します。
+	 * IRCサーバとの接続を継続します。
 	 * 
-	 * @param text QUITメッセージ
+	 * @param server サーバ名
 	 * @return IRCクライアント
 	 */
-	public IRCClient quit(String text)
+	public IRCClient pong(String server)
 	{
-		return postMessage("QUIT :%s", text);
+		return postMessage("PONG :%s", server);
 	}
 
 	/**
@@ -473,14 +574,13 @@ public class IRCClient
 				}
 				catch (Throwable x)
 				{
-					log.error("IRCハンドラの実行中にエラーが発生しました。", x);
-					x.printStackTrace();
+					log.error("IRCメッセージハンドラを中止しました。", x);
 				}
 			}
 		}
 		catch (Throwable x)
 		{
-			log.error("IRCメッセージの処理を中止しました。: " + text, x);
+			log.error("IRCメッセージが不正です。: " + text, x);
 		}
 	}
 }
