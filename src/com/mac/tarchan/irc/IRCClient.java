@@ -53,8 +53,8 @@ public class IRCClient
 	/** 入出力ソケット */
 	protected Socket socket;
 
-	/** メッセージキュー */
-	protected ExecutorService messageQueue = Executors.newFixedThreadPool(2);
+	/** タスクキュー */
+	protected ExecutorService taskQueue = Executors.newFixedThreadPool(2);
 
 	/** メッセージハンドラ */
 	protected ArrayList<IRCHandler> handlers = new ArrayList<IRCHandler>();
@@ -227,7 +227,7 @@ public class IRCClient
 	protected IRCClient start(String encoding) throws IOException
 	{
 		log.info("イベントループを開始します。");
-		messageQueue.execute(new InputTask(this, encoding));
+		taskQueue.execute(new InputTask(this, encoding));
 		return this;
 	}
 
@@ -258,7 +258,7 @@ public class IRCClient
 	public IRCClient close() throws IOException
 	{
 		socket.close();
-		messageQueue.shutdown();
+		taskQueue.shutdown();
 		log.info("disconnected. " + socket.isConnected() + ", " + socket.isClosed());
 		return this;
 	}
@@ -303,7 +303,7 @@ public class IRCClient
 	 */
 	public IRCClient postMessage(String text)
 	{
-		if (text != null && text.trim().length() > 0) messageQueue.execute(new OutputTask(this, text));
+		if (text != null && text.trim().length() > 0) taskQueue.execute(new OutputTask(this, text));
 		return this;
 	}
 
@@ -583,26 +583,39 @@ public class IRCClient
 			log.error("IRCメッセージが不正です。: " + text, x);
 		}
 	}
+
+	/**
+	 * 入出力タスクで例外が発生したときに呼び出されます。
+	 * 
+	 * @param x 例外
+	 */
+	protected void fireError(Throwable x)
+	{
+		log.error(x);
+	}
 }
 
 /**
- * InputTask
+ * 入力タスク
  */
 class InputTask implements Runnable
 {
-	IRCClient irc;
+	/** IRCクライアント */
+	private IRCClient irc;
 
-	BufferedReader in;
+	/** 入力ストリーム */
+	private BufferedReader in;
 
-//	String encoding;
-
-	InputTask(IRCClient irc, String encoding) throws IOException
+	/**
+	 * 入力ストリームがクローズされるまで読み続ける入力タスクを構築します。
+	 * 
+	 * @param irc IRCクライアント
+	 * @param encoding 文字コード
+	 * @throws IOException 入力ストリームをオープンできない場合
+	 */
+	public InputTask(IRCClient irc, String encoding) throws IOException
 	{
 		this.irc = irc;
-//		in = new BufferedReader(new InputStreamReader(client.getInputStream()));
-//		String encoding = "JIS";
-//		String encoding = irc.getEncoding();
-//		in = new BufferedReader(new InputStreamReader(client.getInputStream(), encoding));
 		in = new BufferedReader(new InputStreamReader(new KanaInputFilter(irc.getInputStream()), encoding));
 	}
 
@@ -614,14 +627,13 @@ class InputTask implements Runnable
 			{
 				String line = in.readLine();
 				if (line == null) break;
-//				System.out.println(new String(line.getBytes(), encoding));
 				irc.fireMessage(line);
 				Thread.yield();
 			}
 		}
 		catch (IOException x)
 		{
-			x.printStackTrace();
+			irc.fireError(new IOException("入力ストリームを読み込めません。", x));
 		}
 		finally
 		{
@@ -631,27 +643,36 @@ class InputTask implements Runnable
 			}
 			catch (IOException x)
 			{
-				x.printStackTrace();
+				irc.fireError(new IOException("入力ストリームをクローズできません。", x));
 			}
 		}
 	}
 }
 
 /**
- * OutputTask
+ * 出力タスク
  */
 class OutputTask implements Runnable
 {
 	/** ログ */
 	private static final Log log = LogFactory.getLog(OutputTask.class);
 
-	IRCClient irc;
+	/** IRCクライアント */
+	private IRCClient irc;
 
-	String text;
+	/** 送信するテキスト */
+	private String text;
 
-	PrintStream out;
+	/** 出力ストリーム */
+	private PrintStream out;
 
-	OutputTask(IRCClient irc, String text)
+	/**
+	 * 指定されたテキストをひとつ送信するタスクを構築します。
+	 * 
+	 * @param irc IRCクライアント
+	 * @param text 送信するテキスト
+	 */
+	public OutputTask(IRCClient irc, String text)
 	{
 		this.irc = irc;
 		this.text = text;
@@ -662,14 +683,14 @@ class OutputTask implements Runnable
 		try
 		{
 			log.info(text);
-//			client.out.println(text);
-			out = new PrintStream(irc.getOutputStream(), true, "JIS");
+			out = new PrintStream(irc.getOutputStream(), true, irc.getEncoding());
 			out.println(text);
 //			out.close();
 		}
-		catch (Throwable x)
+		catch (IOException x)
 		{
-			throw new RuntimeException("送信エラー: " + text, x);
+			irc.fireError(new IOException("指定されたテキストを送信できません。: " + text, x));
+//			throw new RuntimeException("送信エラー: " + text, x);
 		}
 	}
 }
