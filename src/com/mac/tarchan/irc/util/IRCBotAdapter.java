@@ -133,9 +133,13 @@ public abstract class IRCBotAdapter
 				public void onMessage(IRCEvent event)
 				{
 					IRCMessage message = event.getMessage();
-					String text = message.getTrailing();
+					String trail = message.getTrailing();
 					IRCPrefix prefix = message.getPrefix();
-					IRCBotAdapter.this.onQuit(prefix, text);
+					IRCBotAdapter.this.onQuit(prefix, trail);
+					if (trail.equals("Killed"))
+					{
+						IRCBotAdapter.this.onKilled(prefix, trail);
+					}
 				}
 			})
 			.on("mode", new IRCHandler()
@@ -361,9 +365,20 @@ public abstract class IRCBotAdapter
 	 * 終了したときに呼び出されます。
 	 * 
 	 * @param prefix ユーザー
-	 * @param text 終了メッセージ
+	 * @param trail 終了メッセージ
 	 */
-	public void onQuit(IRCPrefix prefix, String text)
+	public void onQuit(IRCPrefix prefix, String trail)
+	{
+	}
+
+	/**
+	 * 	ニックネームが衝突してサーバから強制的に排除されたときに呼び出されます。
+	 * 
+	 * @param prefix ユーザー
+	 * @param trail 終了メッセージ
+	 * @see <a href="http://yoshino.tripod.com/73th/data/irccode.htm#quitmessage">server が付加する Quit Message</a>
+	 */
+	public void onKilled(IRCPrefix prefix, String trail)
 	{
 	}
 
