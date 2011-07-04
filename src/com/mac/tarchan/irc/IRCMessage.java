@@ -48,7 +48,7 @@ public class IRCMessage
 	protected String[] params;
 
 	/** トレーラー */
-	protected String trailing;
+	protected String trail;
 
 	/** 疑似BNFによるメッセージ形式 */
 //	protected static final Pattern IRC_PBNF = Pattern.compile("(?::([^ ]+) )?([^ ]+)([^:]+)(?::(.+))?");
@@ -81,12 +81,12 @@ public class IRCMessage
 			int pos = middle.indexOf(" :");
 			if (pos >= 0)
 			{
-				trailing = middle.substring(pos + 2);
+				trail = middle.substring(pos + 2);
 				middle = middle.substring(0, pos);
 			}
 			middle = middle.trim();
 			params = middle.split(" ");
-			log.debug(String.format("(%s):%s/%s/:%s", command, prefix, middle, trailing));
+			log.debug(String.format("(%s):%s/%s/:%s", command, prefix, middle, trail));
 		}
 		else
 		{
@@ -191,9 +191,9 @@ public class IRCMessage
 	 * 
 	 * @return トレーラー
 	 */
-	public String getTrailing()
+	public String getTrail()
 	{
-		return trailing;
+		return trail;
 	}
 
 	/**
@@ -213,7 +213,7 @@ public class IRCMessage
 	 */
 	public boolean isCTCP()
 	{
-		return trailing != null && trailing.contains(CTCP);
+		return trail != null && trail.contains(CTCP);
 	}
 
 	/**
@@ -226,7 +226,7 @@ public class IRCMessage
 	{
 		if (isCTCP())
 		{
-			return trailing.substring(1).split(CTCP);
+			return trail.substring(1).split(CTCP);
 		}
 		else
 		{

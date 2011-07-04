@@ -111,7 +111,7 @@ public abstract class IRCBotAdapter
 				public void onMessage(IRCEvent event)
 				{
 					IRCMessage message = event.getMessage();
-					String channel = message.getTrailing();
+					String channel = message.getTrail();
 					IRCPrefix prefix = message.getPrefix();
 					IRCBotAdapter.this.onJoin(channel, prefix);
 				}
@@ -133,7 +133,7 @@ public abstract class IRCBotAdapter
 				public void onMessage(IRCEvent event)
 				{
 					IRCMessage message = event.getMessage();
-					String trail = message.getTrailing();
+					String trail = message.getTrail();
 					IRCPrefix prefix = message.getPrefix();
 					IRCBotAdapter.this.onQuit(prefix, trail);
 					if (trail.equals("Killed"))
@@ -167,7 +167,7 @@ public abstract class IRCBotAdapter
 				public void onMessage(IRCEvent event)
 				{
 					IRCMessage message = event.getMessage();
-					String[] names = message.getTrailing().split(" ");
+					String[] names = message.getTrail().split(" ");
 					nicklist.addAll(Arrays.asList(names));
 				}
 			})
@@ -190,7 +190,7 @@ public abstract class IRCBotAdapter
 				{
 					IRCMessage message = event.getMessage();
 					String channel = message.getParam0();
-					String topic = message.getTrailing();
+					String topic = message.getTrail();
 					IRCBotAdapter.this.onTopic(channel, topic);
 				}
 			})
@@ -201,7 +201,7 @@ public abstract class IRCBotAdapter
 				{
 					IRCMessage message = event.getMessage();
 					String channel = message.getParam1();
-					String topic = message.getTrailing();
+					String topic = message.getTrail();
 					IRCBotAdapter.this.onTopic(channel, topic);
 				}
 			})
@@ -212,7 +212,7 @@ public abstract class IRCBotAdapter
 				{
 					IRCMessage message = event.getMessage();
 					String oldNick = message.getPrefix().getNick();
-					String newNick = message.getTrailing();
+					String newNick = message.getTrail();
 					try
 					{
 						IRCBotAdapter.this.onNick(oldNick, newNick);

@@ -137,11 +137,11 @@ public class EchoBot extends IRCBotAdapter
 		String nick = message.getPrefix().getNick();
 		if (isUserNick(nick))
 		{
-			log.info("self: " + message.getTrailing());
+			log.info("self: " + message.getTrail());
 		}
 		else
 		{
-			log.info("other: " + message.getTrailing());
+			log.info("other: " + message.getTrail());
 		}
 //		String chan = message.getParam0();
 //		String text = message.getTrailing();
@@ -175,8 +175,8 @@ public class EchoBot extends IRCBotAdapter
 	{
 		String nick = message.getPrefix().getNick();
 //		String chan = message.getParam(0);
-		String text = message.getTrailing();
-		log.debug(String.format("CTCP: %s: %s", nick, text));
+		String trail = message.getTrail();
+		log.debug(String.format("CTCP: %s: %s", nick, trail));
 		int i = 0;
 		for (String ctcp : message.splitCTCP())
 		{
