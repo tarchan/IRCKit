@@ -5,7 +5,7 @@
  * Created by tarchan on 2011/06/16.
  * Copyright (c) 2011 tarchan. All rights reserved.
  */
-package com.mac.tarchan.irc;
+package com.mac.tarchan.irc.client;
 
 import java.util.EventObject;
 

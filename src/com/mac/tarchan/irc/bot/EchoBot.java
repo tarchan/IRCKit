@@ -5,21 +5,21 @@
  * Created by tarchan on 2011/06/30.
  * Copyright (c) 2011 tarchan. All rights reserved.
  */
-package com.mac.tarchan.ircbot;
+package com.mac.tarchan.irc.bot;
 
 import java.util.Arrays;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.mac.tarchan.irc.IRCMessage;
-import com.mac.tarchan.irc.IRCPrefix;
-import com.mac.tarchan.irc.util.IRCBotAdapter;
+import com.mac.tarchan.irc.client.IRCMessage;
+import com.mac.tarchan.irc.client.IRCPrefix;
+import com.mac.tarchan.irc.client.util.BotAdapter;
 
 /**
  * EchoBot
  */
-public class EchoBot extends IRCBotAdapter
+public class EchoBot extends BotAdapter
 {
 	/** ログ */
 	private static final Log log = LogFactory.getLog(EchoBot.class);
@@ -59,7 +59,7 @@ public class EchoBot extends IRCBotAdapter
 	/**
 	 * EchoBot
 	 * 
-	 * @param channels 自動的に参加するチャンネル
+	 * @param channels 最初に参加するチャンネル
 	 */
 	public EchoBot(String[] channels)
 	{

@@ -5,7 +5,7 @@
  * Created by tarchan on 2008/11/27.
  * Copyright (c) 2008 tarchan. All rights reserved.
  */
-package com.mac.tarchan.irc;
+package com.mac.tarchan.irc.client;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -22,7 +22,7 @@ import java.util.concurrent.Executors;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.mac.tarchan.irc.util.KanaInputFilter;
+import com.mac.tarchan.irc.client.util.KanaInputFilter;
 
 /**
  * IRCクライアントを実装します。

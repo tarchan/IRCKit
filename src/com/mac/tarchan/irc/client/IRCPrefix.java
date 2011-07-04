@@ -5,7 +5,7 @@
  * Created by tarchan on 2010/03/17.
  * Copyright (c) 2010 tarchan. All rights reserved.
  */
-package com.mac.tarchan.irc;
+package com.mac.tarchan.irc.client;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

@@ -5,13 +5,13 @@
  * Created by tarchan on 2011/06/17.
  * Copyright (c) 2011 tarchan. All rights reserved.
  */
-package com.mac.tarchan.irc.util;
+package com.mac.tarchan.irc.client.util;
 
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import com.mac.tarchan.irc.IRCClient;
+import com.mac.tarchan.irc.client.IRCClient;
 
 /**
  * 入力ストリームに、半角カナを修正する機能を追加します。

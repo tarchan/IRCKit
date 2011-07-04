@@ -5,23 +5,23 @@
  * Created by tarchan on 2011/06/16.
  * Copyright (c) 2011 tarchan. All rights reserved.
  */
-package com.mac.tarchan.irc.util;
+package com.mac.tarchan.irc.client.util;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import com.mac.tarchan.irc.IRCClient;
-import com.mac.tarchan.irc.IRCEvent;
-import com.mac.tarchan.irc.IRCHandler;
-import com.mac.tarchan.irc.IRCMessage;
-import com.mac.tarchan.irc.IRCPrefix;
+import com.mac.tarchan.irc.client.IRCClient;
+import com.mac.tarchan.irc.client.IRCEvent;
+import com.mac.tarchan.irc.client.IRCHandler;
+import com.mac.tarchan.irc.client.IRCMessage;
+import com.mac.tarchan.irc.client.IRCPrefix;
 
 /**
  * IRCメッセージを受け取る抽象アダプタクラスです。
  * IRCボットを作成するには、このクラスを拡張して関係のあるイベントに対するメソッドをオーバーライドします。
  */
-public abstract class IRCBotAdapter
+public abstract class BotAdapter
 {
 	/** IRCクライアント */
 	protected IRCClient irc;
@@ -76,15 +76,15 @@ public abstract class IRCBotAdapter
 					IRCMessage message = event.getMessage();
 					if (message.isCTCP())
 					{
-						IRCBotAdapter.this.onCtcpQuery(message);
+						BotAdapter.this.onCtcpQuery(message);
 					}
 					else if (isDM(message))
 					{
-						IRCBotAdapter.this.onDirectMessage(message);
+						BotAdapter.this.onDirectMessage(message);
 					}
 					else
 					{
-						IRCBotAdapter.this.onMessage(message);
+						BotAdapter.this.onMessage(message);
 					}
 				}
 			})
@@ -96,11 +96,11 @@ public abstract class IRCBotAdapter
 					IRCMessage message = event.getMessage();
 					if (message.isCTCP())
 					{
-						IRCBotAdapter.this.onCtcpReply(message);
+						BotAdapter.this.onCtcpReply(message);
 					}
 					else
 					{
-						IRCBotAdapter.this.onNotice(message);
+						BotAdapter.this.onNotice(message);
 					}
 				}
 			})
@@ -112,7 +112,7 @@ public abstract class IRCBotAdapter
 					IRCMessage message = event.getMessage();
 					String channel = message.getTrail();
 					IRCPrefix prefix = message.getPrefix();
-					IRCBotAdapter.this.onJoin(channel, prefix);
+					BotAdapter.this.onJoin(channel, prefix);
 				}
 			})
 			.on("part", new IRCHandler()
@@ -123,7 +123,7 @@ public abstract class IRCBotAdapter
 					IRCMessage message = event.getMessage();
 					String channel = message.getParam1();
 					IRCPrefix prefix = message.getPrefix();
-					IRCBotAdapter.this.onPart(channel, prefix);
+					BotAdapter.this.onPart(channel, prefix);
 				}
 			})
 			.on("quit", new IRCHandler()
@@ -134,10 +134,10 @@ public abstract class IRCBotAdapter
 					IRCMessage message = event.getMessage();
 					String trail = message.getTrail();
 					IRCPrefix prefix = message.getPrefix();
-					IRCBotAdapter.this.onQuit(trail, prefix);
+					BotAdapter.this.onQuit(trail, prefix);
 					if (trail.equals("Killed"))
 					{
-						IRCBotAdapter.this.onKilled(trail, prefix);
+						BotAdapter.this.onKilled(trail, prefix);
 					}
 				}
 			})
@@ -151,12 +151,12 @@ public abstract class IRCBotAdapter
 					String mode = message.getParam1();
 					if (message.getParamsCount() < 3)
 					{
-						IRCBotAdapter.this.onChannelMode(channel, mode);
+						BotAdapter.this.onChannelMode(channel, mode);
 					}
 					else
 					{
 						String nick = message.getParam2();
-						IRCBotAdapter.this.onUserMode(channel, mode, nick);
+						BotAdapter.this.onUserMode(channel, mode, nick);
 					}
 				}
 			})
@@ -179,7 +179,7 @@ public abstract class IRCBotAdapter
 					String channel = message.getParam(1);
 					String[] names = nicklist.toArray(new String[]{});
 					nicklist.clear();
-					IRCBotAdapter.this.onNames(channel, names);
+					BotAdapter.this.onNames(channel, names);
 				}
 			})
 			.on("topic", new IRCHandler()
@@ -190,7 +190,7 @@ public abstract class IRCBotAdapter
 					IRCMessage message = event.getMessage();
 					String channel = message.getParam0();
 					String topic = message.getTrail();
-					IRCBotAdapter.this.onTopic(channel, topic);
+					BotAdapter.this.onTopic(channel, topic);
 				}
 			})
 			.on("332", new IRCHandler()
@@ -201,7 +201,7 @@ public abstract class IRCBotAdapter
 					IRCMessage message = event.getMessage();
 					String channel = message.getParam1();
 					String topic = message.getTrail();
-					IRCBotAdapter.this.onTopic(channel, topic);
+					BotAdapter.this.onTopic(channel, topic);
 				}
 			})
 			.on("nick", new IRCHandler()
@@ -214,7 +214,7 @@ public abstract class IRCBotAdapter
 					String newNick = message.getTrail();
 					try
 					{
-						IRCBotAdapter.this.onNick(oldNick, newNick);
+						BotAdapter.this.onNick(oldNick, newNick);
 					}
 					finally
 					{
@@ -232,7 +232,7 @@ public abstract class IRCBotAdapter
 				public void onMessage(IRCEvent event)
 				{
 					IRCMessage message = event.getMessage();
-					if (message.isNumeric()) IRCBotAdapter.this.onNumericReply(message);
+					if (message.isNumeric()) BotAdapter.this.onNumericReply(message);
 				}
 			})
 			.start();

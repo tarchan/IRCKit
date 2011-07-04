@@ -5,12 +5,12 @@
  * Created by tarchan on 2011/06/28.
  * Copyright (c) 2011 tarchan. All rights reserved.
  */
-package com.mac.tarchan.irc.util;
+package com.mac.tarchan.irc.client.util;
 
 import java.beans.EventHandler;
 
-import com.mac.tarchan.irc.IRCEvent;
-import com.mac.tarchan.irc.IRCHandler;
+import com.mac.tarchan.irc.client.IRCEvent;
+import com.mac.tarchan.irc.client.IRCHandler;
 
 /**
  * HandlerBuilder
