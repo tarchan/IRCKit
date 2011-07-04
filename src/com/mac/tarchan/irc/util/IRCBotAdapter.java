@@ -288,6 +288,7 @@ public abstract class IRCBotAdapter
 	 */
 	public void onNickConflict(String conflictNick)
 	{
+		irc.nick(conflictNick + "_");
 	}
 
 	/**
@@ -333,6 +334,9 @@ public abstract class IRCBotAdapter
 
 	/**
 	 * チャンネルを離脱したときに呼び出されます。
+	 * 
+	 * @param channel チャンネル名
+	 * @param prefix ユーザー
 	 */
 	public void onPart(String channel, IRCPrefix prefix)
 	{

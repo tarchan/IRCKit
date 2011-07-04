@@ -77,9 +77,58 @@ public class EchoBot extends IRCBotAdapter
 	}
 
 	@Override
+	public void onPing(String text)
+	{
+		log.info("接続確認: " + text);
+		super.onPing(text);
+	}
+
+	@Override
 	public void onError(String text)
 	{
 		log.error(text);
+	}
+
+	@Override
+	public void onJoin(String channel, IRCPrefix prefix)
+	{
+		log.info(String.format("%3$s has joined %1$s (%2$s)", channel, prefix, prefix.getNick()));
+	}
+
+	@Override
+	public void onPart(String channel, IRCPrefix prefix)
+	{
+		log.info(String.format("%3$s has left channel %1$s (%2$s)", channel, prefix, prefix.getNick()));
+	}
+
+	@Override
+	public void onQuit(IRCPrefix prefix, String text)
+	{
+		log.info(String.format("%3$s has left IRC %1$s (%2$s)", text, prefix, prefix.getNick()));
+	}
+
+	@Override
+	public void onTopic(String channel, String topic)
+	{
+		log.info(String.format("%1$s has set topic %2$s", channel, topic));
+	}
+
+	@Override
+	public void onNames(String channel, String[] names)
+	{
+		log.info(String.format("%1$s (%3$s) names %2$s", channel, Arrays.asList(names), names.length));
+	}
+
+	@Override
+	public void onChannelMode(String channel, String mode)
+	{
+		log.info(String.format("%1$s has changed channel mode %2$s", channel, mode));
+	}
+
+	@Override
+	public void onUserMode(String channel, String mode, String nick)
+	{
+		log.info(String.format("%1$s/%3$s has changed user mode %2$s", channel, mode, nick));
 	}
 
 	@Override
@@ -149,60 +198,5 @@ public class EchoBot extends IRCBotAdapter
 				irc.ctcpQuery(nick, ctcp);
 			}
 		}
-	}
-
-	@Override
-	public void onNickConflict(String conflictNick)
-	{
-		irc.nick(conflictNick + "_");
-	}
-
-	@Override
-	public void onPing(String text)
-	{
-		log.info("接続確認: " + text);
-		super.onPing(text);
-	}
-
-	@Override
-	public void onJoin(String channel, IRCPrefix prefix)
-	{
-		log.info(String.format("%3$s has joined %1$s (%2$s)", channel, prefix, prefix.getNick()));
-	}
-
-	@Override
-	public void onPart(String channel, IRCPrefix prefix)
-	{
-		log.info(String.format("%3$s has left channel %1$s (%2$s)", channel, prefix, prefix.getNick()));
-	}
-
-	@Override
-	public void onQuit(IRCPrefix prefix, String text)
-	{
-		log.info(String.format("%3$s has left IRC %1$s (%2$s)", text, prefix, prefix.getNick()));
-	}
-
-	@Override
-	public void onTopic(String channel, String topic)
-	{
-		log.info(String.format("%1$s has set topic %2$s", channel, topic));
-	}
-
-	@Override
-	public void onNames(String channel, String[] names)
-	{
-		log.info(String.format("%1$s (%3$s) names %2$s", channel, Arrays.asList(names), names.length));
-	}
-
-	@Override
-	public void onChannelMode(String channel, String mode)
-	{
-		log.info(String.format("%1$s has changed channel mode %2$s", channel, mode));
-	}
-
-	@Override
-	public void onUserMode(String channel, String mode, String nick)
-	{
-		log.info(String.format("%1$s/%3$s has changed user mode %2$s", channel, mode, nick));
 	}
 }
