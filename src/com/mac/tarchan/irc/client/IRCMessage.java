@@ -92,7 +92,7 @@ public class IRCMessage
 		Matcher prefix_m = IRC_PBNF.matcher(text);
 		if (prefix_m.find())
 		{
-			prefix = new IRCPrefix(prefix_m.group(1));
+			prefix = new IRCPrefix(prefix_m.group(1), getWhen());
 			command = prefix_m.group(2);
 			middle = prefix_m.group(3);
 			int pos = middle.indexOf(" :");
@@ -112,9 +112,9 @@ public class IRCMessage
 	}
 
 	/**
-	 * メッセージを作成した時間を返します。
+	 * メッセージの作成時間を返します。
 	 * 
-	 * @return メッセージを作成した時間
+	 * @return メッセージの作成時間
 	 */
 	public long getWhen()
 	{

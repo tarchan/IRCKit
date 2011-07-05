@@ -21,6 +21,9 @@ public class IRCPrefix
 	/** プレフィックス */
 	protected String prefix;
 
+	/** メッセージ作成時間 */
+	protected long when;
+
 	/** ニックネーム */
 	protected String nick;
 
@@ -30,13 +33,20 @@ public class IRCPrefix
 	/** ホスト名 */
 	protected String host;
 
+	@Deprecated
+	public IRCPrefix(String prefix)
+	{
+		this(prefix, System.currentTimeMillis());
+	}
+
 	/**
 	 * プレフィックスを、サーバ名、ニックネーム、ユーザ名、ホスト名に分割します。
 	 * 
 	 * @param prefix プレフィックス
 	 */
-	public IRCPrefix(String prefix)
+	public IRCPrefix(String prefix, long when)
 	{
+		this.when = when;
 		if (prefix == null) return;
 
 		this.prefix = prefix;
@@ -61,6 +71,16 @@ public class IRCPrefix
 	public String getPrefix()
 	{
 		return prefix;
+	}
+
+	/**
+	 * メッセージの作成時間を返します。
+	 * 
+	 * @return メッセージの作成時間
+	 */
+	public long getWhen()
+	{
+		return when;
 	}
 
 	/**
