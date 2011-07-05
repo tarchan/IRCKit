@@ -14,6 +14,8 @@ import com.mac.tarchan.irc.client.IRCHandler;
 
 /**
  * HandlerBuilder
+ * 
+ * @see BotAdapter
  */
 public class HandlerBuilder
 {

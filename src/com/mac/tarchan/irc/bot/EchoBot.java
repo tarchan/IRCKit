@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.net.InetAddress;
 import java.util.Arrays;
-import java.util.Locale;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -175,58 +174,22 @@ public class EchoBot extends BotAdapter
 	}
 
 	@Override
-	public void onCtcpQuery(IRCMessage message)
+	public void onDccSend(String trail, IRCPrefix prefix)
 	{
-		String nick = message.getPrefix().getNick();
-//		String chan = message.getParam(0);
-		String trail = message.getTrail();
-		log.debug(String.format("CTCP: %s: %s", nick, trail));
-		int i = 0;
-		for (String ctcp : message.splitCTCP())
+		try
 		{
-			log.debug(String.format("CTCP[%s]=%s%n", i++, ctcp));
-			if (ctcp.startsWith("PING"))
-			{
-				irc.ctcpReply(nick, ctcp);
-			}
-			else if (ctcp.startsWith("TIME"))
-			{
-				irc.ctcpReply(nick, String.format(Locale.ENGLISH, "TIME %tc", System.currentTimeMillis()));
-			}
-			else if (ctcp.startsWith("VERSION"))
-			{
-				irc.ctcpReply(nick, "VERSION IRCKit for Java");
-			}
-			else if (ctcp.startsWith("USERINFO"))
-			{
-				irc.ctcpReply(nick, "USERINFO " + irc.getUserNick());
-			}
-			else if (ctcp.startsWith("CLIENTINFO"))
-			{
-				irc.ctcpReply(nick, "CLIENTINFO PING TIME VERSION USERINFO CLIENTINFO DCC");
-			}
-			else if (ctcp.startsWith("DCC SEND"))
-			{
-				try
-				{
-					// TODO DCC SEND
-					String[] params = ctcp.substring("DCC SEND ".length()).split(" ");
-					String file = params[0];
-					byte[] addr = new BigInteger(params[1]).toByteArray();
-					InetAddress inet = InetAddress.getByAddress(addr);
-					int port = Integer.parseInt(params[2]);
-					long size = Long.parseLong(params[3]);
-					log.info(String.format("%s %,d bytes %s %s", file, size, inet, port));
-				}
-				catch (IOException x)
-				{
-					log.error(x);
-				}
-			}
-			else
-			{
-				// ignore
-			}
+			// TODO DCC SEND
+			String[] params = trail.substring("DCC SEND ".length()).split(" ");
+			String file = params[0];
+			byte[] addr = new BigInteger(params[1]).toByteArray();
+			InetAddress inet = InetAddress.getByAddress(addr);
+			int port = Integer.parseInt(params[2]);
+			long size = Long.parseLong(params[3]);
+			log.info(String.format("%s %,d bytes %s %s", file, size, inet, port));
+		}
+		catch (IOException x)
+		{
+			log.error(x);
 		}
 	}
 }

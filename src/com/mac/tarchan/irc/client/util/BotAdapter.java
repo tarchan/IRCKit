@@ -1,5 +1,5 @@
 /*
- * IRCBot.java
+ * BotAdapter.java
  * IRCKit
  * 
  * Created by tarchan on 2011/06/16.
@@ -10,6 +10,7 @@ package com.mac.tarchan.irc.client.util;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Locale;
 
 import com.mac.tarchan.irc.client.IRCClient;
 import com.mac.tarchan.irc.client.IRCEvent;
@@ -20,6 +21,8 @@ import com.mac.tarchan.irc.client.IRCPrefix;
 /**
  * IRCメッセージを受け取る抽象アダプタクラスです。
  * IRCボットを作成するには、このクラスを拡張して関係のあるイベントに対するメソッドをオーバーライドします。
+ * 
+ * @see HandlerBuilder
  */
 public abstract class BotAdapter
 {
@@ -499,15 +502,6 @@ public abstract class BotAdapter
 	}
 
 	/**
-	 * CTCP問い合わせメッセージを受け取ったときに呼び出されます。
-	 * 
-	 * @param message IRCメッセージ
-	 */
-	public void onCtcpQuery(IRCMessage message)
-	{
-	}
-
-	/**
 	 * CTCPお知らせメッセージを受け取ったときに呼び出されます。
 	 * 
 	 * @param message IRCメッセージ
@@ -517,11 +511,116 @@ public abstract class BotAdapter
 	}
 
 	/**
-	 * ファイル送信メッセージを受け取ったときに呼び出されます。
+	 * CTCP問い合わせメッセージを受け取ったときに呼び出されます。
 	 * 
 	 * @param message IRCメッセージ
+	 * @see #onCtcpPing(String, IRCPrefix)
+	 * @see #onCtcpTime(String, IRCPrefix)
+	 * @see #onCtcpVersion(String, IRCPrefix)
+	 * @see #onCtcpUserInfo(String, IRCPrefix)
+	 * @see #onCtcpClientInfo(String, IRCPrefix)
+	 * @see #onDccSend(String, IRCPrefix)
 	 */
-	public void onDccSend(IRCMessage message)
+	public void onCtcpQuery(IRCMessage message)
+	{
+		IRCPrefix prefix = message.getPrefix();
+		for (String ctcp : message.splitCTCP())
+		{
+			if (ctcp.startsWith("PING"))
+			{
+				onCtcpPing(ctcp, prefix);
+			}
+			else if (ctcp.startsWith("TIME"))
+			{
+				onCtcpTime(ctcp, prefix);
+			}
+			else if (ctcp.startsWith("VERSION"))
+			{
+				onCtcpVersion(ctcp, prefix);
+			}
+			else if (ctcp.startsWith("USERINFO"))
+			{
+				onCtcpUserInfo(ctcp, prefix);
+			}
+			else if (ctcp.startsWith("CLIENTINFO"))
+			{
+				onCtcpClientInfo(ctcp, prefix);
+			}
+			else if (ctcp.startsWith("DCC SEND"))
+			{
+				onDccSend(ctcp, prefix);
+			}
+			else
+			{
+				// ignore
+			}
+		}
+	}
+
+	/**
+	 * CTCP PINGを受け取ったときに呼び出されます。
+	 * 
+	 * @param trail CTCPメッセージ
+	 * @param prefix ユーザ名
+	 */
+	public void onCtcpPing(String trail, IRCPrefix prefix)
+	{
+		irc.ctcpReply(prefix.getNick(), trail);
+	}
+
+	/**
+	 * CTCP TIMEを受け取ったときに呼び出されます。
+	 * 
+	 * @param trail CTCPメッセージ
+	 * @param prefix ユーザ名
+	 */
+	public void onCtcpTime(String trail, IRCPrefix prefix)
+	{
+		irc.ctcpReply(prefix.getNick(), String.format(Locale.ENGLISH, "TIME %tc", System.currentTimeMillis()));
+	}
+
+	/**
+	 * CTCP VERSIONを受け取ったときに呼び出されます。
+	 * 
+	 * @param trail CTCPメッセージ
+	 * @param prefix ユーザ名
+	 */
+	public void onCtcpVersion(String trail, IRCPrefix prefix)
+	{
+		irc.ctcpReply(prefix.getNick(), "VERSION IRCKit for Java");
+	}
+
+	/**
+	 * CTCP USERINFOを受け取ったときに呼び出されます。
+	 * 
+	 * @param trail CTCPメッセージ
+	 * @param prefix ユーザ名
+	 */
+	public void onCtcpUserInfo(String trail, IRCPrefix prefix)
+	{
+		irc.ctcpReply(prefix.getNick(), "USERINFO " + irc.getUserNick());
+	}
+
+	/**
+	 * CTCP CLIENTINFOを受け取ったときに呼び出されます。
+	 * 
+	 * @param trail CTCPメッセージ
+	 * @param prefix ユーザ名
+	 */
+	public void onCtcpClientInfo(String trail, IRCPrefix prefix)
+	{
+		irc.ctcpReply(prefix.getNick(), "CLIENTINFO PING TIME VERSION USERINFO CLIENTINFO DCC");
+	}
+
+	/**
+	 * DCC SENDを受け取ったときに呼び出されます。
+	 * ファイル送信メッセージを受け取ったときに呼び出されます。
+	 * 
+	 * @param trail テキスト
+	 * @param prefix ユーザ名
+	 * @see #onCtcpQuery(IRCMessage)
+	 */
+	public void onDccSend(String trail, IRCPrefix prefix)
 	{
 	}
 }
