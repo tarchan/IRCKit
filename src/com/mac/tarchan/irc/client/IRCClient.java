@@ -26,6 +26,10 @@ import com.mac.tarchan.irc.client.util.KanaInputFilter;
 
 /**
  * IRCクライアントを実装します。
+ * 
+ * @see <a href="http://www.irchelp.org/irchelp/rfc/rfc.html">RFC 1459: Internet Relay Chat Protocol</a>
+ * @see <a href="http://www.haun.org/kent/lib/rfc1459-irc-ja.html">RFC 1459 日本語訳</a>
+ * @see <a href="http://www.faqs.org/rfcs/rfc2812.html">RFC 2812 - Internet Relay Chat: Client Protocol (RFC2812)</a>
  */
 public class IRCClient
 {
@@ -557,7 +561,7 @@ public class IRCClient
 	{
 		try
 		{
-			IRCMessage message = new IRCMessage(text);
+			IRCMessage message = new IRCMessage(text, getUserNick());
 //			String encoding = "JIS";
 ////			System.out.println(new String(text.getBytes(), encoding));
 //			IRCMessage message = new IRCMessage(text, encoding);

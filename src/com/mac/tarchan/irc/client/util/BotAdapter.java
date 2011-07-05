@@ -78,7 +78,7 @@ public abstract class BotAdapter
 					{
 						BotAdapter.this.onCtcpQuery(message);
 					}
-					else if (isDM(message))
+					else if (message.isDirectMessage())
 					{
 						BotAdapter.this.onDirectMessage(message);
 					}
@@ -232,7 +232,7 @@ public abstract class BotAdapter
 				public void onMessage(IRCEvent event)
 				{
 					IRCMessage message = event.getMessage();
-					if (message.isNumeric()) BotAdapter.this.onNumericReply(message);
+					if (message.isNumericReply()) BotAdapter.this.onNumericReply(message);
 				}
 			})
 			.start();
@@ -285,10 +285,12 @@ public abstract class BotAdapter
 	 * @param message メッセージ
 	 * @return ダイレクトメッセージの場合は true
 	 */
-	public boolean isDM(IRCMessage message)
+	@Deprecated
+	public boolean isDirectMessage(IRCMessage message)
 	{
-		String channel = message.getParam0();
-		return isUserNick(channel);
+//		String channel = message.getParam0();
+//		return isUserNick(channel);
+		return message.isDirectMessage();
 	}
 
 	/**

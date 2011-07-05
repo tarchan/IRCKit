@@ -16,7 +16,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * IRCメッセージを生成します。
  * 
- * @see <a href="http://www.haun.org/kent/lib/rfc1459-irc-ja.html#c2.3.1">RFC1459: Internet Relay Chat Protocol (IRC)</a>
+ * @see <a href="http://www.haun.org/kent/lib/rfc1459-irc-ja.html#c2.3.1">疑似BNFによるメッセージ形式</a>
  */
 public class IRCMessage
 {
@@ -32,7 +32,10 @@ public class IRCMessage
 	/** オリジナルテキスト */
 	protected String text;
 
-	/** メッセージオブジェクトの作成時間 */
+	/** ニックネーム */
+	protected String nick;
+
+	/** メッセージの作成時間 */
 	protected long when;
 
 	/** プレフィックス */
@@ -55,15 +58,29 @@ public class IRCMessage
 	protected static final Pattern IRC_PBNF = Pattern.compile("(?::([^ ]+) )?([^ ]+)(.*)");
 
 	/**
-	 * IRCMessage を構築します。
+	 * 指定されたテキストからIRCメッセージを構築します。
+	 * メッセージの作成時間は現在になります。
 	 * 
 	 * @param text テキスト
-	 * @throws IllegalArgumentException メッセージ形式が不明の場合
+	 * @param nick ニックネーム
 	 */
-	public IRCMessage(String text)
+	public IRCMessage(String text, String nick)
+	{
+		this(text, nick, System.currentTimeMillis());
+	}
+
+	/**
+	 * 指定されたテキストからIRCメッセージを構築します。
+	 * 
+	 * @param text テキスト
+	 * @param nick ニックネーム
+	 * @param when メッセージの作成時間
+	 */
+	public IRCMessage(String text, String nick, long when)
 	{
 		this.text = text;
-		this.when = System.currentTimeMillis();
+		this.nick = nick;
+		this.when = when;
 		parse();
 	}
 
@@ -201,9 +218,19 @@ public class IRCMessage
 	 * 
 	 * @return ニュメリックリプライの場合は true
 	 */
-	public boolean isNumeric()
+	public boolean isNumericReply()
 	{
 		return NUMERIC_REPLY_PATTERN.matcher(getCommand()).matches();
+	}
+
+	/**
+	 * ダイレクトメッセージかどうか判定します。
+	 * 
+	 * @return ダイレクトメッセージの場合は true
+	 */
+	public boolean isDirectMessage()
+	{
+		return getParam0().equals(nick);
 	}
 
 	/**
