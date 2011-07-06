@@ -436,25 +436,36 @@ public abstract class BotAdapter
 	/**
 	 * IRCネットワークが切断したときに呼び出されます。
 	 * 
-	 * @see IRCClient#start()
+	 * @see #onRestart()
 	 * @see #onDestroy()
 	 */
 	public void onStop()
 	{
 		if (autoRecconection)
 		{
-			try
-			{
-				irc.start();
-			}
-			catch (IOException x)
-			{
-				throw new RuntimeException("IRCネットワークに再接続できません。", x);
-			}
+			onRestart();
 		}
 		else
 		{
 			onDestroy();
+		}
+	}
+
+	/**
+	 * IRCネットワークに再接続するときに呼び出されます。
+	 * 
+	 * @see IRCClient#start()
+	 * @see #onStart()
+	 */
+	public void onRestart()
+	{
+		try
+		{
+			irc.start();
+		}
+		catch (IOException x)
+		{
+			throw new RuntimeException("IRCネットワークに再接続できません。", x);
 		}
 	}
 
