@@ -18,6 +18,9 @@ public class IRCPrefix
 	/** プレフィックス形式 */
 	protected static Pattern prefixPattern = Pattern.compile("([^!]+)(!.+)?(@.+)?");
 
+	/** 親のIRCメッセージ */
+	protected IRCMessage message;
+
 	/** プレフィックス */
 	protected String prefix;
 
@@ -33,34 +36,56 @@ public class IRCPrefix
 	/** ホスト名 */
 	protected String host;
 
+	/**
+	 * プレフィックスを、サーバ名、ニックネーム、ユーザ名、ホスト名に分割します。
+	 * 
+	 * @param prefix プレフィックス
+	 */
 	@Deprecated
 	public IRCPrefix(String prefix)
 	{
-		this(prefix, System.currentTimeMillis());
+		this(prefix, null);
+		this.when = System.currentTimeMillis();
 	}
 
 	/**
 	 * プレフィックスを、サーバ名、ニックネーム、ユーザ名、ホスト名に分割します。
 	 * 
 	 * @param prefix プレフィックス
+	 * @param parent 親のIRCメッセージ
 	 */
-	public IRCPrefix(String prefix, long when)
+	public IRCPrefix(String prefix, IRCMessage parent)
 	{
-		this.when = when;
-		if (prefix == null) return;
+		if (parent != null)
+		{
+			this.message = parent;
+			this.when = message.getWhen();
+		}
+		if (prefix != null)
+		{
+			this.prefix = prefix;
+			Matcher m = prefixPattern.matcher(prefix);
+			if (m.find())
+			{
+				nick = m.group(1);
+				user = m.group(2);
+				host = m.group(3);
+			}
+			else
+			{
+				throw new IllegalArgumentException("プレフィックスが不正です。: " + prefix);
+			}
+		}
+	}
 
-		this.prefix = prefix;
-		Matcher m = prefixPattern.matcher(prefix);
-		if (m.find())
-		{
-			nick = m.group(1);
-			user = m.group(2);
-			host = m.group(3);
-		}
-		else
-		{
-			throw new IllegalArgumentException("プレフィックスが不正です。: " + prefix);
-		}
+	/**
+	 * 親のIRCメッセージを返します。
+	 * 
+	 * @return 親のIRCメッセージ
+	 */
+	public IRCMessage getMessage()
+	{
+		return message;
 	}
 
 	/**
