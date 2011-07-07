@@ -7,6 +7,7 @@
  */
 package com.mac.tarchan.irc.client;
 
+import java.awt.EventQueue;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -567,17 +568,24 @@ public class IRCClient
 //			IRCMessage message = new IRCMessage(text, encoding);
 //			handler.onMessage(new IRCEvent(this, message));
 //			System.out.println(message.toString());
-			IRCEvent event = new IRCEvent(this, message);
-			for (IRCHandler handler : handlers)
+			final IRCEvent event = new IRCEvent(this, message);
+			for (final IRCHandler handler : handlers)
 			{
-				try
+				EventQueue.invokeLater(new Runnable()
 				{
-					handler.onMessage(event);
-				}
-				catch (Throwable x)
-				{
-					log.error("IRCメッセージハンドラを中止しました。", x);
-				}
+					@Override
+					public void run()
+					{
+						try
+						{
+							handler.onMessage(event);
+						}
+						catch (Throwable x)
+						{
+							log.error("IRCメッセージハンドラを中止しました。", x);
+						}
+					}
+				});
 			}
 		}
 		catch (Throwable x)
