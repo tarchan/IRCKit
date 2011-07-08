@@ -22,7 +22,7 @@ public class IRCEvent extends EventObject
 	private static final long serialVersionUID = 2880861890798748708L;
 
 	/** クライアント */
-	transient protected IRCClient source;
+	transient protected IRCClient irc;
 
 	/** メッセージ */
 	transient protected IRCMessage message;
@@ -36,7 +36,7 @@ public class IRCEvent extends EventObject
 	public IRCEvent(IRCClient source, IRCMessage message)
 	{
 		super(source);
-		this.source = source;
+		this.irc = source;
 		this.message = message;
 	}
 
@@ -47,7 +47,7 @@ public class IRCEvent extends EventObject
 	 */
 	public IRCClient getClient()
 	{
-		return source;
+		return irc;
 	}
 
 	/**
@@ -58,5 +58,16 @@ public class IRCEvent extends EventObject
 	public IRCMessage getMessage()
 	{
 		return message;
+	}
+
+	@Override
+	public String toString()
+	{
+		return new StringBuilder(getClass().getName())
+			.append("[")
+			.append("irc=" + irc)
+			.append(", message=" + message)
+			.append("]")
+			.toString();
 	}
 }

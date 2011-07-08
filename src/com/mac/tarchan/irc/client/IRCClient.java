@@ -582,7 +582,7 @@ public class IRCClient
 						}
 						catch (Throwable x)
 						{
-							log.error("IRCメッセージハンドラを中止しました。", x);
+							fireError(new RuntimeException("IRCメッセージハンドラを中止しました。: " + event, x));
 						}
 					}
 				});
@@ -590,7 +590,7 @@ public class IRCClient
 		}
 		catch (Throwable x)
 		{
-			log.error("IRCメッセージが不正です。: " + text, x);
+			fireError(new RuntimeException("IRCメッセージが不正です。: " + text, x));
 		}
 	}
 
