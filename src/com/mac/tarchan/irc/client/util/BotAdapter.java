@@ -179,10 +179,11 @@ public abstract class BotAdapter
 				public void onMessage(IRCEvent event)
 				{
 					IRCMessage message = event.getMessage();
-					String channel = message.getParam(1);
+					long when = message.getWhen();
+					String channel = message.getParam1();
 					String[] names = nicklist.toArray(new String[]{});
 					nicklist.clear();
-					BotAdapter.this.onNames(channel, names);
+					BotAdapter.this.onNames(channel, names, when);
 				}
 			})
 			.on("topic", new IRCHandler()
@@ -193,7 +194,8 @@ public abstract class BotAdapter
 					IRCMessage message = event.getMessage();
 					String channel = message.getParam0();
 					String topic = message.getTrail();
-					BotAdapter.this.onTopic(channel, topic);
+					long when = message.getWhen();
+					BotAdapter.this.onTopic(channel, topic, when);
 				}
 			})
 			.on("332", new IRCHandler()
@@ -204,7 +206,8 @@ public abstract class BotAdapter
 					IRCMessage message = event.getMessage();
 					String channel = message.getParam1();
 					String topic = message.getTrail();
-					BotAdapter.this.onTopic(channel, topic);
+					long when = message.getWhen();
+					BotAdapter.this.onTopic(channel, topic, when);
 				}
 			})
 			.on("nick", new IRCHandler()
@@ -215,9 +218,10 @@ public abstract class BotAdapter
 					IRCMessage message = event.getMessage();
 					String oldNick = message.getPrefix().getNick();
 					String newNick = message.getTrail();
+					long when = message.getWhen();
 					try
 					{
-						BotAdapter.this.onNick(oldNick, newNick);
+						BotAdapter.this.onNick(oldNick, newNick, when);
 					}
 					finally
 					{
@@ -321,7 +325,7 @@ public abstract class BotAdapter
 	 * @param oldNick 古いニックネーム
 	 * @param newNick 新しいニックネーム
 	 */
-	public void onNick(String oldNick, String newNick)
+	public void onNick(String oldNick, String newNick, long when)
 	{
 	}
 
@@ -331,7 +335,7 @@ public abstract class BotAdapter
 	 * @param channel チャンネル名
 	 * @param names ニックネームリスト
 	 */
-	public void onNames(String channel, String[] names)
+	public void onNames(String channel, String[] names, long when)
 	{
 	}
 
@@ -341,7 +345,7 @@ public abstract class BotAdapter
 	 * @param channel チャンネル名
 	 * @param topic トピック
 	 */
-	public void onTopic(String channel, String topic)
+	public void onTopic(String channel, String topic, long when)
 	{
 	}
 
