@@ -263,15 +263,15 @@ public abstract class BotAdapter
 		}
 	}
 
-	/**
-	 * 新しいニックネームを設定します。
-	 * 
-	 * @param newNick 新しいニックネーム
-	 */
-	public void setUserNick(String newNick)
-	{
-		irc.nick(newNick);
-	}
+//	/**
+//	 * 新しいニックネームを設定します。
+//	 * 
+//	 * @param newNick 新しいニックネーム
+//	 */
+//	public void setUserNick(String newNick)
+//	{
+//		irc.nick(newNick);
+//	}
 
 	/**
 	 * 指定されたニックネームがユーザ自身かどうか判定します。
