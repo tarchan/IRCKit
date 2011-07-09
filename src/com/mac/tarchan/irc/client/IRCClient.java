@@ -601,7 +601,7 @@ public class IRCClient
 	 */
 	protected void fireError(Throwable x)
 	{
-		log.error(x);
+		log.error("IRCクライアントでエラーが発生しました。", x);
 	}
 }
 

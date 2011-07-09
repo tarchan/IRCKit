@@ -7,9 +7,8 @@
  */
 package com.mac.tarchan.irc.bot;
 
+import java.io.File;
 import java.io.IOException;
-import java.math.BigInteger;
-import java.net.InetAddress;
 import java.util.Arrays;
 
 import org.apache.commons.logging.Log;
@@ -18,6 +17,7 @@ import org.apache.commons.logging.LogFactory;
 import com.mac.tarchan.irc.client.IRCMessage;
 import com.mac.tarchan.irc.client.IRCPrefix;
 import com.mac.tarchan.irc.client.util.BotAdapter;
+import com.mac.tarchan.irc.client.util.DccSendFile;
 
 /**
  * EchoBot
@@ -179,13 +179,16 @@ public class EchoBot extends BotAdapter
 		try
 		{
 			// TODO DCC SEND
-			String[] params = trail.substring("DCC SEND ".length()).split(" ");
-			String file = params[0];
-			byte[] addr = new BigInteger(params[1]).toByteArray();
-			InetAddress inet = InetAddress.getByAddress(addr);
-			int port = Integer.parseInt(params[2]);
-			long size = Long.parseLong(params[3]);
-			log.info(String.format("%s %,d bytes %s %s", file, size, inet, port));
+//			String[] params = trail.substring("DCC SEND ".length()).split(" ");
+//			String file = params[0];
+//			byte[] addr = new BigInteger(params[1]).toByteArray();
+//			InetAddress inet = InetAddress.getByAddress(addr);
+//			int port = Integer.parseInt(params[2]);
+//			long size = Long.parseLong(params[3]);
+//			log.info(String.format("%s %,d bytes %s %s", file, size, inet, port));
+			DccSendFile dccfile = new DccSendFile(trail);
+			File savefile = new File("dcc/" + prefix.getNick(), dccfile.getName());
+			dccfile.save(savefile);
 		}
 		catch (IOException x)
 		{
