@@ -23,19 +23,29 @@ public class DccSendFile
 	/** ログ */
 	private static final Log log = LogFactory.getLog(DccSendFile.class);
 
-	String file;
+	/** ファイル名 */
+	protected String file;
 
-	byte[] addr;
+	/** IPアドレス */
+	protected byte[] addr;
 
-	int port;
+	/** ポート番号 */
+	protected int port;
 
-	long size;
+	/** ファイルサイズ */
+	protected long size;
 
-	public DccSendFile(String trail) throws IOException
+	/**
+	 * DCC SENDメッセージからファイルを構築します。
+	 * 
+	 * @param text DCC SENDメッセージ
+	 * @throws IOException 指定されたIPアドレスのサーバが見つからない場合
+	 */
+	public DccSendFile(String text) throws IOException
 	{
-		if (!trail.startsWith("DCC SEND")) throw new IllegalArgumentException("DCC SENDではありません。: " + trail);
+		if (!text.startsWith("DCC SEND")) throw new IllegalArgumentException("DCC SENDではありません。: " + text);
 
-		String[] params = trail.substring("DCC SEND ".length()).split(" ");
+		String[] params = text.substring("DCC SEND ".length()).split(" ");
 		file = params[0];
 		addr = new BigInteger(params[1]).toByteArray();
 		InetAddress inet = InetAddress.getByAddress(addr);
@@ -44,11 +54,21 @@ public class DccSendFile
 		log.info(String.format("%s %,d bytes %s %s", file, size, inet, port));
 	}
 
+	/**
+	 * ファイル名を返します。
+	 * 
+	 * @return ファイル名
+	 */
 	public String getName()
 	{
 		return file;
 	}
 
+	/**
+	 * 指定されたファイルに保存します。
+	 * 
+	 * @param savefile ファイル
+	 */
 	public void save(File savefile)
 	{
 		log.info("ファイルを保存します。: " + savefile);

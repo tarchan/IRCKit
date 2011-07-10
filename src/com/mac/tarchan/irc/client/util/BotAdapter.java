@@ -324,6 +324,7 @@ public abstract class BotAdapter
 	 * 
 	 * @param oldNick 古いニックネーム
 	 * @param newNick 新しいニックネーム
+	 * @param when メッセージ作成時間
 	 */
 	public void onNick(String oldNick, String newNick, long when)
 	{
@@ -334,6 +335,7 @@ public abstract class BotAdapter
 	 * 
 	 * @param channel チャンネル名
 	 * @param names ニックネームリスト
+	 * @param when メッセージ作成時間
 	 */
 	public void onNames(String channel, String[] names, long when)
 	{
@@ -344,6 +346,7 @@ public abstract class BotAdapter
 	 * 
 	 * @param channel チャンネル名
 	 * @param topic トピック
+	 * @param when メッセージ作成時間
 	 */
 	public void onTopic(String channel, String topic, long when)
 	{
