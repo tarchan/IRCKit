@@ -14,7 +14,6 @@ import java.util.Arrays;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.mac.tarchan.irc.client.IRCMessage;
 import com.mac.tarchan.irc.client.IRCPrefix;
 import com.mac.tarchan.irc.client.util.BotAdapter;
 import com.mac.tarchan.irc.client.util.DccSendFile;
@@ -69,6 +68,11 @@ public class EchoBot extends BotAdapter
 		this.channels = channels;
 	}
 
+	private static String getTimeString(long when)
+	{
+		return String.format("%tH:%<tM", when);
+	}
+
 	@Override
 	public void onStart()
 	{
@@ -93,21 +97,21 @@ public class EchoBot extends BotAdapter
 	}
 
 	@Override
-	public void onJoin(String channel, IRCPrefix prefix)
+	public void onJoin(IRCPrefix prefix, String channel)
 	{
 		log.info(String.format("%3$s has joined %1$s (%2$s)", channel, prefix, prefix.getNick()));
 	}
 
 	@Override
-	public void onPart(String channel, IRCPrefix prefix)
+	public void onPart(IRCPrefix prefix, String channel)
 	{
 		log.info(String.format("%3$s has left channel %1$s (%2$s)", channel, prefix, prefix.getNick()));
 	}
 
 	@Override
-	public void onQuit(String trail, IRCPrefix prefix)
+	public void onQuit(IRCPrefix prefix, String text)
 	{
-		log.info(String.format("%3$s has left IRC %1$s (%2$s)", trail, prefix, prefix.getNick()));
+		log.info(String.format("%3$s has left IRC %1$s (%2$s)", text, prefix, prefix.getNick()));
 	}
 
 	@Override
@@ -135,16 +139,16 @@ public class EchoBot extends BotAdapter
 	}
 
 	@Override
-	public void onMessage(IRCMessage message)
+	public void onMessage(IRCPrefix prefix, String channel, String text)
 	{
-		String nick = message.getPrefix().getNick();
+		String nick = prefix.getNick();
 		if (isUserNick(nick))
 		{
-			log.info("self: " + message.getTrail());
+			log.info("self: " + text);
 		}
 		else
 		{
-			log.info("other: " + message.getTrail());
+			log.info("other: " + text);
 		}
 //		String chan = message.getParam0();
 //		String text = message.getTrailing();
@@ -168,9 +172,12 @@ public class EchoBot extends BotAdapter
 	}
 
 	@Override
-	public void onDirectMessage(IRCMessage message)
+	public void onDirectMessage(IRCPrefix prefix, String target, String text)
 	{
-		log.info("DM: " + message);
+		long when = prefix.getWhen();
+		String nick = prefix.getNick();
+		String line = String.format("%s %s: %s", getTimeString(when), nick, text);
+		log.info("DM: " + line);
 	}
 
 	@Override

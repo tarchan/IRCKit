@@ -77,17 +77,20 @@ public abstract class BotAdapter
 				public void onMessage(IRCEvent event)
 				{
 					IRCMessage message = event.getMessage();
+					IRCPrefix prefix = message.getPrefix();
+					String channel = message.getParam0();
+					String text = message.getTrail();
 					if (message.isCTCP())
 					{
-						BotAdapter.this.onCtcpQuery(message);
+						BotAdapter.this.onCtcp(prefix, channel, message.splitCTCP());
 					}
 					else if (message.isDirectMessage())
 					{
-						BotAdapter.this.onDirectMessage(message);
+						BotAdapter.this.onDirectMessage(prefix, channel, text);
 					}
 					else
 					{
-						BotAdapter.this.onMessage(message);
+						BotAdapter.this.onMessage(prefix, channel, text);
 					}
 				}
 			})
@@ -97,13 +100,16 @@ public abstract class BotAdapter
 				public void onMessage(IRCEvent event)
 				{
 					IRCMessage message = event.getMessage();
+					IRCPrefix prefix = message.getPrefix();
+					String channel = message.getParam0();
+					String text = message.getTrail();
 					if (message.isCTCP())
 					{
-						BotAdapter.this.onCtcpReply(message);
+						BotAdapter.this.onCtcpReply(prefix, channel, message.splitCTCP());
 					}
 					else
 					{
-						BotAdapter.this.onNotice(message);
+						BotAdapter.this.onNotice(prefix, channel, text);
 					}
 				}
 			})
@@ -115,7 +121,7 @@ public abstract class BotAdapter
 					IRCMessage message = event.getMessage();
 					String channel = message.getTrail();
 					IRCPrefix prefix = message.getPrefix();
-					BotAdapter.this.onJoin(channel, prefix);
+					BotAdapter.this.onJoin(prefix, channel);
 				}
 			})
 			.on("part", new IRCHandler()
@@ -126,7 +132,7 @@ public abstract class BotAdapter
 					IRCMessage message = event.getMessage();
 					String channel = message.getParam1();
 					IRCPrefix prefix = message.getPrefix();
-					BotAdapter.this.onPart(channel, prefix);
+					BotAdapter.this.onPart(prefix, channel);
 				}
 			})
 			.on("quit", new IRCHandler()
@@ -135,12 +141,12 @@ public abstract class BotAdapter
 				public void onMessage(IRCEvent event)
 				{
 					IRCMessage message = event.getMessage();
-					String trail = message.getTrail();
+					String text = message.getTrail();
 					IRCPrefix prefix = message.getPrefix();
-					BotAdapter.this.onQuit(trail, prefix);
-					if (trail.equals("Killed"))
+					BotAdapter.this.onQuit(prefix, text);
+					if (text.equals("Killed"))
 					{
-						BotAdapter.this.onKilled(trail, prefix);
+						BotAdapter.this.onKilled(prefix, text);
 					}
 				}
 			})
@@ -216,12 +222,13 @@ public abstract class BotAdapter
 				public void onMessage(IRCEvent event)
 				{
 					IRCMessage message = event.getMessage();
+					IRCPrefix prefix = message.getPrefix();
 					String oldNick = message.getPrefix().getNick();
 					String newNick = message.getTrail();
-					long when = message.getWhen();
+//					long when = message.getWhen();
 					try
 					{
-						BotAdapter.this.onNick(oldNick, newNick, when);
+						BotAdapter.this.onNick(prefix, newNick);
 					}
 					finally
 					{
@@ -308,6 +315,49 @@ public abstract class BotAdapter
 	}
 
 	/**
+	 * IRCネットワークが切断したときに呼び出されます。
+	 * 
+	 * @see #onRestart()
+	 * @see #onDestroy()
+	 */
+	public void onStop()
+	{
+		if (autoRecconection)
+		{
+			onRestart();
+		}
+		else
+		{
+			onDestroy();
+		}
+	}
+
+	/**
+	 * IRCネットワークに再接続するときに呼び出されます。
+	 * 
+	 * @see IRCClient#start()
+	 * @see #onStart()
+	 */
+	public void onRestart()
+	{
+		try
+		{
+			irc.start();
+		}
+		catch (IOException x)
+		{
+			throw new RuntimeException("IRCネットワークに再接続できません。", x);
+		}
+	}
+
+	/**
+	 * IRCネットワークの再接続を止めたときに呼び出されます。
+	 */
+	public void onDestroy()
+	{
+	}
+
+	/**
 	 * ニックネームが衝突したときに呼び出されます。
 	 * ニックネームの変更ができませんでした。
 	 * 接続前の場合は直ちに新しいニックネームを設定する必要があります。
@@ -322,11 +372,10 @@ public abstract class BotAdapter
 	/**
 	 * ニックネームが変更されたときに呼び出されます。
 	 * 
-	 * @param oldNick 古いニックネーム
+	 * @param prefix プレフィックス
 	 * @param newNick 新しいニックネーム
-	 * @param when メッセージ作成時間
 	 */
-	public void onNick(String oldNick, String newNick, long when)
+	public void onNick(IRCPrefix prefix, String newNick)
 	{
 	}
 
@@ -373,44 +422,54 @@ public abstract class BotAdapter
 	{
 	}
 
+	public void onInvite(IRCPrefix prefix, String channel)
+	{
+		// TODO INVITE
+	}
+
 	/**
 	 * チャンネルに参加したときに呼び出されます。
 	 * 
+	 * @param prefix プレフィックス
 	 * @param channel チャンネル名
-	 * @param prefix ユーザ名
 	 */
-	public void onJoin(String channel, IRCPrefix prefix)
+	public void onJoin(IRCPrefix prefix, String channel)
 	{
 	}
 
 	/**
 	 * チャンネルを離脱したときに呼び出されます。
 	 * 
+	 * @param prefix プレフィックス
 	 * @param channel チャンネル名
-	 * @param prefix ユーザ名
 	 */
-	public void onPart(String channel, IRCPrefix prefix)
+	public void onPart(IRCPrefix prefix, String channel)
 	{
+	}
+
+	public void onKick(IRCPrefix prefix, String channel, String target, String comment)
+	{
+		// TODO KICK
 	}
 
 	/**
 	 * 終了したときに呼び出されます。
 	 * 
-	 * @param trail 終了メッセージ
-	 * @param prefix ユーザ名
+	 * @param prefix プレフィックス
+	 * @param text 終了メッセージ
 	 */
-	public void onQuit(String trail, IRCPrefix prefix)
+	public void onQuit(IRCPrefix prefix, String text)
 	{
 	}
 
 	/**
 	 * 	ニックネームが衝突してサーバから強制的に排除されたときに呼び出されます。
 	 * 
-	 * @param trail 終了メッセージ
-	 * @param prefix ユーザ名
+	 * @param prefix プレフィックス
+	 * @param text 終了メッセージ
 	 * @see <a href="http://yoshino.tripod.com/73th/data/irccode.htm#quitmessage">server が付加する Quit Message</a>
 	 */
-	public void onKilled(String trail, IRCPrefix prefix)
+	public void onKilled(IRCPrefix prefix, String text)
 	{
 	}
 
@@ -419,95 +478,25 @@ public abstract class BotAdapter
 	 * デフォルトの実装は、IRCネットワークの接続を継続します。
 	 * 自動継続したくないときは、このメソッドをオーバーライドしてください。
 	 * 
-	 * @param trail テキスト
+	 * @param text テキスト
 	 * @see IRCClient#pong(String)
 	 */
-	public void onPing(String trail)
+	public void onPing(String text)
 	{
-		if (autoPingPong) irc.pong(trail);
+		if (autoPingPong) irc.pong(text);
 	}
 
 	/**
 	 * エラーメッセージを受け取ったときに呼び出されます。
 	 * IRCネットワークが切断したときは {@link #onStop()} を呼び出します。
 	 * 
-	 * @param trail エラーメッセージ
+	 * @param text エラーメッセージ
 	 * @see IRCClient#isClosed()
 	 * @see #onStop()
 	 */
-	public void onError(String trail)
+	public void onError(String text)
 	{
 		if (irc.isClosed()) onStop();
-	}
-
-	/**
-	 * IRCネットワークが切断したときに呼び出されます。
-	 * 
-	 * @see #onRestart()
-	 * @see #onDestroy()
-	 */
-	public void onStop()
-	{
-		if (autoRecconection)
-		{
-			onRestart();
-		}
-		else
-		{
-			onDestroy();
-		}
-	}
-
-	/**
-	 * IRCネットワークに再接続するときに呼び出されます。
-	 * 
-	 * @see IRCClient#start()
-	 * @see #onStart()
-	 */
-	public void onRestart()
-	{
-		try
-		{
-			irc.start();
-		}
-		catch (IOException x)
-		{
-			throw new RuntimeException("IRCネットワークに再接続できません。", x);
-		}
-	}
-
-	/**
-	 * IRCネットワークの再接続を止めたときに呼び出されます。
-	 */
-	public void onDestroy()
-	{
-	}
-
-	/**
-	 * メッセージを受け取ったときに呼び出されます。
-	 * 
-	 * @param message IRCメッセージ
-	 */
-	public void onMessage(IRCMessage message)
-	{
-	}
-
-	/**
-	 * ダイレクトメッセージを受け取ったときに呼び出されます。
-	 * 
-	 * @param message IRCメッセージ
-	 */
-	public void onDirectMessage(IRCMessage message)
-	{
-	}
-
-	/**
-	 * お知らせメッセージを受け取ったときに呼び出されます。
-	 * 
-	 * @param message IRCメッセージ
-	 */
-	public void onNotice(IRCMessage message)
-	{
 	}
 
 	/**
@@ -520,18 +509,55 @@ public abstract class BotAdapter
 	}
 
 	/**
+	 * メッセージを受け取ったときに呼び出されます。
+	 * 
+	 * @param prefix プレフィックス
+	 * @param channel チャンネル
+	 * @param text テキスト
+	 */
+	public void onMessage(IRCPrefix prefix, String channel, String text)
+	{
+	}
+
+	/**
+	 * お知らせメッセージを受け取ったときに呼び出されます。
+	 * 
+	 * @param prefix プレフィックス
+	 * @param channel チャンネル
+	 * @param text テキスト
+	 */
+	public void onNotice(IRCPrefix prefix, String channel, String text)
+	{
+	}
+
+	/**
+	 * ダイレクトメッセージを受け取ったときに呼び出されます。
+	 * 
+	 * @param prefix プレフィックス
+	 * @param target 対象ニックネーム
+	 * @param text テキスト
+	 */
+	public void onDirectMessage(IRCPrefix prefix, String target, String text)
+	{
+	}
+
+	/**
 	 * CTCPお知らせメッセージを受け取ったときに呼び出されます。
 	 * 
-	 * @param message IRCメッセージ
+	 * @param prefix プレフィックス
+	 * @param channel チャンネル
+	 * @param text テキスト
 	 */
-	public void onCtcpReply(IRCMessage message)
+	public void onCtcpReply(IRCPrefix prefix, String channel, String[] text)
 	{
 	}
 
 	/**
 	 * CTCP問い合わせメッセージを受け取ったときに呼び出されます。
 	 * 
-	 * @param message IRCメッセージ
+	 * @param prefix プレフィックス
+	 * @param channel チャンネル
+	 * @param text テキスト
 	 * @see #onCtcpPing(String, IRCPrefix)
 	 * @see #onCtcpTime(String, IRCPrefix)
 	 * @see #onCtcpVersion(String, IRCPrefix)
@@ -539,10 +565,9 @@ public abstract class BotAdapter
 	 * @see #onCtcpClientInfo(String, IRCPrefix)
 	 * @see #onDccSend(String, IRCPrefix)
 	 */
-	public void onCtcpQuery(IRCMessage message)
+	public void onCtcp(IRCPrefix prefix, String channel, String[] text)
 	{
-		IRCPrefix prefix = message.getPrefix();
-		for (String ctcp : message.splitCTCP())
+		for (String ctcp : text)
 		{
 			if (ctcp.startsWith("PING"))
 			{
@@ -636,7 +661,6 @@ public abstract class BotAdapter
 	 * 
 	 * @param trail テキスト
 	 * @param prefix ユーザ名
-	 * @see #onCtcpQuery(IRCMessage)
 	 */
 	public void onDccSend(String trail, IRCPrefix prefix)
 	{
