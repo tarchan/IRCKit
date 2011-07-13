@@ -214,14 +214,15 @@ public class IRCClient
 	 * @param handler メッセージハンドラ
 	 * @return IRCクライアント
 	 */
-	public IRCClient on(final String command, IRCHandler handler)
+	public IRCClient on(String command, IRCHandler handler)
 	{
+		final String _command = command.toUpperCase();
 		final IRCMessageFilter filter = new IRCMessageFilter()
 		{
 			@Override
 			public boolean accept(IRCMessage message)
 			{
-				return message.getCommand().equals(command);
+				return message.getCommand().equals(_command);
 			}
 			
 		};
@@ -326,7 +327,7 @@ public class IRCClient
 	 */
 	public IRCClient postMessage(String text)
 	{
-		if (text != null && text.trim().length() > 0) taskQueue.execute(new OutputTask(this, text));
+		if (text != null && text.trim().length() > 0 && !taskQueue.isShutdown()) taskQueue.execute(new OutputTask(this, text));
 		return this;
 	}
 
