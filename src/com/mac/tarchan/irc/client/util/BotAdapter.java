@@ -82,7 +82,13 @@ public abstract class BotAdapter
 					String text = message.getTrail();
 					if (message.isCTCP())
 					{
-						BotAdapter.this.onCtcp(prefix, channel, message.splitCTCP());
+						for (String ctcp : message.splitCTCP())
+						{
+							String[] span = ctcp.split(" ", 2);
+							String command = span[0].toUpperCase();
+							String param = span[1];
+							BotAdapter.this.onCtcp(prefix, channel, command, param);
+						}
 					}
 					else if (message.isDirectMessage())
 					{
@@ -536,17 +542,6 @@ public abstract class BotAdapter
 	}
 
 	/**
-	 * お知らせメッセージを受け取ったときに呼び出されます。
-	 * 
-	 * @param prefix プレフィックス
-	 * @param channel チャンネル名
-	 * @param text テキスト
-	 */
-	public void onNotice(IRCPrefix prefix, String channel, String text)
-	{
-	}
-
-	/**
 	 * ダイレクトメッセージを受け取ったときに呼び出されます。
 	 * 
 	 * @param prefix プレフィックス
@@ -554,6 +549,17 @@ public abstract class BotAdapter
 	 * @param text テキスト
 	 */
 	public void onDirectMessage(IRCPrefix prefix, String target, String text)
+	{
+	}
+
+	/**
+	 * お知らせメッセージを受け取ったときに呼び出されます。
+	 * 
+	 * @param prefix プレフィックス
+	 * @param channel チャンネル名
+	 * @param text テキスト
+	 */
+	public void onNotice(IRCPrefix prefix, String channel, String text)
 	{
 	}
 
@@ -573,7 +579,8 @@ public abstract class BotAdapter
 	 * 
 	 * @param prefix プレフィックス
 	 * @param channel チャンネル名
-	 * @param text CTCPクエリ
+	 * @param command CTCPコマンド
+	 * @param param CTCPパラメータ
 	 * @see #onCtcpPing(String, IRCPrefix)
 	 * @see #onCtcpTime(String, IRCPrefix)
 	 * @see #onCtcpVersion(String, IRCPrefix)
@@ -581,42 +588,40 @@ public abstract class BotAdapter
 	 * @see #onCtcpClientInfo(String, IRCPrefix)
 	 * @see #onDccSend(String, IRCPrefix)
 	 */
-	public void onCtcp(IRCPrefix prefix, String channel, String[] text)
+	public void onCtcp(IRCPrefix prefix, String channel, String command, String param)
 	{
-		for (String ctcp : text)
+		if (command.equals("PING"))
 		{
-			if (ctcp.startsWith("PING"))
-			{
-				onCtcpPing(ctcp, prefix);
-			}
-			else if (ctcp.startsWith("TIME"))
-			{
-				onCtcpTime(ctcp, prefix);
-			}
-			else if (ctcp.startsWith("VERSION"))
-			{
-				onCtcpVersion(ctcp, prefix);
-			}
-			else if (ctcp.startsWith("USERINFO"))
-			{
-				onCtcpUserInfo(ctcp, prefix);
-			}
-			else if (ctcp.startsWith("CLIENTINFO"))
-			{
-				onCtcpClientInfo(ctcp, prefix);
-			}
-			else if (ctcp.startsWith("ACTION"))
-			{
-				onCtcpAction(ctcp, prefix);
-			}
-			else if (ctcp.startsWith("DCC SEND"))
-			{
-				onDccSend(ctcp, prefix);
-			}
-			else
-			{
-				// ignore
-			}
+			onCtcpPing(param, prefix);
+		}
+		else if (command.equals("TIME"))
+		{
+			onCtcpTime(param, prefix);
+		}
+		else if (command.equals("VERSION"))
+		{
+			onCtcpVersion(param, prefix);
+		}
+		else if (command.equals("USERINFO"))
+		{
+			onCtcpUserInfo(param, prefix);
+		}
+		else if (command.equals("CLIENTINFO"))
+		{
+			onCtcpClientInfo(param, prefix);
+		}
+		else if (command.equals("ACTION"))
+		{
+			onCtcpAction(param, prefix);
+		}
+		else if (command.equals("DCC SEND"))
+		{
+			// TODO DCC
+			onDccSend(param, prefix);
+		}
+		else
+		{
+			// ignore
 		}
 	}
 
