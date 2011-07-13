@@ -103,7 +103,7 @@ public class EchoBot extends BotAdapter
 	}
 
 	@Override
-	public void onPart(IRCPrefix prefix, String channel)
+	public void onPart(IRCPrefix prefix, String channel, String text)
 	{
 		log.info(String.format("%3$s has left channel %1$s (%2$s)", channel, prefix, prefix.getNick()));
 	}

@@ -28,9 +28,10 @@ import com.mac.tarchan.irc.client.util.KanaInputFilter;
 /**
  * IRCクライアントを実装します。
  * 
- * @see <a href="http://www.irchelp.org/irchelp/rfc/rfc.html">RFC 1459: Internet Relay Chat Protocol</a>
- * @see <a href="http://www.haun.org/kent/lib/rfc1459-irc-ja.html">RFC 1459 日本語訳</a>
- * @see <a href="http://www.faqs.org/rfcs/rfc2812.html">RFC 2812 - Internet Relay Chat: Client Protocol (RFC2812)</a>
+ * @see <a href="http://www.irchelp.org/irchelp/rfc/rfc.html">RFC 1459 - Internet Relay Chat Protocol</a>
+ * @see <a href="http://www.haun.org/kent/lib/rfc1459-irc-ja.html">RFC 1459 - 日本語訳</a>
+ * @see <a href="http://www.faqs.org/rfcs/rfc2812.html">RFC 2812 - Internet Relay Chat: Client Protocol</a>
+ * @see <a href="http://jbpe.tripod.com/rfcj/rfc2812.j.sjis.txt">RFC 2812 - 日本語訳</a>
  */
 public class IRCClient
 {
@@ -366,12 +367,12 @@ public class IRCClient
 	/**
 	 * クライアントのセッションを、終了メッセージと共に終了します。
 	 * 
-	 * @param message 終了メッセージ
+	 * @param text 終了メッセージ
 	 * @return IRCクライアント
 	 */
-	public IRCClient quit(String message)
+	public IRCClient quit(String text)
 	{
-		return postMessage("QUIT :%s", message);
+		return postMessage("QUIT :%s", text);
 	}
 
 	/**
@@ -413,12 +414,12 @@ public class IRCClient
 	 * 指定されたチャンネルから離脱メッセージと共に離脱します。
 	 * 
 	 * @param channel チャンネル名
-	 * @param message 離脱メッセージ
+	 * @param text 離脱メッセージ
 	 * @return IRCクライアント
 	 */
-	public IRCClient part(String channel, String message)
+	public IRCClient part(String channel, String text)
 	{
-		return postMessage("PART %s :%s", channel, message);
+		return postMessage("PART %s :%s", channel, text);
 	}
 
 	/**
@@ -484,12 +485,12 @@ public class IRCClient
 	 * 
 	 * @param channel チャンネル名
 	 * @param user クライアント
-	 * @param comment 追放メッセージ
+	 * @param text 追放メッセージ
 	 * @return IRCクライアント
 	 */
-	public IRCClient kick(String channel, String user, String comment)
+	public IRCClient kick(String channel, String user, String text)
 	{
-		return postMessage("KICK %s %s :%s", channel, user, comment);
+		return postMessage("KICK %s %s :%s", channel, user, text);
 	}
 
 	/**
@@ -520,11 +521,11 @@ public class IRCClient
 	 * CTCPクエリを送信します。
 	 * 
 	 * @param target チャンネル名またはニックネーム
-	 * @param text テキスト
+	 * @param text CTCPクエリ
 	 * @return IRCクライアント
 	 * @see #privmsg(String, String)
 	 */
-	public IRCClient ctcpQuery(String target, String text)
+	public IRCClient ctcp(String target, String text)
 	{
 		return privmsg(target, IRCMessage.wrapCTCP(text));
 	}
@@ -533,7 +534,7 @@ public class IRCClient
 	 * CTCPリプライを送信します。
 	 * 
 	 * @param target チャンネル名またはニックネーム
-	 * @param text テキスト
+	 * @param text CTCPリプライ
 	 * @return IRCクライアント
 	 * @see #notice(String, String)
 	 */

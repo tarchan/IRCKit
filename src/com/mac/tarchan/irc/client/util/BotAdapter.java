@@ -130,9 +130,10 @@ public abstract class BotAdapter
 				public void onMessage(IRCEvent event)
 				{
 					IRCMessage message = event.getMessage();
-					String channel = message.getParam1();
 					IRCPrefix prefix = message.getPrefix();
-					BotAdapter.this.onPart(prefix, channel);
+					String channel = message.getParam1();
+					String text = message.getTrail();
+					BotAdapter.this.onPart(prefix, channel, text);
 				}
 			})
 			.on("quit", new IRCHandler()
@@ -422,6 +423,12 @@ public abstract class BotAdapter
 	{
 	}
 
+	/**
+	 * チャンネルに招待されたときに呼び出されます。
+	 * 
+	 * @param prefix プレフィックス
+	 * @param channel チャンネル名
+	 */
 	public void onInvite(IRCPrefix prefix, String channel)
 	{
 		// TODO INVITE
@@ -442,12 +449,21 @@ public abstract class BotAdapter
 	 * 
 	 * @param prefix プレフィックス
 	 * @param channel チャンネル名
+	 * @param text 離脱メッセージ
 	 */
-	public void onPart(IRCPrefix prefix, String channel)
+	public void onPart(IRCPrefix prefix, String channel, String text)
 	{
 	}
 
-	public void onKick(IRCPrefix prefix, String channel, String target, String comment)
+	/**
+	 * チャンネルを追放されたときに呼び出されます。
+	 * 
+	 * @param prefix プレフィックス
+	 * @param channel チャンネル名
+	 * @param target 追放したオペレータ
+	 * @param text 追放メッセージ
+	 */
+	public void onKick(IRCPrefix prefix, String channel, String target, String text)
 	{
 		// TODO KICK
 	}
@@ -512,7 +528,7 @@ public abstract class BotAdapter
 	 * メッセージを受け取ったときに呼び出されます。
 	 * 
 	 * @param prefix プレフィックス
-	 * @param channel チャンネル
+	 * @param channel チャンネル名
 	 * @param text テキスト
 	 */
 	public void onMessage(IRCPrefix prefix, String channel, String text)
@@ -523,7 +539,7 @@ public abstract class BotAdapter
 	 * お知らせメッセージを受け取ったときに呼び出されます。
 	 * 
 	 * @param prefix プレフィックス
-	 * @param channel チャンネル
+	 * @param channel チャンネル名
 	 * @param text テキスト
 	 */
 	public void onNotice(IRCPrefix prefix, String channel, String text)
@@ -545,8 +561,8 @@ public abstract class BotAdapter
 	 * CTCPお知らせメッセージを受け取ったときに呼び出されます。
 	 * 
 	 * @param prefix プレフィックス
-	 * @param channel チャンネル
-	 * @param text テキスト
+	 * @param channel チャンネル名
+	 * @param text CTCPリプライ
 	 */
 	public void onCtcpReply(IRCPrefix prefix, String channel, String[] text)
 	{
@@ -556,8 +572,8 @@ public abstract class BotAdapter
 	 * CTCP問い合わせメッセージを受け取ったときに呼び出されます。
 	 * 
 	 * @param prefix プレフィックス
-	 * @param channel チャンネル
-	 * @param text テキスト
+	 * @param channel チャンネル名
+	 * @param text CTCPクエリ
 	 * @see #onCtcpPing(String, IRCPrefix)
 	 * @see #onCtcpTime(String, IRCPrefix)
 	 * @see #onCtcpVersion(String, IRCPrefix)
@@ -589,6 +605,10 @@ public abstract class BotAdapter
 			{
 				onCtcpClientInfo(ctcp, prefix);
 			}
+			else if (ctcp.startsWith("ACTION"))
+			{
+				onCtcpAction(ctcp, prefix);
+			}
 			else if (ctcp.startsWith("DCC SEND"))
 			{
 				onDccSend(ctcp, prefix);
@@ -604,7 +624,7 @@ public abstract class BotAdapter
 	 * CTCP PINGを受け取ったときに呼び出されます。
 	 * 
 	 * @param trail CTCPメッセージ
-	 * @param prefix ユーザ名
+	 * @param prefix プレフィックス
 	 */
 	public void onCtcpPing(String trail, IRCPrefix prefix)
 	{
@@ -615,7 +635,7 @@ public abstract class BotAdapter
 	 * CTCP TIMEを受け取ったときに呼び出されます。
 	 * 
 	 * @param trail CTCPメッセージ
-	 * @param prefix ユーザ名
+	 * @param prefix プレフィックス
 	 */
 	public void onCtcpTime(String trail, IRCPrefix prefix)
 	{
@@ -626,7 +646,7 @@ public abstract class BotAdapter
 	 * CTCP VERSIONを受け取ったときに呼び出されます。
 	 * 
 	 * @param trail CTCPメッセージ
-	 * @param prefix ユーザ名
+	 * @param prefix プレフィックス
 	 */
 	public void onCtcpVersion(String trail, IRCPrefix prefix)
 	{
@@ -637,7 +657,7 @@ public abstract class BotAdapter
 	 * CTCP USERINFOを受け取ったときに呼び出されます。
 	 * 
 	 * @param trail CTCPメッセージ
-	 * @param prefix ユーザ名
+	 * @param prefix プレフィックス
 	 */
 	public void onCtcpUserInfo(String trail, IRCPrefix prefix)
 	{
@@ -656,11 +676,22 @@ public abstract class BotAdapter
 	}
 
 	/**
+	 * CTCP ACTIONを受け取ったときに呼び出されます。
+	 * 
+	 * @param trail CTCPメッセージ
+	 * @param prefix プレフィックス
+	 */
+	public void onCtcpAction(String trail, IRCPrefix prefix)
+	{
+		// TODO ACTION
+	}
+
+	/**
 	 * DCC SENDを受け取ったときに呼び出されます。
 	 * ファイル送信メッセージを受け取ったときに呼び出されます。
 	 * 
 	 * @param trail テキスト
-	 * @param prefix ユーザ名
+	 * @param prefix プレフィックス
 	 */
 	public void onDccSend(String trail, IRCPrefix prefix)
 	{
