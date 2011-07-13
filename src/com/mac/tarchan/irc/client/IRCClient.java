@@ -190,23 +190,42 @@ public class IRCClient
 	}
 
 	/**
+	 * 指定されたフィルタに含まれるメッセージハンドラを追加します。
+	 * 
+	 * @param filter フィルタ
+	 * @param handler メッセージハンドラ
+	 * @return IRCクライアント
+	 */
+	public IRCClient on(final IRCMessageFilter filter, final IRCHandler handler)
+	{
+		return on(new IRCHandler()
+		{
+			public void onMessage(IRCEvent event)
+			{
+				if (filter.accept(event.getMessage())) handler.onMessage(event);
+			}
+		});
+	}
+
+	/**
 	 * 指定されたコマンドのメッセージハンドラを追加します。
 	 * 
 	 * @param command コマンド
 	 * @param handler メッセージハンドラ
 	 * @return IRCクライアント
 	 */
-	public IRCClient on(String command, IRCHandler handler)
+	public IRCClient on(final String command, IRCHandler handler)
 	{
-		final String _command = command.toUpperCase();
-		final IRCHandler _handler = handler;
-		return on(new IRCHandler()
+		final IRCMessageFilter filter = new IRCMessageFilter()
 		{
-			public void onMessage(IRCEvent event)
+			@Override
+			public boolean accept(IRCMessage message)
 			{
-				if (event.getMessage().getCommand().equals(_command)) _handler.onMessage(event);
+				return message.getCommand().equals(command);
 			}
-		});
+			
+		};
+		return on(filter, handler);
 	}
 
 	/**
