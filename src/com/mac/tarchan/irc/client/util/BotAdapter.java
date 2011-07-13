@@ -163,16 +163,21 @@ public abstract class BotAdapter
 				public void onMessage(IRCEvent event)
 				{
 					IRCMessage message = event.getMessage();
+					IRCPrefix prefix = message.getPrefix();
 					String channel = message.getParam0();
 					String mode = message.getParam1();
 					if (message.getParamsCount() < 3)
 					{
-						BotAdapter.this.onChannelMode(channel, mode);
+						// TODO チャンネルモード
+						// (MODE):tarcMac21!~tarchan@124x38x70x51.ap124.ftth.ucom.ne.jp/#javabreak +p-s/:null
+						BotAdapter.this.onMode(prefix, channel, mode);
 					}
 					else
 					{
+						// TODO ユーザーモードが複数指定された場合は分解して呼び出す
+						// (MODE):tarcMac21!~tarchan@124x38x70x51.ap124.ftth.ucom.ne.jp/#javabreak +oo mybot bot2/:null
 						String nick = message.getParam2();
-						BotAdapter.this.onUserMode(channel, mode, nick);
+						BotAdapter.this.onMode(prefix, channel, mode, nick);
 					}
 				}
 			})
@@ -411,21 +416,23 @@ public abstract class BotAdapter
 	/**
 	 * チャンネルのモードが変更されたときに呼び出されます。
 	 * 
+	 * @param prefix プレフィックス
 	 * @param channel チャンネル名
 	 * @param mode チャンネルモード
 	 */
-	public void onChannelMode(String channel, String mode)
+	public void onMode(IRCPrefix prefix, String channel, String mode)
 	{
 	}
 
 	/**
 	 * ユーザのモードが変更されたときに呼び出されます。
 	 * 
+	 * @param prefix プレフィックス
 	 * @param channel チャンネル名
 	 * @param mode ユーザモード
 	 * @param nick ニックネーム
 	 */
-	public void onUserMode(String channel, String mode, String nick)
+	public void onMode(IRCPrefix prefix, String channel, String mode, String nick)
 	{
 	}
 

@@ -127,13 +127,13 @@ public class EchoBot extends BotAdapter
 	}
 
 	@Override
-	public void onChannelMode(String channel, String mode)
+	public void onMode(IRCPrefix prefix, String channel, String mode)
 	{
 		log.info(String.format("%1$s has changed channel mode %2$s", channel, mode));
 	}
 
 	@Override
-	public void onUserMode(String channel, String mode, String nick)
+	public void onMode(IRCPrefix prefix, String channel, String mode, String nick)
 	{
 		log.info(String.format("%1$s/%3$s has changed user mode %2$s", channel, mode, nick));
 	}
