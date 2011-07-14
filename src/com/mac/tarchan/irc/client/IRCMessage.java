@@ -7,6 +7,7 @@
  */
 package com.mac.tarchan.irc.client;
 
+import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -251,14 +252,27 @@ public class IRCMessage
 	 */
 	public String[] splitCTCP()
 	{
-		if (isCTCP())
+		if (!isCTCP()) return null;
+
+		return trail.substring(1).split(CTCP);
+	}
+
+	/**
+	 * CTCPメッセージの配列を返します。
+	 * 
+	 * @return CTCPメッセージの配列
+	 * @see CTCP
+	 */
+	public CTCP[] toCTCPArray()
+	{
+		if (!isCTCP()) return null;
+
+		ArrayList<CTCP> list = new ArrayList<CTCP>();
+		for (String text : splitCTCP())
 		{
-			return trail.substring(1).split(CTCP);
+			list.add(new CTCP(this, text));
 		}
-		else
-		{
-			return null;
-		}
+		return list.toArray(new CTCP[]{});
 	}
 
 	/**
@@ -277,5 +291,84 @@ public class IRCMessage
 	public String toString()
 	{
 		return text;
+	}
+
+	/**
+	 * CTCPメッセージ
+	 */
+	public static class CTCP
+	{
+		/** IRCメッセージ */
+		protected IRCMessage message;
+
+		/** CTCPメッセージ */
+		protected String text;
+
+		/** CTCPコマンド */
+		protected String command;
+
+		/** CTCPパラメータ */
+		protected String param;
+
+		/**
+		 * CTCPメッセージを作成します。
+		 * 
+		 * @param message IRCメッセージ
+		 * @param text CTCPメッセージ
+		 */
+		public CTCP(IRCMessage message, String text)
+		{
+			try
+			{
+				this.message = message;
+				this.text = text;
+				String[] span = text.split(" ", 2);
+				command = span[0].toUpperCase();
+				param = span[1];
+			}
+			catch (Exception x)
+			{
+				throw new IllegalArgumentException("CTCPメッセージが不正です。: " + text, x);
+			}
+		}
+
+		/**
+		 * 親のIRCメッセージを返します。
+		 * 
+		 * @return 親のIRCメッセージ
+		 */
+		public IRCMessage getMessage()
+		{
+			return message;
+		}
+
+		/**
+		 * CTCPコマンドを返します。
+		 * 
+		 * @return CTCPコマンド
+		 */
+		public String getCommand()
+		{
+			return command;
+		}
+
+		/**
+		 * CTCPパラメータを返します。
+		 * 
+		 * @return CTCPパラメータ
+		 */
+		public String getParam()
+		{
+			return param;
+		}
+
+		/**
+		 * CTCPメッセージの文字列表現を返します。
+		 */
+		@Override
+		public String toString()
+		{
+			return text;
+		}
 	}
 }

@@ -16,6 +16,7 @@ import com.mac.tarchan.irc.client.IRCClient;
 import com.mac.tarchan.irc.client.IRCEvent;
 import com.mac.tarchan.irc.client.IRCHandler;
 import com.mac.tarchan.irc.client.IRCMessage;
+import com.mac.tarchan.irc.client.IRCMessage.CTCP;
 import com.mac.tarchan.irc.client.IRCPrefix;
 
 /**
@@ -82,12 +83,9 @@ public abstract class BotAdapter
 					String text = message.getTrail();
 					if (message.isCTCP())
 					{
-						for (String ctcp : message.splitCTCP())
+						for (CTCP ctcp : message.toCTCPArray())
 						{
-							String[] span = ctcp.split(" ", 2);
-							String command = span[0].toUpperCase();
-							String param = span[1];
-							BotAdapter.this.onCtcp(prefix, channel, command, param);
+							BotAdapter.this.onCtcp(prefix, channel, ctcp.getCommand(), ctcp.getParam());
 						}
 					}
 					else if (message.isDirectMessage())
@@ -197,11 +195,11 @@ public abstract class BotAdapter
 				public void onMessage(IRCEvent event)
 				{
 					IRCMessage message = event.getMessage();
-					long when = message.getWhen();
+					IRCPrefix prefix = message.getPrefix();
 					String channel = message.getParam1();
 					String[] names = nicklist.toArray(new String[]{});
 					nicklist.clear();
-					BotAdapter.this.onNames(channel, names, when);
+					BotAdapter.this.onNames(prefix, channel, names);
 				}
 			})
 			.on("topic", new IRCHandler()
@@ -210,10 +208,10 @@ public abstract class BotAdapter
 				public void onMessage(IRCEvent event)
 				{
 					IRCMessage message = event.getMessage();
+					IRCPrefix prefix = message.getPrefix();
 					String channel = message.getParam0();
 					String topic = message.getTrail();
-					long when = message.getWhen();
-					BotAdapter.this.onTopic(channel, topic, when);
+					BotAdapter.this.onTopic(prefix, channel, topic);
 				}
 			})
 			.on("332", new IRCHandler()
@@ -222,10 +220,10 @@ public abstract class BotAdapter
 				public void onMessage(IRCEvent event)
 				{
 					IRCMessage message = event.getMessage();
+					IRCPrefix prefix = message.getPrefix();
 					String channel = message.getParam1();
 					String topic = message.getTrail();
-					long when = message.getWhen();
-					BotAdapter.this.onTopic(channel, topic, when);
+					BotAdapter.this.onTopic(prefix, channel, topic);
 				}
 			})
 			.on("nick", new IRCHandler()
@@ -235,9 +233,8 @@ public abstract class BotAdapter
 				{
 					IRCMessage message = event.getMessage();
 					IRCPrefix prefix = message.getPrefix();
-					String oldNick = message.getPrefix().getNick();
+					String oldNick = prefix.getNick();
 					String newNick = message.getTrail();
-//					long when = message.getWhen();
 					try
 					{
 						BotAdapter.this.onNick(prefix, newNick);
@@ -394,22 +391,22 @@ public abstract class BotAdapter
 	/**
 	 * ニックネームリストが変更されたときに呼び出されます。
 	 * 
+	 * @param prefix プレフィックス
 	 * @param channel チャンネル名
 	 * @param names ニックネームリスト
-	 * @param when メッセージ作成時間
 	 */
-	public void onNames(String channel, String[] names, long when)
+	public void onNames(IRCPrefix prefix, String channel, String[] names)
 	{
 	}
 
 	/**
 	 * トピックが変更されたときに呼び出されます。
 	 * 
+	 * @param prefix プレフィックス
 	 * @param channel チャンネル名
 	 * @param topic トピック
-	 * @param when メッセージ作成時間
 	 */
-	public void onTopic(String channel, String topic, long when)
+	public void onTopic(IRCPrefix prefix, String channel, String topic)
 	{
 	}
 

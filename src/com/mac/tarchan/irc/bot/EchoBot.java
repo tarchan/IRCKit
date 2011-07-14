@@ -115,13 +115,13 @@ public class EchoBot extends BotAdapter
 	}
 
 	@Override
-	public void onTopic(String channel, String topic, long when)
+	public void onTopic(IRCPrefix prefix, String channel, String topic)
 	{
 		log.info(String.format("%1$s has set topic %2$s", channel, topic));
 	}
 
 	@Override
-	public void onNames(String channel, String[] names, long when)
+	public void onNames(IRCPrefix prefix, String channel, String[] names)
 	{
 		log.info(String.format("%1$s (%3$s) names %2$s", channel, Arrays.asList(names), names.length));
 	}
