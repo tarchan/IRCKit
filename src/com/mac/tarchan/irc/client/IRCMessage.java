@@ -225,6 +225,16 @@ public class IRCMessage
 	}
 
 	/**
+	 * ニュメリックリプライの番号を返します。
+	 * 
+	 * @return ニュメリックリプライの番号
+	 */
+	public int getNumber()
+	{
+		return Integer.valueOf(command);
+	}
+
+	/**
 	 * ダイレクトメッセージかどうか判定します。
 	 * 
 	 * @return ダイレクトメッセージの場合は true

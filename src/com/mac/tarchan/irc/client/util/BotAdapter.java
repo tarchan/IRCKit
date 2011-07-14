@@ -258,7 +258,7 @@ public abstract class BotAdapter
 				public void onMessage(IRCEvent event)
 				{
 					IRCMessage message = event.getMessage();
-					if (message.isNumericReply()) BotAdapter.this.onNumericReply(message);
+					if (message.isNumericReply()) BotAdapter.this.onNumericReply(message.getNumber(), message.getTrail());
 				}
 			})
 			.start();
@@ -531,9 +531,10 @@ public abstract class BotAdapter
 	/**
 	 * ニュメリックリプライを受け取ったときに呼び出されます。
 	 * 
-	 * @param message IRCメッセージ
+	 * @param number ニュメリックリプライの番号
+	 * @param text ニュメリックリプライのメッセージ
 	 */
-	public void onNumericReply(IRCMessage message)
+	public void onNumericReply(int number, String text)
 	{
 	}
 
