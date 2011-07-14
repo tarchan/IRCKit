@@ -85,7 +85,7 @@ public abstract class BotAdapter
 					{
 						for (CTCP ctcp : message.toCTCPArray())
 						{
-							BotAdapter.this.onCtcp(prefix, channel, ctcp.getCommand(), ctcp.getParam());
+							BotAdapter.this.onCtcp(prefix, channel, ctcp);
 						}
 					}
 					else if (message.isDirectMessage())
@@ -109,7 +109,10 @@ public abstract class BotAdapter
 					String text = message.getTrail();
 					if (message.isCTCP())
 					{
-						BotAdapter.this.onCtcpReply(prefix, channel, message.splitCTCP());
+						for (CTCP ctcp : message.toCTCPArray())
+						{
+							BotAdapter.this.onCtcpReply(prefix, channel, ctcp);
+						}
 					}
 					else
 					{
@@ -571,10 +574,10 @@ public abstract class BotAdapter
 	 * CTCPお知らせメッセージを受け取ったときに呼び出されます。
 	 * 
 	 * @param prefix プレフィックス
-	 * @param channel チャンネル名
-	 * @param text CTCPリプライ
+	 * @param target 対象ニックネーム
+	 * @param ctcp CTCPメッセージ
 	 */
-	public void onCtcpReply(IRCPrefix prefix, String channel, String[] text)
+	public void onCtcpReply(IRCPrefix prefix, String target, CTCP ctcp)
 	{
 	}
 
@@ -582,46 +585,46 @@ public abstract class BotAdapter
 	 * CTCP問い合わせメッセージを受け取ったときに呼び出されます。
 	 * 
 	 * @param prefix プレフィックス
-	 * @param channel チャンネル名
-	 * @param command CTCPコマンド
-	 * @param param CTCPパラメータ
-	 * @see #onCtcpPing(String, IRCPrefix)
-	 * @see #onCtcpTime(String, IRCPrefix)
-	 * @see #onCtcpVersion(String, IRCPrefix)
-	 * @see #onCtcpUserInfo(String, IRCPrefix)
-	 * @see #onCtcpClientInfo(String, IRCPrefix)
-	 * @see #onDccSend(String, IRCPrefix)
+	 * @param target 対象ニックネーム
+	 * @param ctcp CTCPメッセージ
+	 * @see #onCtcpPing(IRCPrefix, String, CTCP)
+	 * @see #onCtcpTime(IRCPrefix, String, CTCP)
+	 * @see #onCtcpVersion(IRCPrefix, String, CTCP)
+	 * @see #onCtcpUserInfo(IRCPrefix, String, CTCP)
+	 * @see #onCtcpClientInfo(IRCPrefix, String, CTCP)
+	 * @see #onCtcpAction(IRCPrefix, String, CTCP)
+	 * @see #onDccSend(IRCPrefix, String, CTCP)
 	 */
-	public void onCtcp(IRCPrefix prefix, String channel, String command, String param)
+	public void onCtcp(IRCPrefix prefix, String target, CTCP ctcp)
 	{
-		if (command.equals("PING"))
+		String command = ctcp.getCommand();
+		if (command.equals(CTCP.PING))
 		{
-			onCtcpPing(param, prefix);
+			onCtcpPing(prefix, target, ctcp);
 		}
-		else if (command.equals("TIME"))
+		else if (command.equals(CTCP.TIME))
 		{
-			onCtcpTime(param, prefix);
+			onCtcpTime(prefix, target, ctcp);
 		}
-		else if (command.equals("VERSION"))
+		else if (command.equals(CTCP.VERSION))
 		{
-			onCtcpVersion(param, prefix);
+			onCtcpVersion(prefix, target, ctcp);
 		}
-		else if (command.equals("USERINFO"))
+		else if (command.equals(CTCP.USERINFO))
 		{
-			onCtcpUserInfo(param, prefix);
+			onCtcpUserInfo(prefix, target, ctcp);
 		}
-		else if (command.equals("CLIENTINFO"))
+		else if (command.equals(CTCP.CLIENTINFO))
 		{
-			onCtcpClientInfo(param, prefix);
+			onCtcpClientInfo(prefix, target, ctcp);
 		}
-		else if (command.equals("ACTION"))
+		else if (command.equals(CTCP.ACTION))
 		{
-			onCtcpAction(param, prefix);
+			onCtcpAction(prefix, target, ctcp);
 		}
-		else if (command.equals("DCC SEND"))
+		else if (command.equals(CTCP.DCC_SEND))
 		{
-			// TODO DCC
-			onDccSend(param, prefix);
+			onDccSend(prefix, target, ctcp);
 		}
 		else
 		{
@@ -632,21 +635,23 @@ public abstract class BotAdapter
 	/**
 	 * CTCP PINGを受け取ったときに呼び出されます。
 	 * 
-	 * @param trail CTCPメッセージ
 	 * @param prefix プレフィックス
+	 * @param target 対象ニックネーム
+	 * @param ctcp CTCPメッセージ
 	 */
-	public void onCtcpPing(String trail, IRCPrefix prefix)
+	public void onCtcpPing(IRCPrefix prefix, String target, CTCP ctcp)
 	{
-		irc.ctcpReply(prefix.getNick(), trail);
+		irc.ctcpReply(prefix.getNick(), ctcp.toString());
 	}
 
 	/**
 	 * CTCP TIMEを受け取ったときに呼び出されます。
 	 * 
-	 * @param trail CTCPメッセージ
 	 * @param prefix プレフィックス
+	 * @param target 対象ニックネーム
+	 * @param ctcp CTCPメッセージ
 	 */
-	public void onCtcpTime(String trail, IRCPrefix prefix)
+	public void onCtcpTime(IRCPrefix prefix, String target, CTCP ctcp)
 	{
 		irc.ctcpReply(prefix.getNick(), String.format(Locale.ENGLISH, "TIME %tc", System.currentTimeMillis()));
 	}
@@ -654,10 +659,11 @@ public abstract class BotAdapter
 	/**
 	 * CTCP VERSIONを受け取ったときに呼び出されます。
 	 * 
-	 * @param trail CTCPメッセージ
 	 * @param prefix プレフィックス
+	 * @param target 対象ニックネーム
+	 * @param ctcp CTCPメッセージ
 	 */
-	public void onCtcpVersion(String trail, IRCPrefix prefix)
+	public void onCtcpVersion(IRCPrefix prefix, String target, CTCP ctcp)
 	{
 		irc.ctcpReply(prefix.getNick(), "VERSION IRCKit for Java");
 	}
@@ -665,10 +671,11 @@ public abstract class BotAdapter
 	/**
 	 * CTCP USERINFOを受け取ったときに呼び出されます。
 	 * 
-	 * @param trail CTCPメッセージ
 	 * @param prefix プレフィックス
+	 * @param target 対象ニックネーム
+	 * @param ctcp CTCPメッセージ
 	 */
-	public void onCtcpUserInfo(String trail, IRCPrefix prefix)
+	public void onCtcpUserInfo(IRCPrefix prefix, String target, CTCP ctcp)
 	{
 		irc.ctcpReply(prefix.getNick(), "USERINFO " + irc.getUserNick());
 	}
@@ -676,10 +683,11 @@ public abstract class BotAdapter
 	/**
 	 * CTCP CLIENTINFOを受け取ったときに呼び出されます。
 	 * 
-	 * @param trail CTCPメッセージ
-	 * @param prefix ユーザ名
+	 * @param prefix プレフィックス
+	 * @param target 対象ニックネーム
+	 * @param ctcp CTCPメッセージ
 	 */
-	public void onCtcpClientInfo(String trail, IRCPrefix prefix)
+	public void onCtcpClientInfo(IRCPrefix prefix, String target, CTCP ctcp)
 	{
 		irc.ctcpReply(prefix.getNick(), "CLIENTINFO PING TIME VERSION USERINFO CLIENTINFO DCC");
 	}
@@ -687,10 +695,11 @@ public abstract class BotAdapter
 	/**
 	 * CTCP ACTIONを受け取ったときに呼び出されます。
 	 * 
-	 * @param trail CTCPメッセージ
 	 * @param prefix プレフィックス
+	 * @param target 対象ニックネーム
+	 * @param ctcp CTCPメッセージ
 	 */
-	public void onCtcpAction(String trail, IRCPrefix prefix)
+	public void onCtcpAction(IRCPrefix prefix, String target, CTCP ctcp)
 	{
 		// TODO ACTION
 	}
@@ -699,10 +708,11 @@ public abstract class BotAdapter
 	 * DCC SENDを受け取ったときに呼び出されます。
 	 * ファイル送信メッセージを受け取ったときに呼び出されます。
 	 * 
-	 * @param trail テキスト
 	 * @param prefix プレフィックス
+	 * @param target 対象ニックネーム
+	 * @param ctcp CTCPメッセージ
 	 */
-	public void onDccSend(String trail, IRCPrefix prefix)
+	public void onDccSend(IRCPrefix prefix, String target, CTCP ctcp)
 	{
 	}
 }

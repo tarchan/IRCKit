@@ -15,6 +15,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.mac.tarchan.irc.client.IRCPrefix;
+import com.mac.tarchan.irc.client.IRCMessage.CTCP;
 import com.mac.tarchan.irc.client.util.BotAdapter;
 import com.mac.tarchan.irc.client.util.DccSendFile;
 
@@ -181,7 +182,7 @@ public class EchoBot extends BotAdapter
 	}
 
 	@Override
-	public void onDccSend(String trail, IRCPrefix prefix)
+	public void onDccSend(IRCPrefix prefix, String target, CTCP ctcp)
 	{
 		try
 		{
@@ -193,7 +194,7 @@ public class EchoBot extends BotAdapter
 //			int port = Integer.parseInt(params[2]);
 //			long size = Long.parseLong(params[3]);
 //			log.info(String.format("%s %,d bytes %s %s", file, size, inet, port));
-			DccSendFile dccfile = new DccSendFile(trail);
+			DccSendFile dccfile = new DccSendFile(ctcp.toString());
 			File savefile = new File("dcc/" + prefix.getNick(), dccfile.getName());
 			dccfile.save(savefile);
 		}

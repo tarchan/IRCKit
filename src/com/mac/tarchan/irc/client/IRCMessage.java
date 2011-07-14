@@ -298,6 +298,30 @@ public class IRCMessage
 	 */
 	public static class CTCP
 	{
+		/** DCCメッセージのプレフィックス */
+		public static final String DCC = "DCC";
+
+		/** CTCP PING */
+		public static final String PING = "PING";
+
+		/** CTCP TIME */
+		public static final String TIME = "TIME";
+
+		/** CTCP VERSION */
+		public static final String VERSION = "VERSION";
+
+		/** CTCP USERINFO */
+		public static final String USERINFO = "USERINFO";
+
+		/** CTCP CLIENTINFO */
+		public static final String CLIENTINFO = "CLIENTINFO";
+
+		/** CTCP ACTION */
+		public static final String ACTION = "ACTION";
+
+		/** CTCP DCC SEND */
+		public static final String DCC_SEND = "DCC SEND";
+
 		/** IRCメッセージ */
 		protected IRCMessage message;
 
@@ -325,6 +349,12 @@ public class IRCMessage
 				String[] span = text.split(" ", 2);
 				command = span[0].toUpperCase();
 				param = span[1];
+				if (command.equals(DCC))
+				{
+					span = param.split(" ", 2);
+					command = command + " " + span[0].toUpperCase();
+					param = span[1];
+				}
 			}
 			catch (Exception x)
 			{
