@@ -17,7 +17,7 @@ import com.mac.tarchan.irc.client.IRCEvent;
 import com.mac.tarchan.irc.client.IRCHandler;
 import com.mac.tarchan.irc.client.IRCMessage;
 import com.mac.tarchan.irc.client.IRCMessage.CTCP;
-import com.mac.tarchan.irc.client.IRCPrefix;
+import com.mac.tarchan.irc.client.IRCMessage.Prefix;
 
 /**
  * IRCメッセージを受け取る抽象アダプタクラスです。
@@ -78,7 +78,7 @@ public abstract class BotAdapter
 				public void onMessage(IRCEvent event)
 				{
 					IRCMessage message = event.getMessage();
-					IRCPrefix prefix = message.getPrefix();
+					Prefix prefix = message.getPrefix();
 					String channel = message.getParam0();
 					String text = message.getTrail();
 					if (message.isCTCP())
@@ -104,7 +104,7 @@ public abstract class BotAdapter
 				public void onMessage(IRCEvent event)
 				{
 					IRCMessage message = event.getMessage();
-					IRCPrefix prefix = message.getPrefix();
+					Prefix prefix = message.getPrefix();
 					String channel = message.getParam0();
 					String text = message.getTrail();
 					if (message.isCTCP())
@@ -127,7 +127,7 @@ public abstract class BotAdapter
 				{
 					IRCMessage message = event.getMessage();
 					String channel = message.getTrail();
-					IRCPrefix prefix = message.getPrefix();
+					Prefix prefix = message.getPrefix();
 					BotAdapter.this.onJoin(prefix, channel);
 				}
 			})
@@ -137,7 +137,7 @@ public abstract class BotAdapter
 				public void onMessage(IRCEvent event)
 				{
 					IRCMessage message = event.getMessage();
-					IRCPrefix prefix = message.getPrefix();
+					Prefix prefix = message.getPrefix();
 					String channel = message.getParam1();
 					String text = message.getTrail();
 					BotAdapter.this.onPart(prefix, channel, text);
@@ -150,7 +150,7 @@ public abstract class BotAdapter
 				{
 					IRCMessage message = event.getMessage();
 					String text = message.getTrail();
-					IRCPrefix prefix = message.getPrefix();
+					Prefix prefix = message.getPrefix();
 					BotAdapter.this.onQuit(prefix, text);
 					if (text.equals("Killed"))
 					{
@@ -164,7 +164,7 @@ public abstract class BotAdapter
 				public void onMessage(IRCEvent event)
 				{
 					IRCMessage message = event.getMessage();
-					IRCPrefix prefix = message.getPrefix();
+					Prefix prefix = message.getPrefix();
 					String channel = message.getParam0();
 					String mode = message.getParam1();
 					if (message.getParamsCount() < 3)
@@ -198,7 +198,7 @@ public abstract class BotAdapter
 				public void onMessage(IRCEvent event)
 				{
 					IRCMessage message = event.getMessage();
-					IRCPrefix prefix = message.getPrefix();
+					Prefix prefix = message.getPrefix();
 					String channel = message.getParam1();
 					String[] names = nicklist.toArray(new String[]{});
 					nicklist.clear();
@@ -211,7 +211,7 @@ public abstract class BotAdapter
 				public void onMessage(IRCEvent event)
 				{
 					IRCMessage message = event.getMessage();
-					IRCPrefix prefix = message.getPrefix();
+					Prefix prefix = message.getPrefix();
 					String channel = message.getParam0();
 					String topic = message.getTrail();
 					BotAdapter.this.onTopic(prefix, channel, topic);
@@ -223,7 +223,7 @@ public abstract class BotAdapter
 				public void onMessage(IRCEvent event)
 				{
 					IRCMessage message = event.getMessage();
-					IRCPrefix prefix = message.getPrefix();
+					Prefix prefix = message.getPrefix();
 					String channel = message.getParam1();
 					String topic = message.getTrail();
 					BotAdapter.this.onTopic(prefix, channel, topic);
@@ -235,7 +235,7 @@ public abstract class BotAdapter
 				public void onMessage(IRCEvent event)
 				{
 					IRCMessage message = event.getMessage();
-					IRCPrefix prefix = message.getPrefix();
+					Prefix prefix = message.getPrefix();
 					String oldNick = prefix.getNick();
 					String newNick = message.getTrail();
 					try
@@ -387,7 +387,7 @@ public abstract class BotAdapter
 	 * @param prefix プレフィックス
 	 * @param newNick 新しいニックネーム
 	 */
-	public void onNick(IRCPrefix prefix, String newNick)
+	public void onNick(Prefix prefix, String newNick)
 	{
 	}
 
@@ -398,7 +398,7 @@ public abstract class BotAdapter
 	 * @param channel チャンネル名
 	 * @param names ニックネームリスト
 	 */
-	public void onNames(IRCPrefix prefix, String channel, String[] names)
+	public void onNames(Prefix prefix, String channel, String[] names)
 	{
 	}
 
@@ -409,7 +409,7 @@ public abstract class BotAdapter
 	 * @param channel チャンネル名
 	 * @param topic トピック
 	 */
-	public void onTopic(IRCPrefix prefix, String channel, String topic)
+	public void onTopic(Prefix prefix, String channel, String topic)
 	{
 	}
 
@@ -420,7 +420,7 @@ public abstract class BotAdapter
 	 * @param channel チャンネル名
 	 * @param mode チャンネルモード
 	 */
-	public void onMode(IRCPrefix prefix, String channel, String mode)
+	public void onMode(Prefix prefix, String channel, String mode)
 	{
 	}
 
@@ -432,7 +432,7 @@ public abstract class BotAdapter
 	 * @param mode ユーザモード
 	 * @param nick ニックネーム
 	 */
-	public void onMode(IRCPrefix prefix, String channel, String mode, String nick)
+	public void onMode(Prefix prefix, String channel, String mode, String nick)
 	{
 	}
 
@@ -442,7 +442,7 @@ public abstract class BotAdapter
 	 * @param prefix プレフィックス
 	 * @param channel チャンネル名
 	 */
-	public void onInvite(IRCPrefix prefix, String channel)
+	public void onInvite(Prefix prefix, String channel)
 	{
 		// TODO INVITE
 	}
@@ -453,7 +453,7 @@ public abstract class BotAdapter
 	 * @param prefix プレフィックス
 	 * @param channel チャンネル名
 	 */
-	public void onJoin(IRCPrefix prefix, String channel)
+	public void onJoin(Prefix prefix, String channel)
 	{
 	}
 
@@ -464,7 +464,7 @@ public abstract class BotAdapter
 	 * @param channel チャンネル名
 	 * @param text 離脱メッセージ
 	 */
-	public void onPart(IRCPrefix prefix, String channel, String text)
+	public void onPart(Prefix prefix, String channel, String text)
 	{
 	}
 
@@ -476,7 +476,7 @@ public abstract class BotAdapter
 	 * @param target 追放したオペレータ
 	 * @param text 追放メッセージ
 	 */
-	public void onKick(IRCPrefix prefix, String channel, String target, String text)
+	public void onKick(Prefix prefix, String channel, String target, String text)
 	{
 		// TODO KICK
 	}
@@ -487,7 +487,7 @@ public abstract class BotAdapter
 	 * @param prefix プレフィックス
 	 * @param text 終了メッセージ
 	 */
-	public void onQuit(IRCPrefix prefix, String text)
+	public void onQuit(Prefix prefix, String text)
 	{
 	}
 
@@ -498,7 +498,7 @@ public abstract class BotAdapter
 	 * @param text 終了メッセージ
 	 * @see <a href="http://yoshino.tripod.com/73th/data/irccode.htm#quitmessage">server が付加する Quit Message</a>
 	 */
-	public void onKilled(IRCPrefix prefix, String text)
+	public void onKilled(Prefix prefix, String text)
 	{
 	}
 
@@ -545,7 +545,7 @@ public abstract class BotAdapter
 	 * @param channel チャンネル名
 	 * @param text テキスト
 	 */
-	public void onMessage(IRCPrefix prefix, String channel, String text)
+	public void onMessage(Prefix prefix, String channel, String text)
 	{
 	}
 
@@ -556,7 +556,7 @@ public abstract class BotAdapter
 	 * @param target 対象ニックネーム
 	 * @param text テキスト
 	 */
-	public void onDirectMessage(IRCPrefix prefix, String target, String text)
+	public void onDirectMessage(Prefix prefix, String target, String text)
 	{
 	}
 
@@ -567,7 +567,7 @@ public abstract class BotAdapter
 	 * @param channel チャンネル名
 	 * @param text テキスト
 	 */
-	public void onNotice(IRCPrefix prefix, String channel, String text)
+	public void onNotice(Prefix prefix, String channel, String text)
 	{
 	}
 
@@ -578,7 +578,7 @@ public abstract class BotAdapter
 	 * @param target 対象ニックネーム
 	 * @param ctcp CTCPメッセージ
 	 */
-	public void onCtcpReply(IRCPrefix prefix, String target, CTCP ctcp)
+	public void onCtcpReply(Prefix prefix, String target, CTCP ctcp)
 	{
 	}
 
@@ -588,15 +588,15 @@ public abstract class BotAdapter
 	 * @param prefix プレフィックス
 	 * @param target 対象ニックネーム
 	 * @param ctcp CTCPメッセージ
-	 * @see #onCtcpPing(IRCPrefix, String, CTCP)
-	 * @see #onCtcpTime(IRCPrefix, String, CTCP)
-	 * @see #onCtcpVersion(IRCPrefix, String, CTCP)
-	 * @see #onCtcpUserInfo(IRCPrefix, String, CTCP)
-	 * @see #onCtcpClientInfo(IRCPrefix, String, CTCP)
-	 * @see #onCtcpAction(IRCPrefix, String, CTCP)
-	 * @see #onDccSend(IRCPrefix, String, CTCP)
+	 * @see #onCtcpPing(Prefix, String, CTCP)
+	 * @see #onCtcpTime(Prefix, String, CTCP)
+	 * @see #onCtcpVersion(Prefix, String, CTCP)
+	 * @see #onCtcpUserInfo(Prefix, String, CTCP)
+	 * @see #onCtcpClientInfo(Prefix, String, CTCP)
+	 * @see #onCtcpAction(Prefix, String, CTCP)
+	 * @see #onDccSend(Prefix, String, CTCP)
 	 */
-	public void onCtcp(IRCPrefix prefix, String target, CTCP ctcp)
+	public void onCtcp(Prefix prefix, String target, CTCP ctcp)
 	{
 		String command = ctcp.getCommand();
 		if (command.equals(CTCP.PING))
@@ -640,7 +640,7 @@ public abstract class BotAdapter
 	 * @param target 対象ニックネーム
 	 * @param ctcp CTCPメッセージ
 	 */
-	public void onCtcpPing(IRCPrefix prefix, String target, CTCP ctcp)
+	public void onCtcpPing(Prefix prefix, String target, CTCP ctcp)
 	{
 		irc.ctcpReply(prefix.getNick(), ctcp.toString());
 	}
@@ -652,7 +652,7 @@ public abstract class BotAdapter
 	 * @param target 対象ニックネーム
 	 * @param ctcp CTCPメッセージ
 	 */
-	public void onCtcpTime(IRCPrefix prefix, String target, CTCP ctcp)
+	public void onCtcpTime(Prefix prefix, String target, CTCP ctcp)
 	{
 		irc.ctcpReply(prefix.getNick(), String.format(Locale.ENGLISH, "TIME %tc", System.currentTimeMillis()));
 	}
@@ -664,7 +664,7 @@ public abstract class BotAdapter
 	 * @param target 対象ニックネーム
 	 * @param ctcp CTCPメッセージ
 	 */
-	public void onCtcpVersion(IRCPrefix prefix, String target, CTCP ctcp)
+	public void onCtcpVersion(Prefix prefix, String target, CTCP ctcp)
 	{
 		irc.ctcpReply(prefix.getNick(), "VERSION IRCKit for Java");
 	}
@@ -676,7 +676,7 @@ public abstract class BotAdapter
 	 * @param target 対象ニックネーム
 	 * @param ctcp CTCPメッセージ
 	 */
-	public void onCtcpUserInfo(IRCPrefix prefix, String target, CTCP ctcp)
+	public void onCtcpUserInfo(Prefix prefix, String target, CTCP ctcp)
 	{
 		irc.ctcpReply(prefix.getNick(), "USERINFO " + irc.getUserNick());
 	}
@@ -688,7 +688,7 @@ public abstract class BotAdapter
 	 * @param target 対象ニックネーム
 	 * @param ctcp CTCPメッセージ
 	 */
-	public void onCtcpClientInfo(IRCPrefix prefix, String target, CTCP ctcp)
+	public void onCtcpClientInfo(Prefix prefix, String target, CTCP ctcp)
 	{
 		irc.ctcpReply(prefix.getNick(), "CLIENTINFO PING TIME VERSION USERINFO CLIENTINFO DCC");
 	}
@@ -700,7 +700,7 @@ public abstract class BotAdapter
 	 * @param target 対象ニックネーム
 	 * @param ctcp CTCPメッセージ
 	 */
-	public void onCtcpAction(IRCPrefix prefix, String target, CTCP ctcp)
+	public void onCtcpAction(Prefix prefix, String target, CTCP ctcp)
 	{
 		// TODO ACTION
 	}
@@ -713,7 +713,7 @@ public abstract class BotAdapter
 	 * @param target 対象ニックネーム
 	 * @param ctcp CTCPメッセージ
 	 */
-	public void onDccSend(IRCPrefix prefix, String target, CTCP ctcp)
+	public void onDccSend(Prefix prefix, String target, CTCP ctcp)
 	{
 	}
 }

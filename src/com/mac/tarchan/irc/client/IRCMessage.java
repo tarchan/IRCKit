@@ -40,7 +40,7 @@ public class IRCMessage
 	protected long when;
 
 	/** プレフィックス */
-	protected IRCPrefix prefix;
+	protected Prefix prefix;
 
 	/** コマンド */
 	protected String command;
@@ -93,7 +93,7 @@ public class IRCMessage
 		Matcher prefix_m = IRC_PBNF.matcher(text);
 		if (prefix_m.find())
 		{
-			prefix = new IRCPrefix(prefix_m.group(1), this);
+			prefix = new Prefix(this, prefix_m.group(1));
 			command = prefix_m.group(2);
 			middle = prefix_m.group(3);
 			int pos = middle.indexOf(" :");
@@ -127,7 +127,7 @@ public class IRCMessage
 	 * 
 	 * @return プレフィックス
 	 */
-	public IRCPrefix getPrefix()
+	public Prefix getPrefix()
 	{
 		return prefix;
 	}
@@ -301,6 +301,141 @@ public class IRCMessage
 	public String toString()
 	{
 		return text;
+	}
+
+	/**
+	 * IRCメッセージのプレフィックスを、サーバ名、ニックネーム、ユーザ名、ホスト名に分割する機能を提供します。
+	 */
+	public static class Prefix
+	{
+		/** プレフィックス形式 */
+		protected static Pattern prefixPattern = Pattern.compile("([^!]+)(!.+)?(@.+)?");
+
+		/** 親のIRCメッセージ */
+		protected IRCMessage message;
+
+		/** プレフィックス */
+		protected String prefix;
+
+		/** メッセージ作成時間 */
+		protected long when;
+
+		/** ニックネーム */
+		protected String nick;
+
+		/** ユーザ名 */
+		protected String user;
+
+		/** ホスト名 */
+		protected String host;
+
+		/**
+		 * プレフィックスを、サーバ名、ニックネーム、ユーザ名、ホスト名に分割します。
+		 * 
+		 * @param prefix プレフィックス
+		 */
+		@Deprecated
+		public Prefix(String prefix)
+		{
+			this(null, prefix);
+			this.when = System.currentTimeMillis();
+		}
+
+		/**
+		 * プレフィックスを、サーバ名、ニックネーム、ユーザ名、ホスト名に分割します。
+		 * 
+		 * @param parent IRCメッセージ
+		 * @param prefix プレフィックス
+		 */
+		public Prefix(IRCMessage parent, String prefix)
+		{
+			if (parent != null)
+			{
+				this.message = parent;
+				this.when = message.getWhen();
+			}
+			if (prefix != null)
+			{
+				this.prefix = prefix;
+				Matcher m = prefixPattern.matcher(prefix);
+				if (m.find())
+				{
+					nick = m.group(1);
+					user = m.group(2);
+					host = m.group(3);
+				}
+				else
+				{
+					throw new IllegalArgumentException("プレフィックスが不正です。: " + prefix);
+				}
+			}
+		}
+
+		/**
+		 * 親のIRCメッセージを返します。
+		 * 
+		 * @return 親のIRCメッセージ
+		 */
+		public IRCMessage getMessage()
+		{
+			return message;
+		}
+
+		/**
+		 * プレフィックスを返します。
+		 * 
+		 * @return プレフィックス
+		 */
+		public String getPrefix()
+		{
+			return prefix;
+		}
+
+		/**
+		 * メッセージの作成時間を返します。
+		 * 
+		 * @return メッセージの作成時間
+		 */
+		public long getWhen()
+		{
+			return when;
+		}
+
+		/**
+		 * サーバ名またはニックネームを返します。
+		 * 
+		 * @return サーバ名またはニックネーム
+		 */
+		public String getNick()
+		{
+			return nick;
+		}
+
+		/**
+		 * ユーザ名を返します。
+		 * 
+		 * @return ユーザ名
+		 */
+		public String getUser()
+		{
+			return user;
+		}
+
+		/**
+		 * ホスト名を返します。
+		 * 
+		 * @return ホスト名
+		 */
+		public String getHost()
+		{
+			return host;
+		}
+
+		@Override
+		public String toString()
+		{
+			return prefix;
+		}
 	}
 
 	/**

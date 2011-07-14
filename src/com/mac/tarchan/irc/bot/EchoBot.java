@@ -14,8 +14,8 @@ import java.util.Arrays;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.mac.tarchan.irc.client.IRCPrefix;
 import com.mac.tarchan.irc.client.IRCMessage.CTCP;
+import com.mac.tarchan.irc.client.IRCMessage.Prefix;
 import com.mac.tarchan.irc.client.util.BotAdapter;
 import com.mac.tarchan.irc.client.util.DccSendFile;
 
@@ -98,49 +98,49 @@ public class EchoBot extends BotAdapter
 	}
 
 	@Override
-	public void onJoin(IRCPrefix prefix, String channel)
+	public void onJoin(Prefix prefix, String channel)
 	{
 		log.info(String.format("%3$s has joined %1$s (%2$s)", channel, prefix, prefix.getNick()));
 	}
 
 	@Override
-	public void onPart(IRCPrefix prefix, String channel, String text)
+	public void onPart(Prefix prefix, String channel, String text)
 	{
 		log.info(String.format("%3$s has left channel %1$s (%2$s)", channel, prefix, prefix.getNick()));
 	}
 
 	@Override
-	public void onQuit(IRCPrefix prefix, String text)
+	public void onQuit(Prefix prefix, String text)
 	{
 		log.info(String.format("%3$s has left IRC %1$s (%2$s)", text, prefix, prefix.getNick()));
 	}
 
 	@Override
-	public void onTopic(IRCPrefix prefix, String channel, String topic)
+	public void onTopic(Prefix prefix, String channel, String topic)
 	{
 		log.info(String.format("%1$s has set topic %2$s", channel, topic));
 	}
 
 	@Override
-	public void onNames(IRCPrefix prefix, String channel, String[] names)
+	public void onNames(Prefix prefix, String channel, String[] names)
 	{
 		log.info(String.format("%1$s (%3$s) names %2$s", channel, Arrays.asList(names), names.length));
 	}
 
 	@Override
-	public void onMode(IRCPrefix prefix, String channel, String mode)
+	public void onMode(Prefix prefix, String channel, String mode)
 	{
 		log.info(String.format("%1$s has changed channel mode %2$s", channel, mode));
 	}
 
 	@Override
-	public void onMode(IRCPrefix prefix, String channel, String mode, String nick)
+	public void onMode(Prefix prefix, String channel, String mode, String nick)
 	{
 		log.info(String.format("%1$s/%3$s has changed user mode %2$s", channel, mode, nick));
 	}
 
 	@Override
-	public void onMessage(IRCPrefix prefix, String channel, String text)
+	public void onMessage(Prefix prefix, String channel, String text)
 	{
 		String nick = prefix.getNick();
 		if (isUserNick(nick))
@@ -173,7 +173,7 @@ public class EchoBot extends BotAdapter
 	}
 
 	@Override
-	public void onDirectMessage(IRCPrefix prefix, String target, String text)
+	public void onDirectMessage(Prefix prefix, String target, String text)
 	{
 		long when = prefix.getWhen();
 		String nick = prefix.getNick();
@@ -182,7 +182,7 @@ public class EchoBot extends BotAdapter
 	}
 
 	@Override
-	public void onDccSend(IRCPrefix prefix, String target, CTCP ctcp)
+	public void onDccSend(Prefix prefix, String target, CTCP ctcp)
 	{
 		try
 		{
