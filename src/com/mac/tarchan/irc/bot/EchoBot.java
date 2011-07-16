@@ -85,16 +85,16 @@ public class EchoBot extends BotAdapter
 	}
 
 	@Override
-	public void onPing(String trail)
+	public void onPing(String text)
 	{
-		log.info("接続確認: " + trail);
-		super.onPing(trail);
+		log.info("接続確認: " + text);
+		super.onPing(text);
 	}
 
 	@Override
-	public void onError(String trail)
+	public void onError(Prefix prefix, String text)
 	{
-		log.error(trail);
+		log.error(text);
 	}
 
 	@Override

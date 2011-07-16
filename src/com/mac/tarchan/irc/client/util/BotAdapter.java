@@ -149,10 +149,10 @@ public abstract class BotAdapter
 				public void onMessage(IRCEvent event)
 				{
 					IRCMessage message = event.getMessage();
-					String text = message.getTrail();
 					Prefix prefix = message.getPrefix();
+					String text = message.getTrail();
 					BotAdapter.this.onQuit(prefix, text);
-					if (text.equals("Killed"))
+					if (text.startsWith("Killed"))
 					{
 						BotAdapter.this.onKilled(prefix, text);
 					}
@@ -248,8 +248,17 @@ public abstract class BotAdapter
 					}
 				}
 			})
+			.on("error", new IRCHandler()
+			{
+				@Override
+				public void onMessage(IRCEvent event)
+				{
+					IRCMessage message = event.getMessage();
+					BotAdapter.this.onError(message.getPrefix(), message.getTrail());
+				}
+			})
 			.on("ping", HandlerBuilder.create(this, "onPing", "message.trail"))
-			.on("error", HandlerBuilder.create(this, "onError", "message.trail"))
+//			.on("error", HandlerBuilder.create(this, "onError", "message.trail"))
 			.on("001", HandlerBuilder.create(this, "onStart"))
 			.on("433", HandlerBuilder.create(this, "onNickConflict", "message.param1"))
 			.on(new IRCHandler()
@@ -258,7 +267,7 @@ public abstract class BotAdapter
 				public void onMessage(IRCEvent event)
 				{
 					IRCMessage message = event.getMessage();
-					if (message.isNumericReply()) BotAdapter.this.onNumericReply(message.getNumber(), message.getTrail());
+					if (message.isNumericReply()) BotAdapter.this.onNumericReply(message.getPrefix(), message.getNumber(), message.getTrail());
 				}
 			})
 			.start();
@@ -324,6 +333,33 @@ public abstract class BotAdapter
 	 */
 	public void onStart()
 	{
+	}
+
+	/**
+	 * IRCネットワークの接続を確認するメッセージを受け取ったときに呼び出されます。
+	 * デフォルトの実装は、IRCネットワークの接続を継続します。
+	 * 自動継続したくないときは、このメソッドをオーバーライドしてください。
+	 * 
+	 * @param text テキスト
+	 * @see IRCClient#pong(String)
+	 */
+	public void onPing(String text)
+	{
+		if (autoPingPong) irc.pong(text);
+	}
+
+	/**
+	 * エラーメッセージを受け取ったときに呼び出されます。
+	 * IRCネットワークが切断したときは {@link #onStop()} を呼び出します。
+	 * 
+	 * @param prefix プレフィックス
+	 * @param text エラーメッセージ
+	 * @see IRCClient#isClosed()
+	 * @see #onStop()
+	 */
+	public void onError(Prefix prefix, String text)
+	{
+		if (irc.isClosed()) onStop();
 	}
 
 	/**
@@ -503,38 +539,13 @@ public abstract class BotAdapter
 	}
 
 	/**
-	 * IRCネットワークの接続を確認するメッセージを受け取ったときに呼び出されます。
-	 * デフォルトの実装は、IRCネットワークの接続を継続します。
-	 * 自動継続したくないときは、このメソッドをオーバーライドしてください。
-	 * 
-	 * @param text テキスト
-	 * @see IRCClient#pong(String)
-	 */
-	public void onPing(String text)
-	{
-		if (autoPingPong) irc.pong(text);
-	}
-
-	/**
-	 * エラーメッセージを受け取ったときに呼び出されます。
-	 * IRCネットワークが切断したときは {@link #onStop()} を呼び出します。
-	 * 
-	 * @param text エラーメッセージ
-	 * @see IRCClient#isClosed()
-	 * @see #onStop()
-	 */
-	public void onError(String text)
-	{
-		if (irc.isClosed()) onStop();
-	}
-
-	/**
 	 * ニュメリックリプライを受け取ったときに呼び出されます。
 	 * 
+	 * @param prefix プレフィックス
 	 * @param number ニュメリックリプライの番号
 	 * @param text ニュメリックリプライのメッセージ
 	 */
-	public void onNumericReply(int number, String text)
+	public void onNumericReply(Prefix prefix, int number, String text)
 	{
 	}
 
