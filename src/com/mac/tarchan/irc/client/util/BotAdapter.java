@@ -350,25 +350,26 @@ public abstract class BotAdapter
 
 	/**
 	 * エラーメッセージを受け取ったときに呼び出されます。
-	 * IRCネットワークが切断したときは {@link #onStop()} を呼び出します。
+	 * IRCネットワークが切断したときは {@link #onStop(Prefix)} を呼び出します。
 	 * 
 	 * @param prefix プレフィックス
 	 * @param text エラーメッセージ
 	 * @see IRCClient#isClosed()
-	 * @see #onStop()
+	 * @see #onStop(Prefix)
 	 */
 	public void onError(Prefix prefix, String text)
 	{
-		if (irc.isClosed()) onStop();
+		if (irc.isClosed()) onStop(prefix);
 	}
 
 	/**
 	 * IRCネットワークが切断したときに呼び出されます。
 	 * 
+	 * @param prefix プレフィックス
 	 * @see #onRestart()
 	 * @see #onDestroy()
 	 */
-	public void onStop()
+	public void onStop(Prefix prefix)
 	{
 		if (autoRecconection)
 		{
