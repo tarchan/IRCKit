@@ -575,6 +575,27 @@ public class IRCClient
 	}
 
 	/**
+	 * 不在メッセージを設定します。
+	 * 
+	 * @param text 不在メッセージ
+	 * @return IRCクライアント
+	 */
+	public IRCClient away(String text)
+	{
+		return postMessage("AWAY :%s", text);
+	}
+
+	/**
+	 * 不在メッセージを解除します。
+	 * 
+	 * @return IRCクライアント
+	 */
+	public IRCClient away()
+	{
+		return postMessage("AWAY");
+	}
+
+	/**
 	 * 指定されたテキストを解析して、ハンドラに送信します。
 	 * 
 	 * @param text テキスト

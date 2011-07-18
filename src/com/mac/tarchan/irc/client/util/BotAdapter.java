@@ -138,7 +138,7 @@ public abstract class BotAdapter
 				{
 					IRCMessage message = event.getMessage();
 					Prefix prefix = message.getPrefix();
-					String channel = message.getParam1();
+					String channel = message.getParam0();
 					String text = message.getTrail();
 					BotAdapter.this.onPart(prefix, channel, text);
 				}
