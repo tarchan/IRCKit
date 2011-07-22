@@ -443,15 +443,16 @@ public class IRCClient
 	}
 
 	/**
-	 * 指定されたターゲットのモードを変更します。
+	 * 指定されたチャンネル上のユーザモードを変更します。
 	 * 
-	 * @param target チャンネル名またはニックネーム
+	 * @param channel チャンネル名
 	 * @param mode モード
+	 * @param nick ニックネーム
 	 * @return IRCクライアント
 	 */
-	public IRCClient mode(String target, String mode)
+	public IRCClient mode(String channel, String mode, String nick)
 	{
-		return postMessage("MODE %s %s", target, mode);
+		return postMessage("MODE %s %s %s", channel, mode, nick);
 	}
 
 	/**
