@@ -182,6 +182,15 @@ public class EchoBot extends BotAdapter
 	}
 
 	@Override
+	public void onCtcpAction(Prefix prefix, String target, CTCP ctcp)
+	{
+		long when = prefix.getWhen();
+		String nick = prefix.getNick();
+		String line = String.format("%s %s %s", getTimeString(when), nick, ctcp.getParam());
+		log.info(line);
+	}
+
+	@Override
 	public void onDccSend(Prefix prefix, String target, CTCP ctcp)
 	{
 		try

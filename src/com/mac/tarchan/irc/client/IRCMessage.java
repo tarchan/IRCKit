@@ -464,8 +464,14 @@ public class IRCMessage
 		/** CTCP ACTION */
 		public static final String ACTION = "ACTION";
 
+		/** CTCP FINGER */
+		public static final String FINGER = "FINGER";
+
 		/** CTCP DCC SEND */
 		public static final String DCC_SEND = "DCC SEND";
+
+		/** CTCP DCC CHAT */
+		public static final String DCC_CHAT = "DCC CHAT";
 
 		/** IRCメッセージ */
 		protected IRCMessage message;

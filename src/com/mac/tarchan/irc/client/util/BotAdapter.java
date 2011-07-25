@@ -615,21 +615,25 @@ public abstract class BotAdapter
 		{
 			onCtcpPing(prefix, target, ctcp);
 		}
-		else if (command.equals(CTCP.TIME))
-		{
-			onCtcpTime(prefix, target, ctcp);
-		}
 		else if (command.equals(CTCP.VERSION))
 		{
 			onCtcpVersion(prefix, target, ctcp);
 		}
-		else if (command.equals(CTCP.USERINFO))
+		else if (command.equals(CTCP.TIME))
 		{
-			onCtcpUserInfo(prefix, target, ctcp);
+			onCtcpTime(prefix, target, ctcp);
 		}
 		else if (command.equals(CTCP.CLIENTINFO))
 		{
 			onCtcpClientInfo(prefix, target, ctcp);
+		}
+		else if (command.equals(CTCP.FINGER))
+		{
+			onCtcpFinger(prefix, target, ctcp);
+		}
+		else if (command.equals(CTCP.USERINFO))
+		{
+			onCtcpUserInfo(prefix, target, ctcp);
 		}
 		else if (command.equals(CTCP.ACTION))
 		{
@@ -638,6 +642,10 @@ public abstract class BotAdapter
 		else if (command.equals(CTCP.DCC_SEND))
 		{
 			onDccSend(prefix, target, ctcp);
+		}
+		else if (command.equals(CTCP.DCC_CHAT))
+		{
+			onDccChat(prefix, target, ctcp);
 		}
 		else
 		{
@@ -658,6 +666,18 @@ public abstract class BotAdapter
 	}
 
 	/**
+	 * CTCP VERSIONを受け取ったときに呼び出されます。
+	 * 
+	 * @param prefix プレフィックス
+	 * @param target 対象ニックネーム
+	 * @param ctcp CTCPメッセージ
+	 */
+	public void onCtcpVersion(Prefix prefix, String target, CTCP ctcp)
+	{
+		irc.ctcpReply(prefix.getNick(), "VERSION IRCKit for Java");
+	}
+
+	/**
 	 * CTCP TIMEを受け取ったときに呼び出されます。
 	 * 
 	 * @param prefix プレフィックス
@@ -670,15 +690,26 @@ public abstract class BotAdapter
 	}
 
 	/**
-	 * CTCP VERSIONを受け取ったときに呼び出されます。
+	 * CTCP CLIENTINFOを受け取ったときに呼び出されます。
 	 * 
 	 * @param prefix プレフィックス
 	 * @param target 対象ニックネーム
 	 * @param ctcp CTCPメッセージ
 	 */
-	public void onCtcpVersion(Prefix prefix, String target, CTCP ctcp)
+	public void onCtcpClientInfo(Prefix prefix, String target, CTCP ctcp)
 	{
-		irc.ctcpReply(prefix.getNick(), "VERSION IRCKit for Java");
+		irc.ctcpReply(prefix.getNick(), "CLIENTINFO PING VERSION TIME CLIENTINFO FINGER USERINFO ACTION DCC");
+	}
+
+	/**
+	 * CTCP FINGERを受け取ったときに呼び出されます。
+	 * 
+	 * @param prefix プレフィックス
+	 * @param target 対象ニックネーム
+	 * @param ctcp CTCPメッセージ
+	 */
+	public void onCtcpFinger(Prefix prefix, String target, CTCP ctcp)
+	{
 	}
 
 	/**
@@ -694,18 +725,6 @@ public abstract class BotAdapter
 	}
 
 	/**
-	 * CTCP CLIENTINFOを受け取ったときに呼び出されます。
-	 * 
-	 * @param prefix プレフィックス
-	 * @param target 対象ニックネーム
-	 * @param ctcp CTCPメッセージ
-	 */
-	public void onCtcpClientInfo(Prefix prefix, String target, CTCP ctcp)
-	{
-		irc.ctcpReply(prefix.getNick(), "CLIENTINFO PING TIME VERSION USERINFO CLIENTINFO DCC");
-	}
-
-	/**
 	 * CTCP ACTIONを受け取ったときに呼び出されます。
 	 * 
 	 * @param prefix プレフィックス
@@ -714,7 +733,6 @@ public abstract class BotAdapter
 	 */
 	public void onCtcpAction(Prefix prefix, String target, CTCP ctcp)
 	{
-		// TODO ACTION
 	}
 
 	/**
@@ -726,6 +744,17 @@ public abstract class BotAdapter
 	 * @param ctcp CTCPメッセージ
 	 */
 	public void onDccSend(Prefix prefix, String target, CTCP ctcp)
+	{
+	}
+
+	/**
+	 * DCC CHATを受け取ったときに呼び出されます。
+	 * 
+	 * @param prefix プレフィックス
+	 * @param target 対象ニックネーム
+	 * @param ctcp CTCPメッセージ
+	 */
+	public void onDccChat(Prefix prefix, String target, CTCP ctcp)
 	{
 	}
 }
