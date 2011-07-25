@@ -499,7 +499,7 @@ public class IRCMessage
 				this.text = text;
 				String[] span = text.split(" ", 2);
 				command = span[0].toUpperCase();
-				param = span[1];
+				param = span.length == 2 ? span[1] : null;
 				if (command.equals(DCC))
 				{
 					span = param.split(" ", 2);
