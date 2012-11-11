@@ -7,6 +7,7 @@
  */
 package com.mac.tarchan.irc.client;
 
+import com.mac.tarchan.irc.client.util.KanaInputFilter;
 import java.awt.EventQueue;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -19,11 +20,9 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.mac.tarchan.irc.client.util.KanaInputFilter;
 
 /**
  * IRCクライアントを実装します。
@@ -64,6 +63,10 @@ public class IRCClient
 
 	/** メッセージハンドラ */
 	protected ArrayList<IRCHandler> handlers = new ArrayList<IRCHandler>();
+
+	public IRCClient()
+	{
+	}
 
 	/**
 	 * IRCClient を構築します。
@@ -176,6 +179,11 @@ public class IRCClient
 	{
 		return encoding;
 	}
+
+    public void addHandler(Object handler)
+    {
+	throw new UnsupportedOperationException("Not yet implemented");
+    }
 
 	/**
 	 * すべてのコマンドを受け入れるメッセージハンドラを追加します。
@@ -647,7 +655,6 @@ public class IRCClient
 		log.error("IRCクライアントでエラーが発生しました。", x);
 	}
 }
-
 /**
  * 入力タスク
  */
