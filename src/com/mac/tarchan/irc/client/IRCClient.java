@@ -15,11 +15,15 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -180,11 +184,54 @@ public class IRCClient
 		return encoding;
 	}
 
-    public void addHandler(Object handler)
+    public void addHandler(final Object handler)
     {
-	throw new UnsupportedOperationException("Not yet implemented");
+	Class clazz = handler.getClass();
+//	dump("クラス", clazz.getDeclaredAnnotations());
+	Method[] ms = clazz.getDeclaredMethods();
+	for (Method m : ms)
+	{
+//	    dump("メソッド", m.getDeclaredAnnotations());
+	    IRC irc = m.getAnnotation(IRC.class);
+//	    if (a != null) dump("メソッド", new Annotation[]{a});
+	    if (irc != null)
+	    {
+//		System.out.format("メソッド: %s, %s, %s%n", irc, irc.annotationType(), irc.value());
+		Logger.getLogger(IRCClient.class.getName()).log(Level.INFO, String.format("メソッド: %s, %s, %s", irc, irc.annotationType(), irc.value()));
+		final Method mf = m;
+		on(irc.value(), new IRCHandler()
+		{
+		    @Override
+		    public void onMessage(IRCEvent event)
+		    {
+			try {
+			    mf.invoke(handler, event);
+			} catch (IllegalAccessException ex) {
+			    Logger.getLogger(IRCClient.class.getName()).log(Level.SEVERE, null, ex);
+			} catch (IllegalArgumentException ex) {
+			    Logger.getLogger(IRCClient.class.getName()).log(Level.SEVERE, null, ex);
+			} catch (InvocationTargetException ex) {
+			    Logger.getLogger(IRCClient.class.getName()).log(Level.SEVERE, null, ex);
+			}
+		    }
+		    
+		});
+	    }
+	}
+//	Annotation[][] ma = ms[0].getParameterAnnotations();
+//	for (Annotation[] as : ma)
+//	{
+//	    dump("引数1", as);
+//	}
     }
 
+//    public static void dump(String message, Annotation[] as) {
+//		System.out.println(message);
+//		for (Annotation a : as) {
+//			System.out.format("%s, %s, %s%n", a, a.annotationType(), a.annotationType() == IRC.class);
+//		}
+//	}
+    
 	/**
 	 * すべてのコマンドを受け入れるメッセージハンドラを追加します。
 	 * 
