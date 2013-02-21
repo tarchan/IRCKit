@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import com.mac.tarchan.irc.client.IRCClient;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * 入力ストリームに、半角カナを修正する機能を追加します。
@@ -21,7 +23,10 @@ import com.mac.tarchan.irc.client.IRCClient;
  */
 public class KanaInputFilter extends FilterInputStream
 {
-	/**
+	/** ログ */
+	private static final Logger log = Logger.getLogger(KanaInputFilter.class.getName());
+
+        /**
 	 * KanaInputFilter を構築します。
 	 * 
 	 * @param in 入力ストリーム
@@ -49,7 +54,7 @@ public class KanaInputFilter extends FilterInputStream
 	protected static final byte ESC = 0x1b;
 
 	/**
-	 * 	指定されたバイト配列の半角カナを修正します。
+	 * 指定されたバイト配列の半角カナを修正します。
 	 * 
 	 * @param data バイト配列
 	 * @param off データの開始位置
@@ -71,24 +76,14 @@ public class KanaInputFilter extends FilterInputStream
 				if (i + 2 < data.length && data[i + 1] == '(' && data[i + 2] == 'J')
 				{
 					// 「[ESC] ( I」に修正
-//					System.out.printf("|J ");
-					shiftKana = true;
-//					startKana = i;
 					data[i + 2] = 'I';
+					shiftKana = true;
 				}
 				else
 				{
-//					System.out.printf("| ");
-//					if (shiftKana)
-//					{
-////						System.out.printf("%d-%d%n", startKana, i - startKana);
-//						String kana = new String(data, startKana, i - startKana, "JIS");
-//						System.out.printf("「%s」", kana);
-//					}
 					shiftKana = false;
 				}
 			}
-//			if (shiftKana) System.out.printf("%02X ", b0);
 			if (shiftKana)
 			{
 				if ((b0 & 0x80) != 0)
@@ -109,11 +104,9 @@ public class KanaInputFilter extends FilterInputStream
 					}
 				}
 				String str = new String(data, startKana, endKana - startKana, "JIS");
-//				throw new IOException(String.format("不正な文字です。: %s (%02X)", str, b0));
-				System.err.println(String.format("不正な文字です。: %s (%02X)", str, b0));
+                                log.log(Level.WARNING, "不正な文字です。: {0} ({1})", new Object[] {str, b0});
 				data[i] = (byte)(b0 - 0x80);
 			}
 		}
-//		System.out.println();
 	}
 }
