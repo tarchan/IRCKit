@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
 
 @Retention(value = RetentionPolicy.RUNTIME)
 @Target(value = {ElementType.METHOD})
-public @interface IRC
+public @interface Reply
 {
     String value() default "*";
 }

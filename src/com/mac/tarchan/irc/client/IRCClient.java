@@ -24,8 +24,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 
 /**
@@ -39,9 +37,9 @@ import org.apache.commons.logging.LogFactory;
 public class IRCClient
 {
 	/** ログ */
-	private static final Log log = LogFactory.getLog(IRCClient.class);
+	private static final Logger log = Logger.getLogger(IRCClient.class.getName());
 
-	/** ホスト名 */
+        /** ホスト名 */
 	protected String host;
 
 	/** ポート番号 */
@@ -192,12 +190,12 @@ public class IRCClient
 	for (Method m : ms)
 	{
 //	    dump("メソッド", m.getDeclaredAnnotations());
-	    IRC irc = m.getAnnotation(IRC.class);
+	    Reply irc = m.getAnnotation(Reply.class);
 //	    if (a != null) dump("メソッド", new Annotation[]{a});
 	    if (irc != null)
 	    {
 //		System.out.format("メソッド: %s, %s, %s%n", irc, irc.annotationType(), irc.value());
-		Logger.getLogger(IRCClient.class.getName()).log(Level.INFO, String.format("メソッド: %s, %s, %s", irc, irc.annotationType(), irc.value()));
+		log.log(Level.INFO, "イベントハンドラを追加します。: {0}, {1} ({2})", new Object[] {irc, irc.annotationType(), irc.value()});
 		final Method mf = m;
 		on(irc.value(), new IRCHandler()
 		{
@@ -207,14 +205,13 @@ public class IRCClient
 			try {
 			    mf.invoke(handler, event);
 			} catch (IllegalAccessException ex) {
-			    Logger.getLogger(IRCClient.class.getName()).log(Level.SEVERE, null, ex);
+			    log.log(Level.SEVERE, "メソッドにアクセスできません。", ex);
 			} catch (IllegalArgumentException ex) {
-			    Logger.getLogger(IRCClient.class.getName()).log(Level.SEVERE, null, ex);
+			    log.log(Level.SEVERE, "不正な引数です。", ex);
 			} catch (InvocationTargetException ex) {
-			    Logger.getLogger(IRCClient.class.getName()).log(Level.SEVERE, null, ex);
+			    log.log(Level.SEVERE, "呼び出したメソッドで例外が発生しました。", ex);
 			}
 		    }
-		    
 		});
 	    }
 	}
@@ -678,17 +675,17 @@ public class IRCClient
 						{
 							handler.onMessage(event);
 						}
-						catch (Throwable x)
+						catch (Throwable ex)
 						{
-							fireError(new RuntimeException("IRCメッセージハンドラを中止しました。: " + event, x));
+							fireError(new RuntimeException("IRCメッセージハンドラを中止しました。: " + event, ex));
 						}
 					}
 				});
 			}
 		}
-		catch (Throwable x)
+		catch (Throwable ex)
 		{
-			fireError(new RuntimeException("IRCメッセージが不正です。: " + text, x));
+			fireError(new RuntimeException("IRCメッセージが不正です。: " + text, ex));
 		}
 	}
 
@@ -699,9 +696,10 @@ public class IRCClient
 	 */
 	protected void fireError(Throwable x)
 	{
-		log.error("IRCクライアントでエラーが発生しました。", x);
+                log.log(Level.SEVERE, "IRCクライアントでエラーが発生しました。", x);
 	}
 }
+
 /**
  * 入力タスク
  */
@@ -738,9 +736,9 @@ class InputTask implements Runnable
 				Thread.yield();
 			}
 		}
-		catch (IOException x)
+		catch (IOException ex)
 		{
-			irc.fireError(new IOException("入力ストリームを読み込めません。", x));
+			irc.fireError(new IOException("入力ストリームを読み込めません。", ex));
 		}
 		finally
 		{
@@ -748,9 +746,9 @@ class InputTask implements Runnable
 			{
 				irc.close();
 			}
-			catch (IOException x)
+			catch (IOException ex)
 			{
-				irc.fireError(new IOException("入力ストリームをクローズできません。", x));
+				irc.fireError(new IOException("入力ストリームをクローズできません。", ex));
 			}
 		}
 	}
@@ -761,9 +759,6 @@ class InputTask implements Runnable
  */
 class OutputTask implements Runnable
 {
-	/** ログ */
-	private static final Log log = LogFactory.getLog(OutputTask.class);
-
 	/** IRCクライアント */
 	private IRCClient irc;
 
@@ -794,9 +789,9 @@ class OutputTask implements Runnable
 			out.println(text);
 //			out.close();
 		}
-		catch (IOException x)
+		catch (IOException ex)
 		{
-			irc.fireError(new IOException("指定されたテキストを送信できません。: " + text, x));
+			irc.fireError(new IOException("指定されたテキストを送信できません。: " + text, ex));
 //			throw new RuntimeException("送信エラー: " + text, x);
 		}
 	}

@@ -4,7 +4,7 @@
  */
 package com.mac.tarchan.irc.bot;
 
-import com.mac.tarchan.irc.client.IRC;
+import com.mac.tarchan.irc.client.Reply;
 import com.mac.tarchan.irc.client.IRCClient;
 import com.mac.tarchan.irc.client.IRCEvent;
 import java.io.IOException;
@@ -20,6 +20,7 @@ public class SampleClient
     public static void main(String[] args)
     {
 	try {
+            System.setProperty("java.net.useSystemProxies", "true");
 	    SampleClient handler = new SampleClient();
 	    String host = args[0];
 	    int port = Integer.parseInt(args[1]);
@@ -34,85 +35,85 @@ public class SampleClient
 	}
     }
     
-    @IRC("001")
+    @Reply("001")
     public void welcome(IRCEvent event)
     {
         Logger.getLogger(SampleClient.class.getName()).log(Level.INFO, event.toString());
     }
 
-    @IRC("join")
+    @Reply("join")
     public void join(IRCEvent event)
     {
         Logger.getLogger(SampleClient.class.getName()).log(Level.INFO, event.toString());
     }
 
-    @IRC("part")
+    @Reply("part")
     public void part(IRCEvent event)
     {
         Logger.getLogger(SampleClient.class.getName()).log(Level.INFO, event.toString());
     }
 
-    @IRC("quit")
+    @Reply("quit")
     public void quit(IRCEvent event)
     {
         Logger.getLogger(SampleClient.class.getName()).log(Level.INFO, event.toString());
     }
 
-    @IRC("mode")
+    @Reply("mode")
     public void mode(IRCEvent event)
     {
         Logger.getLogger(SampleClient.class.getName()).log(Level.INFO, event.toString());
     }
 
-    @IRC("topic")
+    @Reply("topic")
     public void topic(IRCEvent event)
     {
         Logger.getLogger(SampleClient.class.getName()).log(Level.INFO, event.toString());
     }
 
-    @IRC("332")
+    @Reply("332")
     public void topic332(IRCEvent event)
     {
         Logger.getLogger(SampleClient.class.getName()).log(Level.INFO, event.toString());
     }
 
-    @IRC("353")
+    @Reply("353")
     public void nickStart(IRCEvent event)
     {
         Logger.getLogger(SampleClient.class.getName()).log(Level.INFO, event.toString());
     }
 
-    @IRC("366")
+    @Reply("366")
     public void nickEnd(IRCEvent event)
     {
         Logger.getLogger(SampleClient.class.getName()).log(Level.INFO, event.toString());
     }
 
-    @IRC("433")
+    @Reply("433")
     public void onNickConflict(IRCEvent event)
     {
         Logger.getLogger(SampleClient.class.getName()).log(Level.INFO, event.toString());
     }
 
-    @IRC("nick")
+    @Reply("nick")
     public void nick(IRCEvent event)
     {
         Logger.getLogger(SampleClient.class.getName()).log(Level.INFO, event.toString());
     }
 
-    @IRC("error")
+    @Reply("error")
     public void error(IRCEvent event)
     {
         Logger.getLogger(SampleClient.class.getName()).log(Level.INFO, event.toString());
     }
 
-    @IRC("ping")
+    @Reply("ping")
     public void ping(IRCEvent event)
     {
         Logger.getLogger(SampleClient.class.getName()).log(Level.INFO, event.toString());
     }
 
-    @IRC("privmsg")
+    @Reply("privmsg")
     public void privmsg(IRCEvent event)
     {
         Logger.getLogger(SampleClient.class.getName()).log(Level.INFO, event.toString());
