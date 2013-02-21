@@ -10,8 +10,6 @@ package com.mac.tarchan.irc.client.util;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-
-import com.mac.tarchan.irc.client.IRCClient;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -19,7 +17,7 @@ import java.util.logging.Logger;
  * 入力ストリームに、半角カナを修正する機能を追加します。
  * 入力ストリームの文字コードが JIS ではない場合は、使用できません。
  * 
- * @see IRCClient
+ * @see com.mac.tarchan.irc.client.IRCClient
  */
 public class KanaInputFilter extends FilterInputStream
 {
