@@ -8,11 +8,10 @@
 package com.mac.tarchan.irc.client;
 
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * IRCメッセージを生成します。
@@ -22,7 +21,7 @@ import org.apache.commons.logging.LogFactory;
 public class IRCMessage
 {
 	/** ログ */
-	private static final Log log = LogFactory.getLog(IRCMessage.class);
+	private static final Logger log = Logger.getLogger(IRCMessage.class.getName());
 
 	/** CTCPメッセージの区切り文字 */
 	public static final String CTCP = "\u0001";
@@ -104,7 +103,7 @@ public class IRCMessage
 			}
 			middle = middle.trim();
 			params = middle.split(" ");
-			log.debug(String.format("(%s):%s/%s/:%s", command, prefix, middle, trail));
+			log.log(Level.CONFIG, "({0}):{1}/{2}/:{3}", new Object[] {command, prefix, middle, trail});
 		}
 		else
 		{

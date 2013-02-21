@@ -10,14 +10,12 @@ package com.mac.tarchan.irc.bot;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.mac.tarchan.irc.client.IRCMessage.CTCP;
 import com.mac.tarchan.irc.client.IRCMessage.Prefix;
 import com.mac.tarchan.irc.client.util.BotAdapter;
 import com.mac.tarchan.irc.client.util.DccSendFile;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * EchoBot
@@ -25,7 +23,7 @@ import com.mac.tarchan.irc.client.util.DccSendFile;
 public class EchoBot extends BotAdapter
 {
 	/** ログ */
-	private static final Log log = LogFactory.getLog(EchoBot.class);
+	private static final Logger log = Logger.getLogger(EchoBot.class.getName());
 
 	/** チャンネル */
 	private String[] channels;
@@ -39,7 +37,7 @@ public class EchoBot extends BotAdapter
 	{
 		try
 		{
-			log.debug("args=" + Arrays.toString(args));
+			log.config("args=" + Arrays.toString(args));
 			if (args.length < 4)
 			{
 				System.out.println("Usage: EchoBot <ホスト名> <ポート番号> <ニックネーム> <パスワード> <チャンネル名>");
@@ -50,7 +48,7 @@ public class EchoBot extends BotAdapter
 			String nick = args[2];
 			String pass = args[3];
 			String[] channles = Arrays.asList(args).subList(4, args.length).toArray(new String[]{});
-			log.debug("channles=" + Arrays.toString(channles));
+			log.config("channles=" + Arrays.toString(channles));
 			new EchoBot(channles).login(host, port, nick, pass);
 		}
 		catch (Throwable x)
@@ -94,7 +92,7 @@ public class EchoBot extends BotAdapter
 	@Override
 	public void onError(Prefix prefix, String text)
 	{
-		log.error(text);
+		log.severe(text);
 	}
 
 	@Override
@@ -207,9 +205,9 @@ public class EchoBot extends BotAdapter
 			File savefile = new File("dcc/" + prefix.getNick(), dccfile.getName());
 			dccfile.save(savefile);
 		}
-		catch (IOException x)
+		catch (IOException ex)
 		{
-			log.error(x);
+			log.log(Level.SEVERE, "ファイル受信を中止しました。", ex);
 		}
 	}
 }

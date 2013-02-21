@@ -759,6 +759,9 @@ class InputTask implements Runnable
  */
 class OutputTask implements Runnable
 {
+	/** ログ */
+	private static final Logger log = Logger.getLogger(OutputTask.class.getName());
+
 	/** IRCクライアント */
 	private IRCClient irc;
 

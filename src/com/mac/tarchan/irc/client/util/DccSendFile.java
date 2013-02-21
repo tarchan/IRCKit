@@ -11,9 +11,7 @@ import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.net.InetAddress;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.util.logging.Logger;
 
 /**
  * DccSendFile
@@ -21,7 +19,7 @@ import org.apache.commons.logging.LogFactory;
 public class DccSendFile
 {
 	/** ログ */
-	private static final Log log = LogFactory.getLog(DccSendFile.class);
+	private static final Logger log = Logger.getLogger(DccSendFile.class.getName());
 
 	/** ファイル名 */
 	protected String file;
