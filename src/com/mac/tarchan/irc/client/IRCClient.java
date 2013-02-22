@@ -284,6 +284,7 @@ public class IRCClient {
      */
     protected IRCClient start(String encoding) throws IOException {
         log.info("イベントループを開始します。");
+        this.encoding = encoding;
         taskQueue.execute(new InputTask(this, encoding));
         return this;
     }
