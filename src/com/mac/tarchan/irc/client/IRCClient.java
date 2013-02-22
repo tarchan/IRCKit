@@ -59,8 +59,8 @@ public class IRCClient {
      */
     protected String pass;
     /**
-     * 接続モード (if the bit 2 is set, the user mode 'w' will be set
-     * and if the bit 3 is set, the user mode 'i' will be set.)
+     * 接続モード (if the bit 2 is set, the user mode 'w' will be set and if the bit 3 is set, the user mode 'i' will be
+     * set.)
      */
     protected int mode;
     /**
@@ -358,6 +358,24 @@ public class IRCClient {
     public OutputStream getOutputStream() throws IOException {
         return socket.getOutputStream();
     }
+    PrintStream out;
+    BufferedReader in;
+
+    public String next() {
+
+        try {
+            if (in == null) {
+                in = new BufferedReader(new InputStreamReader(new KanaInputFilter(this.getInputStream()), encoding));
+            }
+            String line = in.readLine();
+            log.info(line);
+            this.fireMessage(line);
+            return line;
+        } catch (IOException ex) {
+            log.log(Level.SEVERE, "テキストを受信できません。", ex);
+            return null;
+        }
+    }
 
     /**
      * 指定されたテキストを送信します。
@@ -373,7 +391,9 @@ public class IRCClient {
         if (text != null && text.trim().length() > 0) {
             try {
                 log.info(text);
-                PrintStream out = new PrintStream(this.getOutputStream(), true, this.getEncoding());
+                if (out == null) {
+                    out = new PrintStream(this.getOutputStream(), true, this.getEncoding());
+                }
                 out.println(text);
             } catch (IOException ex) {
                 log.log(Level.SEVERE, "テキストを送信できません。: " + text, ex);
