@@ -28,17 +28,16 @@ import java.util.logging.Logger;
 /**
  * IRCクライアントを実装します。
  *
- * @see <a href="http://www.irchelp.org/irchelp/rfc/rfc.html">RFC 1459 -
- * Internet Relay Chat Protocol</a>
- * @see <a href="http://www.haun.org/kent/lib/rfc1459-irc-ja.html">RFC 1459 -
- * 日本語訳</a>
- * @see <a href="http://www.faqs.org/rfcs/rfc2812.html">RFC 2812 - Internet
- * Relay Chat: Client Protocol</a>
- * @see <a href="http://jbpe.tripod.com/rfcj/rfc2812.j.sjis.txt">RFC 2812 -
- * 日本語訳</a>
+ * @see <a href="http://www.irchelp.org/irchelp/rfc/rfc.html">RFC 1459 - Internet Relay Chat Protocol</a>
+ * @see <a href="http://www.haun.org/kent/lib/rfc1459-irc-ja.html">RFC 1459 - 日本語訳</a>
+ * @see <a href="http://www.faqs.org/rfcs/rfc2812.html">RFC 2812 - Internet Relay Chat: Client Protocol</a>
+ * @see <a href="http://jbpe.tripod.com/rfcj/rfc2812.j.sjis.txt">RFC 2812 - 日本語訳</a>
  */
 public class IRCClient {
 
+    public static final int UserModeNode = 0;
+    public static final int UserModeInvisible = 4;
+    public static final int UserModeWallops = 8;
     /**
      * ログ
      */
@@ -60,8 +59,8 @@ public class IRCClient {
      */
     protected String pass;
     /**
-     * 接続モード (if the bit 2 is set, the user mode 'w' will be set and if the bit
-     * 3 is set, the user mode 'i' will be set.)
+     * 接続モード (if the bit 2 is set, the user mode 'w' will be set and if the bit 3 is set, the user mode 'i' will be
+     * set.)
      */
     protected int mode;
     /**
@@ -453,7 +452,8 @@ public class IRCClient {
     }
 
     /**
-     * 指定されたチャンネルに参加します。 キーワードが設定されているチャンネルに入るときは、キーワードを正しく入力しなくてはいけません。
+     * 指定されたチャンネルに参加します。
+     * キーワードが設定されているチャンネルに入るときは、キーワードを正しく入力しなくてはいけません。
      *
      * @param channel チャンネル名
      * @param keyword キーワード
@@ -746,7 +746,7 @@ class OutputTask implements Runnable {
         this.irc = irc;
         this.text = text;
     }
-    
+
     public void run() {
         try {
             log.info(text);
