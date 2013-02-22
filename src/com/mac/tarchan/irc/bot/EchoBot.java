@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import com.mac.tarchan.irc.client.IRCMessage.CTCP;
 import com.mac.tarchan.irc.client.IRCMessage.Prefix;
-import com.mac.tarchan.irc.client.util.BotAdapter;
 import com.mac.tarchan.irc.client.util.DccSendFile;
 import java.util.logging.Level;
 import java.util.logging.Logger;

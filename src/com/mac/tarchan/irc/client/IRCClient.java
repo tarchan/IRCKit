@@ -425,6 +425,7 @@ public class IRCClient {
      */
     public IRCClient login(String nick, String user, String real, int mode, String pass) {
         log.log(Level.INFO, "ログインします。: {0}", nick);
+        this.nick = nick;
         if (pass != null && pass.length() != 0) {
             pass(pass);
         }

@@ -5,12 +5,7 @@
  * Created by tarchan on 2011/06/16.
  * Copyright (c) 2011 tarchan. All rights reserved.
  */
-package com.mac.tarchan.irc.client.util;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Locale;
+package com.mac.tarchan.irc.bot;
 
 import com.mac.tarchan.irc.client.IRCClient;
 import com.mac.tarchan.irc.client.IRCEvent;
@@ -18,6 +13,11 @@ import com.mac.tarchan.irc.client.IRCHandler;
 import com.mac.tarchan.irc.client.IRCMessage;
 import com.mac.tarchan.irc.client.IRCMessage.CTCP;
 import com.mac.tarchan.irc.client.IRCMessage.Prefix;
+import com.mac.tarchan.irc.client.util.HandlerBuilder;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Locale;
 
 /**
  * IRCメッセージを受け取る抽象アダプタクラスです。
