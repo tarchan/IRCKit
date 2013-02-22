@@ -16,7 +16,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.Socket;
@@ -60,8 +59,8 @@ public class IRCClient {
      */
     protected String pass;
     /**
-     * 接続モード (if the bit 2 is set, the user mode 'w' will be set and if the bit 3 is set, the user mode 'i' will be
-     * set.)
+     * 接続モード (if the bit 2 is set, the user mode 'w' will be set
+     * and if the bit 3 is set, the user mode 'i' will be set.)
      */
     protected int mode;
     /**
@@ -238,6 +237,7 @@ public class IRCClient {
      */
     public IRCClient on(final IRCMessageFilter filter, final IRCHandler handler) {
         return on(new IRCHandler() {
+            @Override
             public void onMessage(IRCEvent event) {
                 if (filter.accept(event.getMessage())) {
                     handler.onMessage(event);
@@ -299,17 +299,21 @@ public class IRCClient {
      */
     protected IRCClient connect(String host, int port) throws IOException {
         InetAddress inet = InetAddress.getByName(host);
-        socket = new Socket(host, port);
         log.log(Level.INFO, "接続します。: {0}", inet);
+        socket = new Socket(host, port);
+        log.log(Level.INFO, "接続しました。: {0}", socket);
 //		new Thread(new InputListener(this)).start();
 //		messageQueue.execute(new InputTask(this, encoding));
         return this;
     }
 
     public IRCClient connect(String host, int port, String encoding) throws IOException {
+        this.host = host;
+        this.port = port;
+        this.encoding = encoding;
         connect(host, port);
 //        login(nick, null, null, mode, pass);
-        start(encoding);
+//        start(encoding);
         return this;
     }
 
@@ -363,8 +367,17 @@ public class IRCClient {
      */
     public IRCClient postMessage(String text) {
         // TODO タスクキューが落ちてたら再起動する
-        if (text != null && text.trim().length() > 0 && !taskQueue.isShutdown()) {
-            taskQueue.execute(new OutputTask(this, text));
+//        if (text != null && text.trim().length() > 0 && !taskQueue.isShutdown()) {
+//            taskQueue.execute(new OutputTask(this, text));
+//        }
+        if (text != null && text.trim().length() > 0) {
+            try {
+                log.info(text);
+                PrintStream out = new PrintStream(this.getOutputStream(), true, this.getEncoding());
+                out.println(text);
+            } catch (IOException ex) {
+                log.log(Level.SEVERE, "テキストを送信できません。: " + text, ex);
+            }
         }
         return this;
     }
