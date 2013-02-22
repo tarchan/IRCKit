@@ -13,5 +13,6 @@ import java.lang.annotation.Target;
 @Target(value = {ElementType.METHOD})
 public @interface Reply
 {
-    String value() default "*";
+    String[] value() default {};
+    String property() default "";
 }

@@ -9,6 +9,7 @@ package com.mac.tarchan.irc.client;
 
 import com.mac.tarchan.irc.client.util.KanaInputFilter;
 import java.awt.EventQueue;
+import java.beans.EventHandler;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -192,33 +193,27 @@ public class IRCClient {
         return encoding;
     }
 
-    public void addHandler(Object handler) {
-        final Object obj = handler;
-        Class clazz = handler.getClass();
+    public void addHandler(Object target) {
+//        final Object target = handler;
+        Class clazz = target.getClass();
 //	dump("クラス", clazz.getDeclaredAnnotations());
-        Method[] ms = clazz.getDeclaredMethods();
-        for (Method m : ms) {
+        Method[] methods = clazz.getDeclaredMethods();
+        for (Method method : methods) {
 //	    dump("メソッド", m.getDeclaredAnnotations());
-            Reply irc = m.getAnnotation(Reply.class);
+            Reply reply = method.getAnnotation(Reply.class);
 //	    if (a != null) dump("メソッド", new Annotation[]{a});
-            if (irc != null) {
+            if (reply != null) {
 //		System.out.format("メソッド: %s, %s, %s%n", irc, irc.annotationType(), irc.value());
-                log.log(Level.INFO, "イベントハンドラを追加します。: {0}, {1} ({2})", new Object[]{irc, irc.annotationType(), irc.value()});
-                final Method mf = m;
-                on(irc.value(), new IRCHandler() {
-                    @Override
-                    public void onMessage(IRCEvent event) {
-                        try {
-                            mf.invoke(obj, event);
-                        } catch (IllegalAccessException ex) {
-                            log.log(Level.SEVERE, "メソッドにアクセスできません。", ex);
-                        } catch (IllegalArgumentException ex) {
-                            log.log(Level.SEVERE, "不正な引数です。", ex);
-                        } catch (InvocationTargetException ex) {
-                            log.log(Level.SEVERE, "呼び出したメソッドで例外が発生しました。", ex);
-                        }
-                    }
-                });
+                log.log(Level.INFO, "イベントハンドラを追加します。: {0} [{1}]", new Object[]{reply, method});
+//                final Method mf = m;
+                if (reply.value().length == 0) {
+                    IRCHandler handler = EventHandler.create(IRCHandler.class, target, method.getName(), reply.property());
+                    on(handler);
+                }
+                for (String cmd : reply.value()) {
+                    IRCHandler handler = EventHandler.create(IRCHandler.class, target, method.getName(), reply.property());
+                    on(cmd, handler);
+                }
             }
         }
     }
@@ -310,7 +305,7 @@ public class IRCClient {
         return this;
     }
 
-    public IRCClient open(String host, int port, String encoding) throws IOException {
+    public IRCClient connect(String host, int port, String encoding) throws IOException {
         connect(host, port);
 //        login(nick, null, null, mode, pass);
         start(encoding);
@@ -452,8 +447,7 @@ public class IRCClient {
     }
 
     /**
-     * 指定されたチャンネルに参加します。
-     * キーワードが設定されているチャンネルに入るときは、キーワードを正しく入力しなくてはいけません。
+     * 指定されたチャンネルに参加します。 キーワードが設定されているチャンネルに入るときは、キーワードを正しく入力しなくてはいけません。
      *
      * @param channel チャンネル名
      * @param keyword キーワード
