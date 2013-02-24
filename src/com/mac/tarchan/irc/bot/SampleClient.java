@@ -28,7 +28,7 @@ public class SampleClient
 	    String pass = args[3];
 	    String encoding = args[4];
 	    IRCClient client = IRCClient.createClient(host, port, nick, pass, encoding);
-	    client.addHandler(handler);
+	    client.addEventHandler(handler);
 	    client.start();
 	} catch (IOException ex) {
 	    Logger.getLogger(SampleClient.class.getName()).log(Level.SEVERE, null, ex);

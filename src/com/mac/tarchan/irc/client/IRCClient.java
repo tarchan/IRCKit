@@ -72,6 +72,14 @@ public class IRCClient {
      */
     protected Socket socket;
     /**
+     * 入力ストリーム
+     */
+    protected BufferedReader in;
+    /**
+     * 出力ストリーム
+     */
+    protected PrintStream out;
+    /**
      * タスクキュー
      */
     protected ExecutorService taskQueue = Executors.newFixedThreadPool(2);
@@ -80,7 +88,7 @@ public class IRCClient {
      */
     protected ArrayList<IRCHandler> handlers = new ArrayList<IRCHandler>();
 
-    protected IRCClient() {
+    private IRCClient() {
     }
 
     /**
@@ -91,6 +99,7 @@ public class IRCClient {
      * @param nick ニックネーム
      * @param pass パスワード
      * @param encoding 文字コード
+     * @deprecated 使用しません。
      */
     protected IRCClient(String host, int port, String nick, String pass, String encoding) {
         this.host = host;
@@ -102,7 +111,7 @@ public class IRCClient {
 
     public static IRCClient createClient(Object handler) {
         IRCClient irc = new IRCClient();
-        irc.addHandler(handler);
+        irc.addEventHandler(handler);
         return irc;
     }
 
@@ -113,6 +122,7 @@ public class IRCClient {
      * @param port ポート番号
      * @param nick ニックネーム
      * @return IRCClient
+     * @deprecated 使用しません。
      */
     public static IRCClient createClient(String host, int port, String nick) {
         return createClient(host, port, nick, null);
@@ -126,6 +136,7 @@ public class IRCClient {
      * @param nick ニックネーム
      * @param pass パスワード
      * @return IRCクライアント
+     * @deprecated 使用しません。
      */
     public static IRCClient createClient(String host, int port, String nick, String pass) {
         return createClient(host, port, nick, pass, "JIS");
@@ -140,6 +151,7 @@ public class IRCClient {
      * @param pass パスワード
      * @param encoding 文字コード
      * @return IRCクライアント
+     * @deprecated 使用しません。
      */
     public static IRCClient createClient(String host, int port, String nick, String pass, String encoding) {
         return new IRCClient(host, port, nick, pass, encoding);
@@ -192,7 +204,7 @@ public class IRCClient {
         return encoding;
     }
 
-    public void addHandler(Object target) {
+    public void addEventHandler(Object target) {
 //        final Object target = handler;
         Class clazz = target.getClass();
 //	dump("クラス", clazz.getDeclaredAnnotations());
@@ -269,6 +281,7 @@ public class IRCClient {
      *
      * @return IRCクライアント
      * @throws IOException IRCサーバに接続できない場合
+     * @deprecated 使用しません。
      */
     public IRCClient start() throws IOException {
         return connect(host, port).login(nick, nick, nick, mode, pass).start(encoding);
@@ -281,6 +294,7 @@ public class IRCClient {
      * @return IRCクライアント
      * @throws IOException 入力ストリームをオープンできない場合
      * @see #fireMessage(String)
+     * @deprecated 使用しません。
      */
     protected IRCClient start(String encoding) throws IOException {
         log.info("イベントループを開始します。");
@@ -349,6 +363,12 @@ public class IRCClient {
         return socket.getInputStream();
     }
 
+    protected void prepareInput() throws IOException {
+        if (in == null) {
+            in = new BufferedReader(new InputStreamReader(new KanaInputFilter(getInputStream()), encoding));
+        }
+    }
+
     /**
      * 出力ストリームを返します。
      *
@@ -358,18 +378,54 @@ public class IRCClient {
     public OutputStream getOutputStream() throws IOException {
         return socket.getOutputStream();
     }
-    PrintStream out;
-    BufferedReader in;
 
-    public String next() {
+    protected void prepareOutput() throws IOException {
+        if (out == null) {
+            out = new PrintStream(getOutputStream(), true, getEncoding());
+        }
+    }
 
+    /**
+     * 指定されたテキストを解析して、ハンドラに送信します。
+     *
+     * @param text テキスト
+     */
+    protected void fireMessage(String text) {
         try {
-            if (in == null) {
-                in = new BufferedReader(new InputStreamReader(new KanaInputFilter(this.getInputStream()), encoding));
+            IRCMessage message = new IRCMessage(text, getUserNick());
+            final IRCEvent event = new IRCEvent(this, message);
+            for (final IRCHandler handler : handlers) {
+                EventQueue.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            handler.onMessage(event);
+                        } catch (Throwable ex) {
+                            fireError(new RuntimeException("IRCメッセージハンドラを中止しました。: " + event, ex));
+                        }
+                    }
+                });
             }
+        } catch (Exception ex) {
+            fireError(new RuntimeException("IRCメッセージが不正です。: " + text, ex));
+        }
+    }
+
+    /**
+     * 入出力タスクで例外が発生したときに呼び出されます。
+     *
+     * @param ex 例外
+     */
+    protected void fireError(Throwable ex) {
+        log.log(Level.SEVERE, "IRCクライアントでエラーが発生しました。", ex);
+    }
+
+    public String readMessage() {
+        try {
+            prepareInput();
             String line = in.readLine();
             log.info(line);
-            this.fireMessage(line);
+            fireMessage(line);
             return line;
         } catch (IOException ex) {
             log.log(Level.SEVERE, "テキストを受信できません。", ex);
@@ -391,9 +447,7 @@ public class IRCClient {
         if (text != null && text.trim().length() > 0) {
             try {
                 log.info(text);
-                if (out == null) {
-                    out = new PrintStream(this.getOutputStream(), true, this.getEncoding());
-                }
+                prepareOutput();
                 out.println(text);
             } catch (IOException ex) {
                 log.log(Level.SEVERE, "テキストを送信できません。: " + text, ex);
@@ -429,7 +483,16 @@ public class IRCClient {
         if (pass != null && pass.length() != 0) {
             pass(pass);
         }
+        if (nick == null || nick.isEmpty()) {
+            throw new IllegalArgumentException("nick");
+        }
         nick(nick);
+        if (user == null || user.isEmpty()) {
+            user = nick;
+        }
+        if (real == null || real.isEmpty()) {
+            real = nick;
+        }
         user(user, mode, real);
         return this;
     }
@@ -547,7 +610,7 @@ public class IRCClient {
     }
 
     /**
-     * 指定されたチャンネルの情報を取得します。
+     * 指定されたチャンネルのリストを取得します。
      *
      * @param channel チャンネル名
      * @return IRCクライアント
@@ -652,46 +715,6 @@ public class IRCClient {
      */
     public IRCClient away() {
         return postMessage("AWAY");
-    }
-
-    /**
-     * 指定されたテキストを解析して、ハンドラに送信します。
-     *
-     * @param text テキスト
-     */
-    protected void fireMessage(String text) {
-        try {
-            IRCMessage message = new IRCMessage(text, getUserNick());
-//			String encoding = "JIS";
-////			System.out.println(new String(text.getBytes(), encoding));
-//			IRCMessage message = new IRCMessage(text, encoding);
-//			handler.onMessage(new IRCEvent(this, message));
-//			System.out.println(message.toString());
-            final IRCEvent event = new IRCEvent(this, message);
-            for (final IRCHandler handler : handlers) {
-                EventQueue.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            handler.onMessage(event);
-                        } catch (Throwable ex) {
-                            fireError(new RuntimeException("IRCメッセージハンドラを中止しました。: " + event, ex));
-                        }
-                    }
-                });
-            }
-        } catch (Throwable ex) {
-            fireError(new RuntimeException("IRCメッセージが不正です。: " + text, ex));
-        }
-    }
-
-    /**
-     * 入出力タスクで例外が発生したときに呼び出されます。
-     *
-     * @param x 例外
-     */
-    protected void fireError(Throwable x) {
-        log.log(Level.SEVERE, "IRCクライアントでエラーが発生しました。", x);
     }
 }
 
