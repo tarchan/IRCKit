@@ -396,16 +396,17 @@ public class IRCClient implements Iterable<String> {
             IRCMessage message = new IRCMessage(text, getUserNick());
             final IRCEvent event = new IRCEvent(this, message);
             for (final IRCHandler handler : handlers) {
-                EventQueue.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            handler.onMessage(event);
-                        } catch (Throwable ex) {
-                            fireError(new RuntimeException("IRCメッセージハンドラを中止しました。: " + event, ex));
-                        }
-                    }
-                });
+                handler.onMessage(event);
+//                EventQueue.invokeLater(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        try {
+//                            handler.onMessage(event);
+//                        } catch (Throwable ex) {
+//                            fireError(new RuntimeException("IRCメッセージハンドラを中止しました。: " + event, ex));
+//                        }
+//                    }
+//                });
             }
         } catch (Exception ex) {
             fireError(new RuntimeException("IRCメッセージが不正です。: " + text, ex));
