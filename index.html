@@ -45,12 +45,13 @@
 <li>Java 5 or later</li>
 </ul>
 
-<p>Sample code is this.</p>
+<h3>Examples</h3>
 
 <pre><code>IRCClient irc = IRCClient.createClient(new Yourbot());
-irc.connect("irc.host", irc.port, "irc.encoding");
-irc.login("irc.nick", "irc.user", "irc.real", irc.mode, "irc.pass");
-irc.join("#channel");
+irc.connect("irc.ircnet.ne.jp", 6667, "jis");
+irc.login("irckit", "irckit", "powered by IRCKit", 0, null);
+irc.join("#javabreak");
+irc.privmsg("#javabreak", "hello");
 </code></pre>
 
 <h3>Javadoc</h3>
