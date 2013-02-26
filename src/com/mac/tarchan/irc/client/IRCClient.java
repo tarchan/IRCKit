@@ -20,6 +20,7 @@ import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
@@ -33,7 +34,7 @@ import java.util.logging.Logger;
  * @see <a href="http://www.faqs.org/rfcs/rfc2812.html">RFC 2812 - Internet Relay Chat: Client Protocol</a>
  * @see <a href="http://jbpe.tripod.com/rfcj/rfc2812.j.sjis.txt">RFC 2812 - 日本語訳</a>
  */
-public class IRCClient {
+public class IRCClient implements Iterable<String> {
 
     public static final int UserModeNode = 0;
     public static final int UserModeInvisible = 4;
@@ -340,7 +341,7 @@ public class IRCClient {
     public IRCClient close() throws IOException {
         socket.close();
         taskQueue.shutdown();
-        log.info("disconnected. " + socket.isConnected() + ", " + socket.isClosed());
+        log.log(Level.INFO, "disconnected. {0}, {1}", new Object[]{socket.isConnected(), socket.isClosed()});
         return this;
     }
 
@@ -420,7 +421,7 @@ public class IRCClient {
         log.log(Level.SEVERE, "IRCクライアントでエラーが発生しました。", ex);
     }
 
-    public String readMessage() {
+    public String nextMessage() {
         try {
             prepareInput();
             String line = in.readLine();
@@ -430,6 +431,35 @@ public class IRCClient {
         } catch (IOException ex) {
             log.log(Level.SEVERE, "テキストを受信できません。", ex);
             return null;
+        }
+    }
+
+    public Iterator<String> iterator() {
+        return new InputIterator();
+    }
+
+    private class InputIterator implements Iterator<String> {
+
+        private String line;
+
+        @Override
+        public boolean hasNext() {
+            if (line == null) {
+                 line = nextMessage();
+            }
+            return line != null;
+        }
+
+        @Override
+        public String next() {
+            String value = line;
+            line = null;
+            return value;
+        }
+
+        @Override
+        public void remove() {
+            line = null;
         }
     }
 
