@@ -21,6 +21,7 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
@@ -110,9 +111,11 @@ public class IRCClient implements Iterable<String> {
         this.encoding = encoding;
     }
 
-    public static IRCClient createClient(Object handler) {
+    public static IRCClient createClient(Object... handlers) {
         IRCClient irc = new IRCClient();
-        irc.addEventHandler(handler);
+        for (Object handler : handlers) {
+            irc.addEventHandler(handler);
+        }
         return irc;
     }
 
@@ -446,16 +449,20 @@ public class IRCClient implements Iterable<String> {
         @Override
         public boolean hasNext() {
             if (line == null) {
-                 line = nextMessage();
+                line = nextMessage();
             }
             return line != null;
         }
 
         @Override
         public String next() {
-            String value = line;
-            line = null;
-            return value;
+            if (hasNext()) {
+                String value = line;
+                line = null;
+                return value;
+            } else {
+                throw new NoSuchElementException("InputStream");
+            }
         }
 
         @Override
