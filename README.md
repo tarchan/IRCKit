@@ -1,4 +1,4 @@
-IRCKit
+IRCKit [![Build Status](https://travis-ci.org/tarchan/IRCKit.png)](https://travis-ci.org/tarchan/IRCKit)
 ======
 
 Description
