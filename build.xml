@@ -61,6 +61,9 @@
 		<delete file="${build.jar}" />
 	</target>
 
+	<target name="test">
+	</target>
+
 	<target name="download.jars">
 		<mkdir dir="lib" />
 		<get src="http://ws.zones.apache.org/repository/stax-utils/jars/stax-utils-20060915.jar"
