@@ -6,6 +6,7 @@
 
 package com.mac.tarchan.irc.bot;
 
+import com.mac.tarchan.irc.IrcURLStreamHandlerFactory;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -19,22 +20,27 @@ import java.util.logging.Logger;
  * @author tarchan
  */
 public class ShellAdapter {
+    static final Logger logger = Logger.getLogger(ShellAdapter.class.getName());
+
     public static void main(String[] args) {
         try {
+            URL.setURLStreamHandlerFactory(new IrcURLStreamHandlerFactory());
             URL url = new URL("irc://irc.ircnet.ne.jp/#javabreak");
             URLConnection con = url.openConnection();
+            con.connect();
             try (BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()))) {
                 while (true) {
                     String line = in.readLine();
                     if (line == null) break;
                     
                     System.out.println(line);
+                    logger.log(Level.INFO, line);
                 }
             } catch (IOException ex) {
-                Logger.getLogger(ShellAdapter.class.getName()).log(Level.SEVERE, null, ex);
+                logger.log(Level.SEVERE, null, ex);
             }
         } catch (IOException ex) {
-            Logger.getLogger(ShellAdapter.class.getName()).log(Level.SEVERE, null, ex);
+            logger.log(Level.SEVERE, null, ex);
         }
     }
 }
