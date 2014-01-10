@@ -35,54 +35,54 @@ import java.net.URLStreamHandler;
 
 /**
  * IRC接続のプロトコルハンドラです。
- * 
+ *
  * @author tarchan
  * @see URL#URL(String, String, int, String)
  */
-public class Handler extends URLStreamHandler
-{
-	/**
-	 * IRC接続をオープンします。
-	 * 
-	 * @see URLStreamHandler#openConnection(java.net.URL)
-	 * @see IRCConnection
-	 */
-	@Override
-	protected URLConnection openConnection(URL url) throws IOException
-	{
-		return new IRCConnection(url);
-	}
+public class Handler extends URLStreamHandler {
 
-	/**
-	 * IRC接続のデフォルトのポート番号を返します。
-	 * 
-	 * @see URLStreamHandler#getDefaultPort()
-	 */
-	@Override
-	protected int getDefaultPort()
-	{
-		return 6667;
-	}
+    /**
+     * IRC接続をオープンします。
+     *
+     * @param url
+     * @return
+     * @throws java.io.IOException
+     * @see URLStreamHandler#openConnection(java.net.URL)
+     * @see IRCConnection
+     */
+    @Override
+    protected URLConnection openConnection(URL url) throws IOException {
+        return new IRCConnection(url);
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected void setURL(URL u, String protocol, String host, int port, String authority, String userInfo, String path, String query, String ref)
-	{
-		try
-		{
-			// チャンネル名を設定
-			if (ref != null) path = "#" + ref;
-			else if (path.length() > 1) path = "#" + path.substring(1);
+    /**
+     * IRC接続のデフォルトのポート番号を返します。
+     *
+     * @see URLStreamHandler#getDefaultPort()
+     */
+    @Override
+    protected int getDefaultPort() {
+        return 6667;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void setURL(URL u, String protocol, String host, int port, String authority, String userInfo, String path, String query, String ref) {
+        try {
+            // チャンネル名を設定
+            if (ref != null) {
+                path = "#" + ref;
+            } else if (path.length() > 1) {
+                path = "#" + path.substring(1);
+            }
 
 //			System.out.format("[URL] %s://%s:%s, %s, %s, %s, %s, %s\n", protocol, host, port, authority, userInfo, path, query, ref);
-			super.setURL(u, protocol, host, port, authority, userInfo, path, query, ref);
-		}
-		catch (RuntimeException x)
-		{
-			x.printStackTrace();
-			throw x;
-		}
-	}
+            super.setURL(u, protocol, host, port, authority, userInfo, path, query, ref);
+        } catch (RuntimeException x) {
+            x.printStackTrace();
+            throw x;
+        }
+    }
 }
