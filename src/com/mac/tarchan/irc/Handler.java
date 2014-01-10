@@ -32,6 +32,8 @@ import java.net.URL;
 import java.net.URLConnection;
 
 import java.net.URLStreamHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * IRC接続のプロトコルハンドラです。
@@ -41,6 +43,8 @@ import java.net.URLStreamHandler;
  */
 public class Handler extends URLStreamHandler {
 
+    static final Logger logger = Logger.getLogger(Handler.class.getName());
+
     /**
      * IRC接続をオープンします。
      *
@@ -48,16 +52,17 @@ public class Handler extends URLStreamHandler {
      * @return
      * @throws java.io.IOException
      * @see URLStreamHandler#openConnection(java.net.URL)
-     * @see IRCConnection
+     * @see IrcURLConnection
      */
     @Override
     protected URLConnection openConnection(URL url) throws IOException {
-        return new IRCConnection(url);
+        return new IrcURLConnection(url);
     }
 
     /**
      * IRC接続のデフォルトのポート番号を返します。
      *
+     * @return
      * @see URLStreamHandler#getDefaultPort()
      */
     @Override
@@ -71,6 +76,16 @@ public class Handler extends URLStreamHandler {
     @Override
     protected void setURL(URL u, String protocol, String host, int port, String authority, String userInfo, String path, String query, String ref) {
         try {
+            // デフォルトポートを設定
+            if (port == -1) {
+                port = getDefaultPort();
+            }
+
+            // デフォルトニックネームを設定
+            if (userInfo == null) {
+                userInfo = System.getProperty("user.name");
+            }
+
             // チャンネル名を設定
             if (ref != null) {
                 path = "#" + ref;
@@ -78,10 +93,16 @@ public class Handler extends URLStreamHandler {
                 path = "#" + path.substring(1);
             }
 
-//			System.out.format("[URL] %s://%s:%s, %s, %s, %s, %s, %s\n", protocol, host, port, authority, userInfo, path, query, ref);
+//            System.out.format("[URL] %s://%s:%s, %s, %s, %s, %s, %s\n", protocol, host, port, authority, userInfo, path, query, ref);
+            logger.log(Level.INFO, "protocol=" + protocol);
+            logger.log(Level.INFO, "host=" + host);
+            logger.log(Level.INFO, "port=" + port);
+            logger.log(Level.INFO, "authority=" + authority);
+            logger.log(Level.INFO, "userInfo=" + userInfo);
+            logger.log(Level.INFO, "path=" + path);
+            logger.log(Level.INFO, "query=" + query);
             super.setURL(u, protocol, host, port, authority, userInfo, path, query, ref);
         } catch (RuntimeException x) {
-            x.printStackTrace();
             throw x;
         }
     }

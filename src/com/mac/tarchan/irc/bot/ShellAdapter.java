@@ -25,8 +25,10 @@ public class ShellAdapter {
     public static void main(String[] args) {
         try {
             URL.setURLStreamHandlerFactory(new IrcURLStreamHandlerFactory());
-            URL url = new URL("irc://irc.ircnet.ne.jp/#javabreak");
+            URL url = new URL("irc:tar2014@irc.ircnet.ne.jp/#javabreak");
+//            URL url = new URL("irc://tarchan:pass@irc.ircnet.ne.jp/#javabreak");
             URLConnection con = url.openConnection();
+            con.addRequestProperty("channel", "#javabreak");
             con.connect();
             try (BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()))) {
                 while (true) {

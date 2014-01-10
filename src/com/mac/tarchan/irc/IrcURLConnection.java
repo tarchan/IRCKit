@@ -27,12 +27,16 @@
  */
 package com.mac.tarchan.irc;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintStream;
 import java.net.Socket;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * IRCサーバーへのURL接続です。 IRC URL 構文は次のとおりです。
@@ -41,24 +45,35 @@ import java.net.URLConnection;
  * @author tarchan
  * @see Handler#openConnection(URL)
  */
-public class IRCConnection extends URLConnection {
+public class IrcURLConnection extends URLConnection {
+
+    static final Logger logger = Logger.getLogger(IrcURLConnection.class.getName());
 
     /**
-     * ソケット
+     * 入出力ソケット
      */
     private Socket socket;
+    /**
+     * 入力ストリーム
+     */
+    protected BufferedReader in;
+    /**
+     * 出力ストリーム
+     */
+    protected PrintStream out;
 
     /**
      * IRC 接続を構築します。
      *
      * @param url URL
      */
-    protected IRCConnection(URL url) {
+    protected IrcURLConnection(URL url) {
         super(url);
     }
 
     /**
      * 通信リンクを確立します。
+     *
      * @throws java.io.IOException
      */
     @Override
@@ -70,20 +85,46 @@ public class IRCConnection extends URLConnection {
 
         // 接続する
         int port = url.getPort();
-        if (port == -1) {
-            port = url.getDefaultPort();
-        }
         socket = new Socket(url.getHost(), port);
         socket.setSoTimeout(5 * 60 * 1000);
 //		System.out.format("[CON] %s\n", socket);
+
+        // ログイン
+        login();
+
+        // JOIN
+        String file = url.getFile();
+        logger.log(Level.INFO, "file=" + file);
 
         // 接続済みにする
         connected = true;
     }
 
+    public void login() {
+        String[] userInfo = url.getUserInfo().split(":");
+        String nick = userInfo.length >= 1 ? userInfo[0] : null;
+        String pass = userInfo.length >= 2 ? userInfo[1] : null;
+        logger.log(Level.INFO, "nick=" + nick);
+        logger.log(Level.INFO, "pass=" + pass);
+
+        if (pass != null) {
+            postMessage("PASS " + pass);
+        }
+        postMessage("NICK " + nick);
+
+        String user = getRequestProperty("user");
+        if (user == null) user = nick;
+        String mode = getRequestProperty("mode");
+        if (mode == null) mode = "0";
+        String real = getRequestProperty("real");
+        if (real == null) real = "IRCKit 2.1";
+        postMessage("USER %s %d * :%s", user, Integer.parseInt(mode), real);
+    }
+
     /**
      * 入力ストリームを返します。
-     * @return 
+     *
+     * @return
      * @throws java.io.IOException
      */
     @Override
@@ -93,11 +134,37 @@ public class IRCConnection extends URLConnection {
 
     /**
      * 出力ストリームを返します。
-     * @return 
+     *
+     * @return
      * @throws java.io.IOException
      */
     @Override
     public OutputStream getOutputStream() throws IOException {
         return socket != null ? socket.getOutputStream() : null;
+    }
+
+    protected void prepareOutput() throws IOException {
+        if (out == null) {
+            out = new PrintStream(getOutputStream(), true, getEncoding());
+        }
+    }
+
+    private String getEncoding() {
+        return "JIS";
+    }
+
+    public IrcURLConnection postMessage(String text) {
+        try {
+            logger.log(Level.INFO, text);
+            prepareOutput();
+            out.println(text);
+        } catch (IOException ex) {
+            logger.log(Level.SEVERE, "メッセージを送信できません。: " + text, ex);
+        }
+        return this;
+    }
+
+    public IrcURLConnection postMessage(String format, Object... args) {
+        return postMessage(String.format(format, args));
     }
 }
