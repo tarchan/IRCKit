@@ -25,18 +25,23 @@ public class ShellAdapter {
     public static void main(String[] args) {
         try {
             URL.setURLStreamHandlerFactory(new IrcURLStreamHandlerFactory());
-            URL url = new URL("irc:tar2014@irc.ircnet.ne.jp/#javabreak");
+//            URL url = new URL("irc://irc.ircnet.ne.jp/#javabreak");
 //            URL url = new URL("irc://tarchan:pass@irc.ircnet.ne.jp/#javabreak");
+            URL url = new URL("irc://irc.freenode.net/#javabreak");
             URLConnection con = url.openConnection();
             con.addRequestProperty("channel", "#javabreak");
+            con.addRequestProperty("channel", "#test");
+            con.setRequestProperty("content-encoding", "JIS");
             con.connect();
-            try (BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()))) {
+            try (BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream(), "JIS"))) {
                 while (true) {
                     String line = in.readLine();
+                    // TODO String line = con.getContent();
+                    Object reply = con.getContent();
                     if (line == null) break;
                     
-                    System.out.println(line);
                     logger.log(Level.INFO, line);
+                    logger.log(Level.INFO, "reply: " + reply);
                 }
             } catch (IOException ex) {
                 logger.log(Level.SEVERE, null, ex);

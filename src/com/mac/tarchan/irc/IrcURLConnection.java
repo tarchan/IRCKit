@@ -46,7 +46,6 @@ import java.util.logging.Logger;
  * @see Handler#openConnection(URL)
  */
 public class IrcURLConnection extends URLConnection {
-
     static final Logger logger = Logger.getLogger(IrcURLConnection.class.getName());
 
     /**
@@ -61,6 +60,10 @@ public class IrcURLConnection extends URLConnection {
      * 出力ストリーム
      */
     protected PrintStream out;
+    /**
+     * 文字コード
+     */
+    protected String encoding;
 
     /**
      * IRC 接続を構築します。
@@ -69,6 +72,24 @@ public class IrcURLConnection extends URLConnection {
      */
     protected IrcURLConnection(URL url) {
         super(url);
+    }
+
+    @Override
+    public Object getContent() throws IOException {
+        // TODO IRCメッセージを取得
+        String enc = this.getContentEncoding();
+        logger.log(Level.INFO, "encoding: " + enc);
+        getInputStream();
+//        return getContentHandler().getContent(this);
+//        return super.getContent();
+        return "test";
+    }
+
+    @Override
+    public String getContentEncoding() {
+//        return super.getContentEncoding();
+//        return this.getRequestProperty("content-encoding");
+        return encoding;
     }
 
     /**
@@ -83,6 +104,8 @@ public class IrcURLConnection extends URLConnection {
             return;
         }
 
+        encoding = this.getRequestProperty("content-encoding");
+
         // 接続する
         int port = url.getPort();
         socket = new Socket(url.getHost(), port);
@@ -95,6 +118,9 @@ public class IrcURLConnection extends URLConnection {
         // JOIN
         String file = url.getFile();
         logger.log(Level.INFO, "file=" + file);
+        if (file != null) {
+            postMessage("JOIN " + file);
+        }
 
         // 接続済みにする
         connected = true;

@@ -75,35 +75,35 @@ public class Handler extends URLStreamHandler {
      */
     @Override
     protected void setURL(URL u, String protocol, String host, int port, String authority, String userInfo, String path, String query, String ref) {
-        try {
-            // デフォルトポートを設定
-            if (port == -1) {
-                port = getDefaultPort();
-            }
+        if (host == null || host.isEmpty()) {
+            throw new IllegalArgumentException("host");
+        }
 
-            // デフォルトニックネームを設定
-            if (userInfo == null) {
-                userInfo = System.getProperty("user.name");
-            }
+        // デフォルトポートを設定
+        if (port == -1) {
+            port = getDefaultPort();
+        }
 
-            // チャンネル名を設定
-            if (ref != null) {
-                path = "#" + ref;
-            } else if (path.length() > 1) {
-                path = "#" + path.substring(1);
-            }
+        // デフォルトニックネームを設定
+        if (userInfo == null) {
+            userInfo = System.getProperty("user.name");
+        }
+
+        // チャンネル名を設定
+        if (ref != null) {
+            path = "#" + ref;
+        } else if (path.length() > 1) {
+            path = "#" + path.substring(1);
+        }
 
 //            System.out.format("[URL] %s://%s:%s, %s, %s, %s, %s, %s\n", protocol, host, port, authority, userInfo, path, query, ref);
-            logger.log(Level.INFO, "protocol=" + protocol);
-            logger.log(Level.INFO, "host=" + host);
-            logger.log(Level.INFO, "port=" + port);
-            logger.log(Level.INFO, "authority=" + authority);
-            logger.log(Level.INFO, "userInfo=" + userInfo);
-            logger.log(Level.INFO, "path=" + path);
-            logger.log(Level.INFO, "query=" + query);
-            super.setURL(u, protocol, host, port, authority, userInfo, path, query, ref);
-        } catch (RuntimeException x) {
-            throw x;
-        }
+        logger.log(Level.INFO, "protocol=" + protocol);
+        logger.log(Level.INFO, "host=" + host);
+        logger.log(Level.INFO, "port=" + port);
+        logger.log(Level.INFO, "authority=" + authority);
+        logger.log(Level.INFO, "userInfo=" + userInfo);
+        logger.log(Level.INFO, "path=" + path);
+        logger.log(Level.INFO, "query=" + query);
+        super.setURL(u, protocol, host, port, authority, userInfo, path, query, ref);
     }
 }
