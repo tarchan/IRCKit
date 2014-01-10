@@ -17,7 +17,8 @@
 	<property name="bin" value="bin" />
 	<property name="doc" value="doc" />
 
-	<path id="build.lib">
+	<path id="lib.path.id">
+		<fileset dir="${build.lib}" />
 	</path>
 
 	<target name="jar" depends="compile">
@@ -48,11 +49,13 @@
 		<ivy:retrieve/>
 	</target>
 
+	<target name="report" depends="resolve" description="--> generates a report of dependencies">
+		<ivy:report todir="${build.dir}"/>
+	</target>
+
 	<target name="compile" depends="resolve">
 		<mkdir dir="${build.bin}" />
-		<javac srcdir="${build.src}" destdir="${build.bin}" encoding="UTF-8">
-			<classpath refid="build.lib" />
-		</javac>
+		<javac srcdir="${build.src}" destdir="${build.bin}" classpathref="lib.path.id" includeAntRuntime="false" encoding="UTF-8" />
 		<copy todir="${build.bin}" overwrite="true">
 			<fileset dir="${build.src}">
 				<include name="**/*.properties"/>
@@ -65,7 +68,7 @@
 		<delete file="${build.jar}" />
 	</target>
 
-	<target name="test">
+	<target name="test" depends="compile">
 	</target>
 
 	<target name="download.jars">
