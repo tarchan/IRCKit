@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="IRCKit" basedir="." default="jar">
+<project name="IRCKit" basedir="." default="jar" xmlns:ivy="antlib:org.apache.ivy.ant">
 
 	<property environment="env" />
 	<property name="manifest.title" value="IRCKit" />
@@ -44,7 +44,11 @@
 		</javadoc>
 	</target>
 
-	<target name="compile">
+	<target name="resolve" description="--> retreive dependencies with ivy">
+		<ivy:retrieve/>
+	</target>
+
+	<target name="compile" depends="resolve">
 		<mkdir dir="${build.bin}" />
 		<javac srcdir="${build.src}" destdir="${build.bin}" encoding="UTF-8">
 			<classpath refid="build.lib" />
