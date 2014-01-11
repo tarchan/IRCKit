@@ -6,6 +6,7 @@
 package com.mac.tarchan.irc.bot;
 
 import java.io.IOException;
+import java.io.PrintStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.logging.Level;
@@ -32,15 +33,20 @@ public class ShellAdapter {
             con.addRequestProperty("channel", "#test");
             con.setRequestProperty("content-encoding", "JIS");
             con.connect();
+            PrintStream out = new PrintStream(con.getOutputStream(), true, con.getContentEncoding());
             while (true) {
-                Object reply = con.getContent();
+                String reply = (String)con.getContent();
                 if (reply == null) break;
 
                 logger.log(Level.INFO, "reply: " + reply);
-                // TODO PONGを返す
+                if (reply.startsWith("PING")) {
+                    String pong = reply.replaceFirst("PING", "PONG");
+                    logger.log(Level.INFO, "pong: " + pong);
+                    out.println(pong);
+                }
             }
         } catch (IOException ex) {
-            logger.log(Level.SEVERE, null, ex);
+            logger.log(Level.SEVERE, "IRCサーバーにアクセスできません。", ex);
         }
     }
 }
