@@ -42,6 +42,7 @@ public class ShellAdapter {
                     
                     logger.log(Level.INFO, line);
                     logger.log(Level.INFO, "reply: " + reply);
+                    // TODO PONGを返す
                 }
             } catch (IOException ex) {
                 logger.log(Level.SEVERE, null, ex);
