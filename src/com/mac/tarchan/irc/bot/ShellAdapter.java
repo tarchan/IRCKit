@@ -3,12 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package com.mac.tarchan.irc.bot;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.logging.Level;
@@ -19,6 +16,7 @@ import java.util.logging.Logger;
  * @author tarchan
  */
 public class ShellAdapter {
+
     static final Logger logger = Logger.getLogger(ShellAdapter.class.getName());
 
     public static void main(String[] args) {
@@ -34,19 +32,12 @@ public class ShellAdapter {
             con.addRequestProperty("channel", "#test");
             con.setRequestProperty("content-encoding", "JIS");
             con.connect();
-            try (BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream(), "JIS"))) {
-                while (true) {
-                    String line = in.readLine();
-                    // TODO String line = con.getContent();
-                    Object reply = con.getContent();
-                    if (line == null) break;
-                    
-                    logger.log(Level.INFO, line);
-                    logger.log(Level.INFO, "reply: " + reply);
-                    // TODO PONGを返す
-                }
-            } catch (IOException ex) {
-                logger.log(Level.SEVERE, null, ex);
+            while (true) {
+                Object reply = con.getContent();
+                if (reply == null) break;
+
+                logger.log(Level.INFO, "reply: " + reply);
+                // TODO PONGを返す
             }
         } catch (IOException ex) {
             logger.log(Level.SEVERE, null, ex);

@@ -30,6 +30,7 @@ package com.mac.tarchan.irc;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.net.Socket;
@@ -72,24 +73,6 @@ public class IrcURLConnection extends URLConnection {
      */
     protected IrcURLConnection(URL url) {
         super(url);
-    }
-
-    @Override
-    public Object getContent() throws IOException {
-        // TODO IRCメッセージを取得
-        String enc = this.getContentEncoding();
-        logger.log(Level.INFO, "encoding: " + enc);
-        getInputStream();
-//        return getContentHandler().getContent(this);
-//        return super.getContent();
-        return "test";
-    }
-
-    @Override
-    public String getContentEncoding() {
-//        return super.getContentEncoding();
-//        return this.getRequestProperty("content-encoding");
-        return encoding;
     }
 
     /**
@@ -158,6 +141,25 @@ public class IrcURLConnection extends URLConnection {
         return socket != null ? socket.getInputStream() : null;
     }
 
+    @Override
+    public String getContentEncoding() {
+//        return super.getContentEncoding();
+//        return this.getRequestProperty("content-encoding");
+        return encoding;
+    }
+
+    @Override
+    public Object getContent() throws IOException {
+//        return getContentHandler().getContent(this);
+        if (in == null) {
+            String enc = getContentEncoding();
+            logger.log(Level.INFO, "encoding: " + enc);
+            in = new BufferedReader(new InputStreamReader(getInputStream(), enc));
+        }
+        String line = in.readLine();
+        return line;
+    }
+
     /**
      * 出力ストリームを返します。
      *
@@ -171,12 +173,8 @@ public class IrcURLConnection extends URLConnection {
 
     protected void prepareOutput() throws IOException {
         if (out == null) {
-            out = new PrintStream(getOutputStream(), true, getEncoding());
+            out = new PrintStream(getOutputStream(), true, getContentEncoding());
         }
-    }
-
-    private String getEncoding() {
-        return "JIS";
     }
 
     public IrcURLConnection postMessage(String text) {
