@@ -89,8 +89,11 @@ public class IrcURLConnection extends URLConnection {
 
         encoding = this.getRequestProperty("content-encoding");
 
-        // 接続する
+        // デフォルトポートを設定
         int port = url.getPort();
+        if (port == -1) port = url.getDefaultPort();
+
+        // 接続する
         socket = new Socket(url.getHost(), port);
         socket.setSoTimeout(5 * 60 * 1000);
 //		System.out.format("[CON] %s\n", socket);
@@ -110,8 +113,9 @@ public class IrcURLConnection extends URLConnection {
     }
 
     public void login() {
-        String[] userInfo = url.getUserInfo().split(":");
+        String[] userInfo = url.getUserInfo() != null ? url.getUserInfo().split(":") : new String[]{};
         String nick = userInfo.length >= 1 ? userInfo[0] : null;
+        if (nick == null) nick = System.getProperty("user.name");
         String pass = userInfo.length >= 2 ? userInfo[1] : null;
         logger.log(Level.INFO, "nick=" + nick);
         logger.log(Level.INFO, "pass=" + pass);

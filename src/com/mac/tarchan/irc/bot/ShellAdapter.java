@@ -24,7 +24,9 @@ public class ShellAdapter {
         try {
 //            URL.setURLStreamHandlerFactory(new IrcURLStreamHandlerFactory());
             System.setProperty("java.protocol.handler.pkgs", "com.mac.tarchan");
-            URL url = new URL("irc://irc.ircnet.ne.jp/javabreak");
+            System.setProperty("java.content.handler.pkgs", "com.mac.tarchan");
+//            URL url = new URL("irc://irc.ircnet.ne.jp/javabreak");
+            URL url = new URL("irc", "irc.ircnet.ne.jp", "javabreak");
 //            URL url = new URL("irc://tarchan:pass@irc.ircnet.ne.jp/#javabreak");
 //            URL url = new URL("irc://irc.freenode.net/#javabreak");
 //            URL url = new URL("irc://irc.mozilla.org/firefox");
