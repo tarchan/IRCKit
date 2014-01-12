@@ -36,6 +36,8 @@ import java.io.PrintStream;
 import java.net.Socket;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -87,7 +89,11 @@ public class IrcURLConnection extends URLConnection {
             return;
         }
 
-        encoding = this.getRequestProperty("content-encoding");
+        String contentEncoding = this.getRequestProperty("content-encoding");
+        headers.put("content-encoding", contentEncoding);
+        headers.put("content-type", "irc/text");
+
+        encoding = getContentEncoding();
 
         // デフォルトポートを設定
         int port = url.getPort();
@@ -103,8 +109,9 @@ public class IrcURLConnection extends URLConnection {
 
         // JOIN
         String file = url.getFile();
-        logger.log(Level.INFO, "file=" + file);
         if (file != null) {
+            if (!file.startsWith("#")) file = "#" + file;
+            logger.log(Level.INFO, "file={0}", file);
             postMessage("JOIN " + file);
         }
 
@@ -117,8 +124,8 @@ public class IrcURLConnection extends URLConnection {
         String nick = userInfo.length >= 1 ? userInfo[0] : null;
         if (nick == null) nick = System.getProperty("user.name");
         String pass = userInfo.length >= 2 ? userInfo[1] : null;
-        logger.log(Level.INFO, "nick=" + nick);
-        logger.log(Level.INFO, "pass=" + pass);
+        logger.log(Level.INFO, "nick={0}", nick);
+        logger.log(Level.INFO, "pass={0}", pass);
 
         if (pass != null) {
             postMessage("PASS " + pass);
@@ -145,11 +152,11 @@ public class IrcURLConnection extends URLConnection {
         return socket != null ? socket.getInputStream() : null;
     }
 
+    protected Map<String, String> headers = new LinkedHashMap<>();
+
     @Override
-    public String getContentEncoding() {
-//        return super.getContentEncoding();
-//        return this.getRequestProperty("content-encoding");
-        return encoding;
+    public String getHeaderField(String name) {
+        return headers.get(name);
     }
 
     @Override
@@ -157,7 +164,7 @@ public class IrcURLConnection extends URLConnection {
 //        return getContentHandler().getContent(this);
         if (in == null) {
             String enc = getContentEncoding();
-            logger.log(Level.INFO, "encoding: " + enc);
+            logger.log(Level.INFO, "encoding: {0}", enc);
             in = new BufferedReader(new InputStreamReader(getInputStream(), enc));
         }
         String line = in.readLine();

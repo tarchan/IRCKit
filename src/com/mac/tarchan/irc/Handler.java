@@ -97,13 +97,13 @@ public class Handler extends URLStreamHandler {
         }
 
 //            System.out.format("[URL] %s://%s:%s, %s, %s, %s, %s, %s\n", protocol, host, port, authority, userInfo, path, query, ref);
-        logger.log(Level.INFO, "protocol=" + protocol);
-        logger.log(Level.INFO, "host=" + host);
-        logger.log(Level.INFO, "port=" + port);
-        logger.log(Level.INFO, "authority=" + authority);
-        logger.log(Level.INFO, "userInfo=" + userInfo);
-        logger.log(Level.INFO, "path=" + path);
-        logger.log(Level.INFO, "query=" + query);
+        logger.log(Level.INFO, "protocol={0}", protocol);
+        logger.log(Level.INFO, "host={0}", host);
+        logger.log(Level.INFO, "port={0}", port);
+        logger.log(Level.INFO, "authority={0}", authority);
+        logger.log(Level.INFO, "userInfo={0}", userInfo);
+        logger.log(Level.INFO, "path={0}", path);
+        logger.log(Level.INFO, "query={0}", query);
         super.setURL(u, protocol, host, port, authority, userInfo, path, query, ref);
     }
 }
