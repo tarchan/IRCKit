@@ -53,7 +53,7 @@
 		<ivy:report todir="${build.dir}"/>
 	</target>
 
-	<target name="compile" depends="resolve">
+	<target name="compile">
 		<mkdir dir="${build.bin}" />
 		<javac srcdir="${build.src}" destdir="${build.bin}" classpathref="lib.path.id" includeAntRuntime="false" encoding="UTF-8" />
 		<copy todir="${build.bin}" overwrite="true">
