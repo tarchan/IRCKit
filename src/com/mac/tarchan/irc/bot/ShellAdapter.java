@@ -28,6 +28,7 @@ public class ShellAdapter {
 //            System.setProperty("java.util.logging.SimpleFormatter.format", "%1$tc %2$s%n%4$s: %5$s%6$s%n");
             System.setProperty("java.util.logging.SimpleFormatter.format", "%1$tT %2$s %4$s: %5$s%6$s%n");
 //            URL url = new URL("irc://irc.ircnet.ne.jp/javabreak");
+//            URL url = new URL("irc://irc.ircnet.ne.jp/#javabreak");
             URL url = new URL("irc", "irc.ircnet.ne.jp", "javabreak");
 //            URL url = new URL("irc://tarchan:pass@irc.ircnet.ne.jp/#javabreak");
 //            URL url = new URL("irc://irc.freenode.net/#javabreak");
@@ -44,7 +45,7 @@ public class ShellAdapter {
                 Object obj = con.getContent();
                 if (obj == null) break;
 
-                logger.log(Level.INFO, "type: {0}", obj.getClass().getName());
+//                logger.log(Level.INFO, "type: {0}", obj.getClass().getName());
                 String reply = (String)obj;
                 logger.log(Level.INFO, "reply: {0}", reply);
                 if (reply.startsWith("PING")) {

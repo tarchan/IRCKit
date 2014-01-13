@@ -43,14 +43,16 @@ import java.util.logging.Logger;
 
 /**
  * IRCサーバーへのURL接続です。 IRC URL 構文は次のとおりです。
- * <pre>irc://{host}:{port}</pre>
+ * <pre>irc://{nick}:{pass}@{host}:{port}/{channel}</pre>
  *
  * @author tarchan
  * @see Handler#openConnection(URL)
  */
 public class IrcURLConnection extends URLConnection {
+    /**
+     * ロガー
+     */
     static final Logger logger = Logger.getLogger(IrcURLConnection.class.getName());
-
     /**
      * 入出力ソケット
      */
@@ -67,6 +69,10 @@ public class IrcURLConnection extends URLConnection {
      * 文字コード
      */
     protected String encoding;
+    /**
+     * ヘッダーフィールド
+     */
+    protected Map<String, String> headers = new LinkedHashMap<>();
 
     /**
      * IRC 接続を構築します。
@@ -75,6 +81,11 @@ public class IrcURLConnection extends URLConnection {
      */
     protected IrcURLConnection(URL url) {
         super(url);
+    }
+
+    @Override
+    public String getHeaderField(String name) {
+        return headers.get(name);
     }
 
     /**
@@ -93,7 +104,7 @@ public class IrcURLConnection extends URLConnection {
         headers.put("content-encoding", contentEncoding);
         headers.put("content-type", "irc/text");
 
-        encoding = getContentEncoding();
+//        encoding = getContentEncoding();
 
         // デフォルトポートを設定
         int port = url.getPort();
@@ -150,13 +161,6 @@ public class IrcURLConnection extends URLConnection {
     @Override
     public InputStream getInputStream() throws IOException {
         return socket != null ? socket.getInputStream() : null;
-    }
-
-    protected Map<String, String> headers = new LinkedHashMap<>();
-
-    @Override
-    public String getHeaderField(String name) {
-        return headers.get(name);
     }
 
     @Override

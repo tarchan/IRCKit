@@ -80,14 +80,14 @@ public class Handler extends URLStreamHandler {
         }
 
         // デフォルトポートを設定
-        if (port == -1) {
-            port = getDefaultPort();
-        }
+//        if (port == -1) {
+//            port = getDefaultPort();
+//        }
 
         // デフォルトニックネームを設定
-        if (userInfo == null) {
-            userInfo = System.getProperty("user.name");
-        }
+//        if (userInfo == null) {
+//            userInfo = System.getProperty("user.name");
+//        }
 
         // チャンネル名を設定
         if (ref != null) {
@@ -104,6 +104,7 @@ public class Handler extends URLStreamHandler {
         logger.log(Level.INFO, "userInfo={0}", userInfo);
         logger.log(Level.INFO, "path={0}", path);
         logger.log(Level.INFO, "query={0}", query);
+        logger.log(Level.INFO, "ref={0}", ref);
         super.setURL(u, protocol, host, port, authority, userInfo, path, query, ref);
     }
 }
