@@ -62,7 +62,7 @@ public class Shell {
         while (true) {
             System.out.print(target + ": ");
             String line = buf.readLine();
-            log.log(Level.INFO, "input: " + line);
+            log.log(Level.INFO, "input: {0}", line);
             if (line.startsWith("/")) {
                 if (line.equals("/exit")) {
                     break;
@@ -71,7 +71,7 @@ public class Shell {
                 // TODO IRCサーバーに送信
             }
         }
-        log.log(Level.INFO, "shell exit.");
+        log.info("shell exit.");
     }
 
     public void run() throws IOException {
