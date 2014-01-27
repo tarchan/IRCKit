@@ -18,22 +18,24 @@ import java.util.logging.Logger;
  *
  * @author tarchan
  */
-public class ShellAdapter {
-    static final Logger log = Logger.getLogger(ShellAdapter.class.getName());
+public class Shell {
+    static final Logger log = Logger.getLogger(Shell.class.getName());
     private URLConnection con;
     private BufferedReader in;
     private PrintStream out;
+    private BufferedReader buf;
+    private String target;
 
     public static void main(String[] args) {
         try {
-            new ShellAdapter().run();
+            new Shell().input();
         } catch (IOException ex) {
             log.log(Level.SEVERE, "IRCサーバーにアクセスできません。", ex);
         }
     }
 
-    public ShellAdapter() throws IOException {
-        log.info("ShellAdapter connecting...");
+    public Shell() throws IOException {
+        log.info("shell init.");
 //        System.setProperty("java.net.useSystemProxies", "true");
 //            URL.setURLStreamHandlerFactory(new IrcURLStreamHandlerFactory());
         System.setProperty("java.protocol.handler.pkgs", "com.mac.tarchan");
@@ -52,7 +54,28 @@ public class ShellAdapter {
         con.setRequestProperty("content-encoding", "JIS");
      }
 
+    public void input() throws IOException {
+        String enc = "SJIS";
+        log.log(Level.INFO, "encoding: {0}", enc);
+        buf = new BufferedReader(new InputStreamReader(System.in, enc));
+        target = "#javabreak";
+        while (true) {
+            System.out.print(target + ": ");
+            String line = buf.readLine();
+            log.log(Level.INFO, "input: " + line);
+            if (line.startsWith("/")) {
+                if (line.equals("/exit")) {
+                    break;
+                }
+            } else {
+                // TODO IRCサーバーに送信
+            }
+        }
+        log.log(Level.INFO, "shell exit.");
+    }
+
     public void run() throws IOException {
+        log.info("shell connecting...");
         con.connect();
         String contentType = con.getContentType();
         log.log(Level.INFO, "contentType: {0}", contentType);
