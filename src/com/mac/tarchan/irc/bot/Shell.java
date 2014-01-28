@@ -9,6 +9,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.net.ContentHandler;
+import java.net.ContentHandlerFactory;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.logging.Level;
@@ -40,8 +42,15 @@ public class Shell {
         log.info("shell init.");
 //        System.setProperty("java.net.useSystemProxies", "true");
 //            URL.setURLStreamHandlerFactory(new IrcURLStreamHandlerFactory());
+        URLConnection.setContentHandlerFactory(new ContentHandlerFactory() {
+            @Override
+            public ContentHandler createContentHandler(String mimetype) {
+                log.log(Level.INFO, "mimetype: {0}", mimetype);
+                return null;
+            }
+        });
         System.setProperty("java.protocol.handler.pkgs", "com.mac.tarchan");
-        System.setProperty("java.content.handler.pkgs", "com.mac.tarchan");
+//        System.setProperty("java.content.handler.pkgs", "com.mac.tarchan");
 //            URL url = new URL("irc://irc.ircnet.ne.jp/javabreak");
 //            URL url = new URL("irc://irc.ircnet.ne.jp/#javabreak");
         URL url = new URL("irc", "irc.ircnet.ne.jp", "javabreak");
@@ -57,6 +66,9 @@ public class Shell {
         Object content = con.getContent();
         log.log(Level.INFO, "content: {0}", content);
         content = con.getContent();
+        log.log(Level.INFO, "content2: {0}", content);
+        content = con.getContent(new Class[] {BufferedReader.class});
+        log.log(Level.INFO, "content3: {0}", content);
      }
 
     public void input() throws IOException {

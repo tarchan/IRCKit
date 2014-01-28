@@ -43,7 +43,7 @@ import java.util.logging.Logger;
 
 /**
  * IRCサーバーへのURL接続です。 IRC URL 構文は次のとおりです。
- * <pre>irc://{nick}:{pass}@{host}:{port}/{channel}</pre>
+ * <pre>irc://{nick}:{pass}@{host}:{port}/{channel},{key}</pre>
  *
  * @author tarchan
  * @see Handler#openConnection(URL)
@@ -82,7 +82,8 @@ public class IrcURLConnection extends URLConnection {
     protected IrcURLConnection(URL url) {
         super(url);
         headers.put("content-encoding", "UTF-8");
-        headers.put("content-type", "irc/text");
+//        headers.put("content-type", "irc/text; charset=ISO-2022-JP");
+        headers.put("content-type", "text/plain");
     }
 
     @Override
@@ -103,8 +104,9 @@ public class IrcURLConnection extends URLConnection {
         }
 
         String contentEncoding = this.getRequestProperty("content-encoding");
-        headers.put("content-encoding", contentEncoding);
-        headers.put("content-type", "irc/text");
+        if (contentEncoding != null) {
+            headers.put("content-encoding", contentEncoding);
+        }
 
 //        encoding = getContentEncoding();
 

@@ -18,8 +18,7 @@ public class text extends ContentHandler {
 
     @Override
     public Object getContent(URLConnection urlc) throws IOException {
-        log.info("host=" + urlc.getURL().getHost());
-        log.info("file=" + urlc.getURL().getFile());
+        log.info("connection=" + urlc);
         return "" + urlc;
     }
 }
