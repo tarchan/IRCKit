@@ -28,6 +28,8 @@ public class Shell {
 
     public static void main(String[] args) {
         try {
+//            System.setProperty("java.util.logging.SimpleFormatter.format", "%1$tc %2$s%n%4$s: %5$s%6$s%n");
+            System.setProperty("java.util.logging.SimpleFormatter.format", "%1$tT %2$s %4$s: %5$s%6$s%n");
             new Shell().input();
         } catch (IOException ex) {
             log.log(Level.SEVERE, "IRCサーバーにアクセスできません。", ex);
@@ -40,8 +42,6 @@ public class Shell {
 //            URL.setURLStreamHandlerFactory(new IrcURLStreamHandlerFactory());
         System.setProperty("java.protocol.handler.pkgs", "com.mac.tarchan");
         System.setProperty("java.content.handler.pkgs", "com.mac.tarchan");
-//            System.setProperty("java.util.logging.SimpleFormatter.format", "%1$tc %2$s%n%4$s: %5$s%6$s%n");
-        System.setProperty("java.util.logging.SimpleFormatter.format", "%1$tT %2$s %4$s: %5$s%6$s%n");
 //            URL url = new URL("irc://irc.ircnet.ne.jp/javabreak");
 //            URL url = new URL("irc://irc.ircnet.ne.jp/#javabreak");
         URL url = new URL("irc", "irc.ircnet.ne.jp", "javabreak");
