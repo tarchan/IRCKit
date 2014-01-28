@@ -81,6 +81,8 @@ public class IrcURLConnection extends URLConnection {
      */
     protected IrcURLConnection(URL url) {
         super(url);
+        headers.put("content-encoding", "UTF-8");
+        headers.put("content-type", "irc/text");
     }
 
     @Override
@@ -163,8 +165,7 @@ public class IrcURLConnection extends URLConnection {
         return socket != null ? socket.getInputStream() : null;
     }
 
-    @Override
-    public Object getContent() throws IOException {
+    public Object getContent0() throws IOException {
 //        return getContentHandler().getContent(this);
         if (in == null) {
             String enc = getContentEncoding();

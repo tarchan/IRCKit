@@ -52,6 +52,11 @@ public class Shell {
         con.addRequestProperty("channel", "#javabreak");
         con.addRequestProperty("channel", "#test");
         con.setRequestProperty("content-encoding", "JIS");
+        String type = con.getContentType();
+        log.log(Level.INFO, "type: {0}", type);
+        Object content = con.getContent();
+        log.log(Level.INFO, "content: {0}", content);
+        content = con.getContent();
      }
 
     public void input() throws IOException {
@@ -86,6 +91,7 @@ public class Shell {
         while (true) {
 //            Object obj = con.getContent();
             String line = in.readLine();
+            con.setIfModifiedSince(System.currentTimeMillis());
             if (line == null) break;
 
     //                log.log(Level.INFO, "type: {0}", obj.getClass().getName());
