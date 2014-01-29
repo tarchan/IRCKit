@@ -106,15 +106,19 @@ public class Shell {
                             quit();
                         }
                     // /join <channnel>,<key> switch to channnel
-                    } if (cmd.startsWith("/j")) {
+                    } else if (cmd.startsWith("/j")) {
                         for (int i = 1; i < args.length; i++) {
                             String target = args[i];
                             this.target = join(target);
                         }
+                    // /part <channel> part channel
+                    } else if (cmd.startsWith("/p")) {
+                        part(target);
+                        target = null;
+                        // TODO 他のチャンネルに移動する
                     } else {
                         System.err.println("unknown command: " + args[0]);
                     }
-                    // /part <channel> part channel
                     // /notice <message> send notice message
                 } else {
                     // TODO IRCサーバーに送信
@@ -160,6 +164,10 @@ public class Shell {
         // TODO ,セパレータでkeyを設定
         postMessage("join :" + target);
         return target;
+    }
+
+    public void part(String target) {
+        postMessage("part :" + target);
     }
 
     public void run() throws IOException {
