@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.ContentHandler;
 import java.net.ContentHandlerFactory;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.logging.Level;
@@ -25,8 +26,9 @@ public class Shell {
     private URLConnection con;
     private BufferedReader in;
     private PrintStream out;
-    private BufferedReader buf;
+//    private BufferedReader buf;
     private String target;
+    private String charset = "JIS";
 
     public static void main(String[] args) {
         try {
@@ -74,36 +76,55 @@ public class Shell {
     public void input() throws IOException {
         String enc = "SJIS";
         log.log(Level.INFO, "encoding: {0}", enc);
-        buf = new BufferedReader(new InputStreamReader(System.in, enc));
+        BufferedReader buf = new BufferedReader(new InputStreamReader(System.in, enc));
         target = "#javabreak";
         while (true) {
-            System.out.print(target + ": ");
-            String line = buf.readLine();
-//            log.log(Level.INFO, "input: {0}", line);
-            if (line.startsWith("/")) {
-                String[] args = line.split(" ");
-                String cmd = args[0].toLowerCase();
-                // /exit exit to shell
-                if (cmd.startsWith("/e")) {
-                    System.err.println("えんいー");
-                    break;
-                // /help print help
-                } else if (cmd.startsWith("/h")) {
-                    help();
+            try {
+                System.out.print(target + ": ");
+                String line = buf.readLine();
+    //            log.log(Level.INFO, "input: {0}", line);
+                if (line.startsWith("/")) {
+                    String[] args = line.split(" ");
+                    String cmd = args[0].toLowerCase();
+                    // /exit exit to shell
+                    if (cmd.startsWith("/e")) {
+                        System.err.println("えんいー");
+                        break;
+                    // /help print help
+                    } else if (cmd.startsWith("/h")) {
+                        help();
+                    // /open <host>:<port> connect to server
+                    } else if (cmd.startsWith("/o")) {
+                        String host = args[1];
+                        con = open(host, charset);
+                    } else {
+                        System.err.println("unknown command: " + args[0]);
+                    }
+                    // /join <channnel>,<key> switch to channnel
+                    // /part <channel> part channel
+                    // /quit <message> disconnect server
+                    // /notice <message> send notice message
                 } else {
-                    System.err.println("unknown command: " + args[0]);
+                    // TODO IRCサーバーに送信
                 }
-                // /join <channnel>,<key> switch to channnel
-                // /part <channel> part channel
-                // /open <host>:<port> connect to server
-                // /quit <message> disconnect server
-                // /notice <message> send notice message
-            } else {
-                // TODO IRCサーバーに送信
+            } catch (RuntimeException e) {
+                log.log(Level.SEVERE, "エラー", e);
             }
         }
     }
 
+    public URLConnection open(String host, String charset) {
+        try {
+            URL url = new URL("irc", host, null);
+            URLConnection con = url.openConnection();
+            con.setRequestProperty("content-encoding", charset);
+            con.connect();
+            return con;
+        } catch (IOException ex) {
+            throw new RuntimeException("サーバーに接続できません。: " + host, ex);
+        }
+    }
+    
     public void help() {
         System.out.println("IRC shell help message.");
         System.out.println("  /help print this message");
