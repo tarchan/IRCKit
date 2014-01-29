@@ -79,16 +79,40 @@ public class Shell {
         while (true) {
             System.out.print(target + ": ");
             String line = buf.readLine();
-            log.log(Level.INFO, "input: {0}", line);
+//            log.log(Level.INFO, "input: {0}", line);
             if (line.startsWith("/")) {
-                if (line.equals("/exit")) {
+                String[] args = line.split(" ");
+                String cmd = args[0].toLowerCase();
+                // /exit exit to shell
+                if (cmd.startsWith("/e")) {
+                    System.err.println("えんいー");
                     break;
+                // /help print help
+                } else if (cmd.startsWith("/h")) {
+                    help();
+                } else {
+                    System.err.println("unknown command: " + args[0]);
                 }
+                // /join <channnel>,<key> switch to channnel
+                // /part <channel> part channel
+                // /open <host>:<port> connect to server
+                // /quit <message> disconnect server
+                // /notice <message> send notice message
             } else {
                 // TODO IRCサーバーに送信
             }
         }
-        log.info("shell exit.");
+    }
+
+    public void help() {
+        System.out.println("IRC shell help message.");
+        System.out.println("  /help print this message");
+        System.out.println("  /open <nick>:<pass>@<host>:<port> connect to server");
+        System.out.println("  /quit <message> disconnect server");
+        System.out.println("  /join <channnel>,<key> switch to channnel");
+        System.out.println("  /part <channel> part channel");
+        System.out.println("  /notice <message> send notice message");
+        System.out.println("  <message> send normal message");
     }
 
     public void run() throws IOException {
