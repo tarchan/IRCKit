@@ -97,12 +97,19 @@ public class Shell {
                     } else if (cmd.startsWith("/o")) {
                         String host = args[1];
                         con = open(host, charset);
+                    // /quit <message> disconnect server
+                    } else if (cmd.startsWith("/q")) {
+                        if (args.length >= 2) {
+                            String message = args[1];
+                            quit(message);
+                        } else {
+                            quit();
+                        }
                     } else {
                         System.err.println("unknown command: " + args[0]);
                     }
                     // /join <channnel>,<key> switch to channnel
                     // /part <channel> part channel
-                    // /quit <message> disconnect server
                     // /notice <message> send notice message
                 } else {
                     // TODO IRCサーバーに送信
@@ -111,6 +118,17 @@ public class Shell {
                 log.log(Level.SEVERE, "エラー", e);
             }
         }
+    }
+    
+    public void help() {
+        System.out.println("IRC shell help message.");
+        System.out.println("  /help print this message");
+        System.out.println("  /open <nick>:<pass>@<host>:<port> connect to server");
+        System.out.println("  /quit <message> disconnect server");
+        System.out.println("  /join <channnel>,<key> switch to channnel");
+        System.out.println("  /part <channel> part channel");
+        System.out.println("  /notice <message> send notice message");
+        System.out.println("  <message> send normal message");
     }
 
     public URLConnection open(String host, String charset) {
@@ -124,16 +142,13 @@ public class Shell {
             throw new RuntimeException("サーバーに接続できません。: " + host, ex);
         }
     }
-    
-    public void help() {
-        System.out.println("IRC shell help message.");
-        System.out.println("  /help print this message");
-        System.out.println("  /open <nick>:<pass>@<host>:<port> connect to server");
-        System.out.println("  /quit <message> disconnect server");
-        System.out.println("  /join <channnel>,<key> switch to channnel");
-        System.out.println("  /part <channel> part channel");
-        System.out.println("  /notice <message> send notice message");
-        System.out.println("  <message> send normal message");
+
+    public void quit() {
+        postMessage("quit");
+    }
+
+    public void quit(String message) {
+        postMessage("quit :" + message);
     }
 
     public void run() throws IOException {
