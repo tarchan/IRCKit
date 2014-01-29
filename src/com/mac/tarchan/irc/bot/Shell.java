@@ -105,10 +105,15 @@ public class Shell {
                         } else {
                             quit();
                         }
+                    // /join <channnel>,<key> switch to channnel
+                    } if (cmd.startsWith("/j")) {
+                        for (int i = 1; i < args.length; i++) {
+                            String target = args[i];
+                            this.target = join(target);
+                        }
                     } else {
                         System.err.println("unknown command: " + args[0]);
                     }
-                    // /join <channnel>,<key> switch to channnel
                     // /part <channel> part channel
                     // /notice <message> send notice message
                 } else {
@@ -149,6 +154,12 @@ public class Shell {
 
     public void quit(String message) {
         postMessage("quit :" + message);
+    }
+
+    public String join(String target) {
+        // TODO ,セパレータでkeyを設定
+        postMessage("join :" + target);
+        return target;
     }
 
     public void run() throws IOException {
