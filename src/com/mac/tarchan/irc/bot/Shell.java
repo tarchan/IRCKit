@@ -11,7 +11,6 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.ContentHandler;
 import java.net.ContentHandlerFactory;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.logging.Level;
@@ -80,7 +79,7 @@ public class Shell {
         target = "#javabreak";
         while (true) {
             try {
-                System.out.print(target + ": ");
+                System.out.print(target + "> ");
                 String line = buf.readLine();
     //            log.log(Level.INFO, "input: {0}", line);
                 if (line.startsWith("/")) {
@@ -88,6 +87,7 @@ public class Shell {
                     String cmd = args[0].toLowerCase();
                     // /exit exit to shell
                     if (cmd.startsWith("/e")) {
+                        close();
                         System.err.println("えんいー");
                         break;
                     // /help print help
@@ -109,7 +109,8 @@ public class Shell {
                     } else if (cmd.startsWith("/j")) {
                         for (int i = 1; i < args.length; i++) {
                             String target = args[i];
-                            this.target = join(target);
+                            join(target);
+                            this.target = target;
                         }
                     // /part <channel> part channel
                     } else if (cmd.startsWith("/p")) {
@@ -152,6 +153,11 @@ public class Shell {
         }
     }
 
+    public void close() throws IOException {
+        if (in != null) in.close();
+        if (out != null) out.close();
+    }
+
     public void quit() {
         postMessage("quit");
     }
@@ -160,14 +166,36 @@ public class Shell {
         postMessage("quit :" + message);
     }
 
-    public String join(String target) {
-        // TODO ,セパレータでkeyを設定
-        postMessage("join :" + target);
-        return target;
+    public void join(String channel) {
+        postMessage("join " + channel);
+    }
+
+    public void join(String channel, String key) {
+        postMessage(String.format("join %s %s", channel, key));
+    }
+
+    public void leaveAll() {
+        postMessage("join 0");
     }
 
     public void part(String target) {
         postMessage("part :" + target);
+    }
+
+    public void nick(String nickname) {
+        postMessage("nick " + nickname);
+    }
+
+    public void mode(String target, String mode) {
+        postMessage(String.format("mode %s %s", target, mode));
+    }
+
+    public void topic(String channel, String topic) {
+        postMessage(String.format("topic %s :%s", channel, topic));
+    }
+
+    public void topic(String channel) {
+        postMessage(String.format("topic %s", channel));
     }
 
     public void run() throws IOException {
